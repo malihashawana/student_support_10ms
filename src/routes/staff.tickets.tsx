@@ -145,7 +145,10 @@ function TicketWorkspace() {
         </Select>
         <Select
           value={filters.range ?? "all"}
-          onValueChange={(v) => setFilters({ ...filters, range: v as StaffTicketFilters["range"] })}
+          onValueChange={(v) =>
+            setFilters({ ...filters, range: v as NonNullable<StaffTicketFilters["range"]> })
+          }
+
         >
           <SelectTrigger>
             <SelectValue />
@@ -281,10 +284,11 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
       update({
         data: {
           id,
-          status: status ?? data?.ticket.status,
+          status: status ?? data?.ticket.status ?? "Open",
           response: response ?? data?.ticket.official_response ?? "",
           sendResponse,
         },
+
       }),
     onSuccess: () => {
       toast.success("Ticket updated.");
@@ -338,17 +342,8 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 {formatDate(data.ticket.created_at)}
               </p>
               <p className="mt-3 text-sm whitespace-pre-wrap">{data.ticket.description}</p>
-              {data.ticket.link ? (
-                <a
-                  href={data.ticket.link}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                  className="mt-2 inline-block text-xs text-primary hover:underline"
-                >
-                  {data.ticket.link}
-                </a>
-              ) : null}
             </div>
+
 
             <div className="rounded-lg bg-secondary/60 p-3 text-sm">
               <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
