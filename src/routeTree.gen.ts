@@ -12,8 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as StudentIndexRouteImport } from './routes/student.index'
+import { Route as StudentNoticesRouteImport } from './routes/student.notices'
 import { Route as StudentReportRouteImport } from './routes/student.report'
+import { Route as StudentCommunityIndexRouteImport } from './routes/student.community.index'
+import { Route as StudentCommunityIdRouteImport } from './routes/student.community.$id'
 import { Route as StudentIssuesIndexRouteImport } from './routes/student.issues.index'
+import { Route as StudentIssuesIdRouteImport } from './routes/student.issues.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,9 +34,24 @@ const StudentIndexRoute = StudentIndexRouteImport.update({
   path: '/',
   getParentRoute: () => StudentRoute,
 } as any)
+const StudentNoticesRoute = StudentNoticesRouteImport.update({
+  id: '/notices',
+  path: '/notices',
+  getParentRoute: () => StudentRoute,
+} as any)
 const StudentReportRoute = StudentReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentCommunityIndexRoute = StudentCommunityIndexRouteImport.update({
+  id: '/community/',
+  path: '/community/',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentCommunityIdRoute = StudentCommunityIdRouteImport.update({
+  id: '/community/$id',
+  path: '/community/$id',
   getParentRoute: () => StudentRoute,
 } as any)
 const StudentIssuesIndexRoute = StudentIssuesIndexRouteImport.update({
@@ -40,40 +59,77 @@ const StudentIssuesIndexRoute = StudentIssuesIndexRouteImport.update({
   path: '/issues/',
   getParentRoute: () => StudentRoute,
 } as any)
+const StudentIssuesIdRoute = StudentIssuesIdRouteImport.update({
+  id: '/issues/$id',
+  path: '/issues/$id',
+  getParentRoute: () => StudentRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/student': typeof StudentRouteWithChildren
+  '/student/notices': typeof StudentNoticesRoute
   '/student/report': typeof StudentReportRoute
   '/student/': typeof StudentIndexRoute
+  '/student/community/$id': typeof StudentCommunityIdRoute
+  '/student/issues/$id': typeof StudentIssuesIdRoute
+  '/student/community/': typeof StudentCommunityIndexRoute
   '/student/issues/': typeof StudentIssuesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/student/notices': typeof StudentNoticesRoute
   '/student/report': typeof StudentReportRoute
   '/student': typeof StudentIndexRoute
+  '/student/community/$id': typeof StudentCommunityIdRoute
+  '/student/issues/$id': typeof StudentIssuesIdRoute
+  '/student/community': typeof StudentCommunityIndexRoute
   '/student/issues': typeof StudentIssuesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/student': typeof StudentRouteWithChildren
+  '/student/notices': typeof StudentNoticesRoute
   '/student/report': typeof StudentReportRoute
   '/student/': typeof StudentIndexRoute
+  '/student/community/$id': typeof StudentCommunityIdRoute
+  '/student/issues/$id': typeof StudentIssuesIdRoute
+  '/student/community/': typeof StudentCommunityIndexRoute
   '/student/issues/': typeof StudentIssuesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/student' | '/student/report' | '/student/' | '/student/issues/'
+    | '/'
+    | '/student'
+    | '/student/notices'
+    | '/student/report'
+    | '/student/'
+    | '/student/community/$id'
+    | '/student/issues/$id'
+    | '/student/community/'
+    | '/student/issues/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/student/report' | '/student' | '/student/issues'
+  to:
+    | '/'
+    | '/student/notices'
+    | '/student/report'
+    | '/student'
+    | '/student/community/$id'
+    | '/student/issues/$id'
+    | '/student/community'
+    | '/student/issues'
   id:
     | '__root__'
     | '/'
     | '/student'
+    | '/student/notices'
     | '/student/report'
     | '/student/'
+    | '/student/community/$id'
+    | '/student/issues/$id'
+    | '/student/community/'
     | '/student/issues/'
   fileRoutesById: FileRoutesById
 }
@@ -105,11 +161,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentIndexRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/student/notices': {
+      id: '/student/notices'
+      path: '/notices'
+      fullPath: '/student/notices'
+      preLoaderRoute: typeof StudentNoticesRouteImport
+      parentRoute: typeof StudentRoute
+    }
     '/student/report': {
       id: '/student/report'
       path: '/report'
       fullPath: '/student/report'
       preLoaderRoute: typeof StudentReportRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/community/': {
+      id: '/student/community/'
+      path: '/community'
+      fullPath: '/student/community/'
+      preLoaderRoute: typeof StudentCommunityIndexRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/community/$id': {
+      id: '/student/community/$id'
+      path: '/community/$id'
+      fullPath: '/student/community/$id'
+      preLoaderRoute: typeof StudentCommunityIdRouteImport
       parentRoute: typeof StudentRoute
     }
     '/student/issues/': {
@@ -119,18 +196,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentIssuesIndexRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/student/issues/$id': {
+      id: '/student/issues/$id'
+      path: '/issues/$id'
+      fullPath: '/student/issues/$id'
+      preLoaderRoute: typeof StudentIssuesIdRouteImport
+      parentRoute: typeof StudentRoute
+    }
   }
 }
 
 interface StudentRouteChildren {
+  StudentNoticesRoute: typeof StudentNoticesRoute
   StudentReportRoute: typeof StudentReportRoute
   StudentIndexRoute: typeof StudentIndexRoute
+  StudentCommunityIdRoute: typeof StudentCommunityIdRoute
+  StudentIssuesIdRoute: typeof StudentIssuesIdRoute
+  StudentCommunityIndexRoute: typeof StudentCommunityIndexRoute
   StudentIssuesIndexRoute: typeof StudentIssuesIndexRoute
 }
 
 const StudentRouteChildren: StudentRouteChildren = {
+  StudentNoticesRoute: StudentNoticesRoute,
   StudentReportRoute: StudentReportRoute,
   StudentIndexRoute: StudentIndexRoute,
+  StudentCommunityIdRoute: StudentCommunityIdRoute,
+  StudentIssuesIdRoute: StudentIssuesIdRoute,
+  StudentCommunityIndexRoute: StudentCommunityIndexRoute,
   StudentIssuesIndexRoute: StudentIssuesIndexRoute,
 }
 
