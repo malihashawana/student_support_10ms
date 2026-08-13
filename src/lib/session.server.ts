@@ -14,6 +14,14 @@ function sessionConfig() {
     password,
     name: "hsc28-support-session",
     maxAge: 60 * 60 * 24 * 7,
+    // The app is often viewed inside an embedded preview frame, so the session
+    // cookie must be allowed in a cross-site context.
+    cookie: {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none" as const,
+      path: "/",
+    },
   };
 }
 
