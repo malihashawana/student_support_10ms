@@ -26,7 +26,7 @@ export const Route = createFileRoute("/staff")({
 function StaffLayout() {
   const { staff } = Route.useRouteContext();
   return (
-    <AppShell nav={nav} variant="staff" title={staff.name} subtitle="Support team">
+    <AppShell nav={nav} variant="staff" title={staff.username} subtitle="Support team">
       <Outlet />
     </AppShell>
   );
