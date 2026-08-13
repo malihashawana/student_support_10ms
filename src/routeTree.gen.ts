@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as StaffIndexRouteImport } from './routes/staff.index'
+import { Route as StaffTicketsRouteImport } from './routes/staff.tickets'
 import { Route as StudentIndexRouteImport } from './routes/student.index'
 import { Route as StudentNoticesRouteImport } from './routes/student.notices'
 import { Route as StudentProfileRouteImport } from './routes/student.profile'
@@ -40,6 +41,11 @@ const StudentRoute = StudentRouteImport.update({
 const StaffIndexRoute = StaffIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => StaffRoute,
+} as any)
+const StaffTicketsRoute = StaffTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
   getParentRoute: () => StaffRoute,
 } as any)
 const StudentIndexRoute = StudentIndexRouteImport.update({
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/staff': typeof StaffRouteWithChildren
   '/student': typeof StudentRouteWithChildren
+  '/staff/tickets': typeof StaffTicketsRoute
   '/student/notices': typeof StudentNoticesRoute
   '/student/profile': typeof StudentProfileRoute
   '/student/report': typeof StudentReportRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/staff/tickets': typeof StaffTicketsRoute
   '/student/notices': typeof StudentNoticesRoute
   '/student/profile': typeof StudentProfileRoute
   '/student/report': typeof StudentReportRoute
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/staff': typeof StaffRouteWithChildren
   '/student': typeof StudentRouteWithChildren
+  '/staff/tickets': typeof StaffTicketsRoute
   '/student/notices': typeof StudentNoticesRoute
   '/student/profile': typeof StudentProfileRoute
   '/student/report': typeof StudentReportRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/'
     | '/staff'
     | '/student'
+    | '/staff/tickets'
     | '/student/notices'
     | '/student/profile'
     | '/student/report'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/staff/tickets'
     | '/student/notices'
     | '/student/profile'
     | '/student/report'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/'
     | '/staff'
     | '/student'
+    | '/staff/tickets'
     | '/student/notices'
     | '/student/profile'
     | '/student/report'
@@ -201,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/staff/'
       preLoaderRoute: typeof StaffIndexRouteImport
+      parentRoute: typeof StaffRoute
+    }
+    '/staff/tickets': {
+      id: '/staff/tickets'
+      path: '/tickets'
+      fullPath: '/staff/tickets'
+      preLoaderRoute: typeof StaffTicketsRouteImport
       parentRoute: typeof StaffRoute
     }
     '/student/': {
@@ -263,10 +282,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface StaffRouteChildren {
+  StaffTicketsRoute: typeof StaffTicketsRoute
   StaffIndexRoute: typeof StaffIndexRoute
 }
 
 const StaffRouteChildren: StaffRouteChildren = {
+  StaffTicketsRoute: StaffTicketsRoute,
   StaffIndexRoute: StaffIndexRoute,
 }
 
