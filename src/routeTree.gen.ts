@@ -10,33 +10,76 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StudentRouteImport } from './routes/student'
+import { Route as StudentIndexRouteImport } from './routes/student.index'
+import { Route as StudentReportRouteImport } from './routes/student.report'
+import { Route as StudentIssuesIndexRouteImport } from './routes/student.issues.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentRoute = StudentRouteImport.update({
+  id: '/student',
+  path: '/student',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentIndexRoute = StudentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentReportRoute = StudentReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentIssuesIndexRoute = StudentIssuesIndexRouteImport.update({
+  id: '/issues/',
+  path: '/issues/',
+  getParentRoute: () => StudentRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/student': typeof StudentRouteWithChildren
+  '/student/report': typeof StudentReportRoute
+  '/student/': typeof StudentIndexRoute
+  '/student/issues/': typeof StudentIssuesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/student/report': typeof StudentReportRoute
+  '/student': typeof StudentIndexRoute
+  '/student/issues': typeof StudentIssuesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/student': typeof StudentRouteWithChildren
+  '/student/report': typeof StudentReportRoute
+  '/student/': typeof StudentIndexRoute
+  '/student/issues/': typeof StudentIssuesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    '/' | '/student' | '/student/report' | '/student/' | '/student/issues/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/student/report' | '/student' | '/student/issues'
+  id:
+    | '__root__'
+    | '/'
+    | '/student'
+    | '/student/report'
+    | '/student/'
+    | '/student/issues/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  StudentRoute: typeof StudentRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +91,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student': {
+      id: '/student'
+      path: '/student'
+      fullPath: '/student'
+      preLoaderRoute: typeof StudentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student/': {
+      id: '/student/'
+      path: '/'
+      fullPath: '/student/'
+      preLoaderRoute: typeof StudentIndexRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/report': {
+      id: '/student/report'
+      path: '/report'
+      fullPath: '/student/report'
+      preLoaderRoute: typeof StudentReportRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/issues/': {
+      id: '/student/issues/'
+      path: '/issues'
+      fullPath: '/student/issues/'
+      preLoaderRoute: typeof StudentIssuesIndexRouteImport
+      parentRoute: typeof StudentRoute
+    }
   }
 }
 
+interface StudentRouteChildren {
+  StudentReportRoute: typeof StudentReportRoute
+  StudentIndexRoute: typeof StudentIndexRoute
+  StudentIssuesIndexRoute: typeof StudentIssuesIndexRoute
+}
+
+const StudentRouteChildren: StudentRouteChildren = {
+  StudentReportRoute: StudentReportRoute,
+  StudentIndexRoute: StudentIndexRoute,
+  StudentIssuesIndexRoute: StudentIssuesIndexRoute,
+}
+
+const StudentRouteWithChildren =
+  StudentRoute._addFileChildren(StudentRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  StudentRoute: StudentRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
