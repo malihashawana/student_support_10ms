@@ -92,3 +92,13 @@ export function formatDateShort(value: string | null | undefined): string {
     year: "numeric",
   });
 }
+
+export function downloadCsv(fileName: string, csv: string): void {
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
