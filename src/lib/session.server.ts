@@ -1,0 +1,93 @@
+import { useSession } from "@tanstack/react-start/server";
+
+export type SupportSession = {
+  role?: "student" | "staff";
+  studentId?: string;
+  staffId?: string;
+  username?: string;
+};
+
+function sessionConfig() {
+  const password = process.env["SESSION_SECRET"];
+  if (!password) throw new Error("SESSION_SECRET is not configured");
+  return {
+    password,
+    name: "hsc28-support-session",
+    maxAge: 60 * 60 * 24 * 7,
+  };
+}
+
+export async function getSupportSession() {
+  return useSession<SupportSession>(sessionConfig());
+}
+
+export class AppError extends Error {}
+
+/** Friendly, non-technical errors only — never leak internals to users. */
+export function friendly(message: string): AppError {
+  return new AppError(message);
+}
+
+export async function readSession(): Promise<SupportSession> {
+  const session = await getSupportSession();
+  return session.data ?? {};
+}
+
+export async function requireStudent() {
+  const data = await readSession();
+  if (data.role !== "student" || !data.studentId) {
+    throw friendly("Your session has expired. Please sign in again.");
+  }
+  return { studentId: data.studentId };
+}
+
+/**
+ * Server-side staff authorization. Do not remove — every support-only
+ * server function must pass through this check.
+ */
+export async function requireStaff() {
+  const data = await readSession();
+  if (data.role !== "staff" || !data.staffId) {
+    throw friendly("You don't have permission to access this page. Please sign in as support team.");
+  }
+  return { staffId: data.staffId, username: data.username ?? "Support Team" };
+}
+
+const ITERATIONS = 100_000;
+
+function toHex(buffer: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function pbkdf2(password: string, salt: string, iterations: number): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, [
+    "deriveBits",
+  ]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: enc.encode(salt), iterations, hash: "SHA-256" },
+    key,
+    256,
+  );
+  return toHex(bits);
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  const salt = toHex(crypto.getRandomValues(new Uint8Array(16)).buffer);
+  const hash = await pbkdf2(password, salt, ITERATIONS);
+  return `pbkdf2$${ITERATIONS}$${salt}$${hash}`;
+}
+
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  const parts = stored.split("$");
+  if (parts.length !== 4 || parts[0] !== "pbkdf2") return false;
+  const iterations = Number(parts[1]);
+  const computed = await pbkdf2(password, parts[2]!, iterations);
+  const expected = parts[3]!;
+  if (computed.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < computed.length; i++) diff |= computed.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
