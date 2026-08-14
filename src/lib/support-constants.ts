@@ -189,9 +189,25 @@ export function bn(value: string | number | null | undefined): string {
 }
 
 export function formatDateBn(value: string | null | undefined): string {
-  return value ? bn(formatDate(value)) : "—";
+  if (!value) return "—";
+  return new Date(value).toLocaleString("bn-BD", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function formatDateShortBn(value: string | null | undefined): string {
-  return value ? bn(formatDateShort(value)) : "—";
+  if (!value) return "—";
+  return new Date(value).toLocaleDateString("bn-BD", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function formatBytesBn(bytes: number | null | undefined): string {
+  return bn(formatBytes(bytes));
 }
