@@ -1,4 +1,4 @@
-import { STATUS_SHORT, STATUS_STYLES } from "@/lib/support-constants";
+import { STATUS_STYLES, labelPriority, labelStatus } from "@/lib/support-constants";
 import { cn } from "@/lib/utils";
 
 export function StatusBadge({
@@ -19,7 +19,7 @@ export function StatusBadge({
       )}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {short ? (STATUS_SHORT[status] ?? status) : status}
+      {labelStatus(status, short)}
     </span>
   );
 }
@@ -37,7 +37,7 @@ export function PriorityBadge({ priority }: { priority: string }) {
         styles[priority] ?? styles["Normal"],
       )}
     >
-      {priority}
+      {labelPriority(priority)}
     </span>
   );
 }

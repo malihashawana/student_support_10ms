@@ -51,7 +51,7 @@ export const myTicketDetail = createServerFn({ method: "GET" })
       .eq("id", input.id)
       .eq("student_id", studentId)
       .maybeSingle();
-    if (!ticket) throw friendly("This ticket was not found in your account.");
+    if (!ticket) throw friendly("এই সমস্যাটি আপনার অ্যাকাউন্টে পাওয়া যায়নি।");
     const [{ data: messages }, { data: attachments }] = await Promise.all([
       db
         .from("ticket_messages")
@@ -84,13 +84,13 @@ export const createTicket = createServerFn({ method: "POST" })
     const title = (data.title ?? "").trim();
     const description = (data.description ?? "").trim();
     if (!CATEGORIES.includes(data.category as (typeof CATEGORIES)[number])) {
-      throw friendly("Please choose a valid problem category.");
+      throw friendly("সমস্যার সঠিক ধরন নির্বাচন করুন।");
     }
     if (title.length < 5 || title.length > 150) {
-      throw friendly("Please write a problem title between 5 and 150 characters.");
+      throw friendly("সমস্যার শিরোনাম ৫ থেকে ১৫০ অক্ষরের মধ্যে লিখুন।");
     }
     if (description.length < 10 || description.length > 4000) {
-      throw friendly("Please describe your problem in at least 10 characters.");
+      throw friendly("সমস্যাটি অন্তত ১০ অক্ষরে বর্ণনা করুন।");
     }
     const { data: ticket, error } = await db
       .from("tickets")
@@ -105,7 +105,7 @@ export const createTicket = createServerFn({ method: "POST" })
       })
       .select("id, ticket_number, category, status, created_at")
       .single();
-    if (error || !ticket) throw friendly("We couldn't submit your problem. Please try again.");
+    if (error || !ticket) throw friendly("সমস্যাটি জমা দেওয়া যায়নি। আবার চেষ্টা করুন।");
 
     await db.from("ticket_messages").insert({
       ticket_id: ticket.id,
@@ -135,7 +135,7 @@ export const addStudentMessage = createServerFn({ method: "POST" })
     const { studentId } = await requireStudent();
     const message = (data.message ?? "").trim();
     if (message.length < 2 || message.length > 4000) {
-      throw friendly("Please write your message before sending.");
+      throw friendly("পাঠানোর আগে আপনার বার্তাটি লিখুন।");
     }
     const { data: ticket } = await db
       .from("tickets")
@@ -143,7 +143,7 @@ export const addStudentMessage = createServerFn({ method: "POST" })
       .eq("id", data.ticketId)
       .eq("student_id", studentId)
       .maybeSingle();
-    if (!ticket) throw friendly("This ticket was not found in your account.");
+    if (!ticket) throw friendly("এই সমস্যাটি আপনার অ্যাকাউন্টে পাওয়া যায়নি।");
     await db.from("ticket_messages").insert({
       ticket_id: ticket.id,
       sender_type: "student",
@@ -194,7 +194,7 @@ export const communityTicketDetail = createServerFn({ method: "GET" })
       )
       .eq("id", data.id)
       .maybeSingle();
-    if (!ticket) throw friendly("This issue could not be found.");
+    if (!ticket) throw friendly("সমস্যাটি খুঁজে পাওয়া যায়নি।");
     return ticket;
   });
 

@@ -44,7 +44,7 @@ export async function readSession(): Promise<SupportSession> {
 export async function requireStudent() {
   const data = await readSession();
   if (data.role !== "student" || !data.studentId) {
-    throw friendly("Your session has expired. Please sign in again.");
+    throw friendly("আপনার সেশনের সময় শেষ হয়েছে। আবার লগইন করুন।");
   }
   return { studentId: data.studentId };
 }
@@ -56,7 +56,7 @@ export async function requireStudent() {
 export async function requireStaff() {
   const data = await readSession();
   if (data.role !== "staff" || !data.staffId) {
-    throw friendly("You don't have permission to access this page. Please sign in as support team.");
+    throw friendly("এই পেজে প্রবেশের অনুমতি আপনার নেই। সাপোর্ট টিম হিসেবে লগইন করুন।");
   }
   return { staffId: data.staffId, username: data.username ?? "Support Team" };
 }

@@ -9,19 +9,19 @@ import { EmptyState } from "@/components/EmptyState";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatDateShort } from "@/lib/support-constants";
+import { bn, formatDateShortBn, labelCategory } from "@/lib/support-constants";
 import { myTickets } from "@/lib/student.functions";
 
 export const Route = createFileRoute("/student/issues/")({
   head: () => ({
     meta: [
-      { title: "My Issues — Student Support Hub HSC 28" },
+      { title: "আমার সমস্যা — Student Support Hub HSC 28" },
       {
         name: "description",
-        content: "All the problems you reported, with current status and last update.",
+        content: "তুমি যেসব সমস্যা জানিয়েছ, সেগুলোর বর্তমান অবস্থা ও সর্বশেষ আপডেট।",
       },
-      { property: "og:title", content: "My Issues — Student Support Hub HSC 28" },
-      { property: "og:description", content: "Track the status of your HSC 28 support tickets." },
+      { property: "og:title", content: "আমার সমস্যা — Student Support Hub HSC 28" },
+      { property: "og:description", content: "তোমার HSC 28 সাপোর্ট টিকেটের অবস্থা দেখো।" },
     ],
   }),
   component: MyIssues,
@@ -45,13 +45,13 @@ function MyIssues() {
   return (
     <div>
       <PageHeader
-        title="My Issues"
-        description="Only you can see these tickets and their details."
+        title="আমার সমস্যা"
+        description="শুধু তুমিই এই টিকেট ও এর বিস্তারিত দেখতে পাবে।"
         action={
           <Button asChild>
             <Link to="/student/report">
               <FilePlus2 className="size-4" />
-              Report a Problem
+              সমস্যা জানান
             </Link>
           </Button>
         }
@@ -63,7 +63,7 @@ function MyIssues() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search my tickets"
+            placeholder="আমার টিকেট খুঁজুন"
             className="h-9 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
@@ -77,12 +77,12 @@ function MyIssues() {
             <table className="w-full min-w-[760px] text-sm">
               <thead className="sticky top-0 bg-secondary/70 text-xs tracking-wide text-muted-foreground uppercase">
                 <tr>
-                  <th className="px-4 py-2 text-left font-medium">Ticket ID</th>
-                  <th className="px-4 py-2 text-left font-medium">Problem</th>
-                  <th className="px-4 py-2 text-left font-medium">Category</th>
-                  <th className="px-4 py-2 text-left font-medium">Date</th>
-                  <th className="px-4 py-2 text-left font-medium">Status</th>
-                  <th className="px-4 py-2 text-left font-medium">Last updated</th>
+                  <th className="px-4 py-2 text-left font-medium">টিকেট আইডি</th>
+                  <th className="px-4 py-2 text-left font-medium">সমস্যা</th>
+                  <th className="px-4 py-2 text-left font-medium">ধরন</th>
+                  <th className="px-4 py-2 text-left font-medium">তারিখ</th>
+                  <th className="px-4 py-2 text-left font-medium">অবস্থা</th>
+                  <th className="px-4 py-2 text-left font-medium">সর্বশেষ আপডেট</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -94,7 +94,7 @@ function MyIssues() {
                         params={{ id: ticket.id }}
                         className="text-primary hover:underline"
                       >
-                        {ticket.ticket_number}
+                        {bn(ticket.ticket_number)}
                       </Link>
                     </td>
                     <td className="max-w-[320px] px-4 py-3">
@@ -107,16 +107,16 @@ function MyIssues() {
                       </Link>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                      {ticket.category}
+                      {labelCategory(ticket.category)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                      {formatDateShort(ticket.created_at)}
+                      {formatDateShortBn(ticket.created_at)}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={ticket.status} short />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                      {formatDateShort(ticket.updated_at)}
+                      {formatDateShortBn(ticket.updated_at)}
                     </td>
                   </tr>
                 ))}
@@ -126,9 +126,9 @@ function MyIssues() {
         ) : (
           <EmptyState
             icon={<Inbox className="size-5" />}
-            title={search ? "No issues found matching your search." : "No problems reported yet."}
+            title={search ? "তোমার খোঁজার সাথে মিলে এমন কোনো সমস্যা পাওয়া যায়নি।" : "এখনো কোনো সমস্যা জানানো হয়নি।"}
             description={
-              search ? "Try a different keyword." : "Report a problem and track it right here."
+              search ? "অন্য কোনো শব্দ দিয়ে চেষ্টা করো।" : "সমস্যা জানাও এবং এখানে এর অবস্থা দেখো।"
             }
           />
         )}

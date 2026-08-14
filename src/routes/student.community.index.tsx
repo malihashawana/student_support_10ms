@@ -16,21 +16,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { communityTickets } from "@/lib/student.functions";
-import { CATEGORIES, STATUSES, formatDateShort } from "@/lib/support-constants";
+import {
+  CATEGORIES,
+  STATUSES,
+  bn,
+  formatDateShortBn,
+  labelCategory,
+  labelCourse,
+  labelStatus,
+} from "@/lib/support-constants";
 
 export const Route = createFileRoute("/student/community/")({
   head: () => ({
     meta: [
-      { title: "Community Issues — Student Support Hub HSC 28" },
+      { title: "সবার সমস্যা — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
       {
         name: "description",
         content:
-          "Search problems already reported by other HSC 28 students and read the official answers.",
+          "অন্য HSC 28 শিক্ষার্থীদের জানানো সমস্যাগুলো খুঁজে দেখো এবং অফিসিয়াল উত্তর পড়ো।",
       },
-      { property: "og:title", content: "Community Issues — Student Support Hub HSC 28" },
+      { property: "og:title", content: "সবার সমস্যা — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
       {
         property: "og:description",
-        content: "Check if your problem is already answered before reporting it.",
+        content: "সমস্যা জানানোর আগে দেখে নাও এটা আগে থেকে সমাধান হয়েছে কিনা।",
       },
     ],
   }),
@@ -51,13 +59,13 @@ function CommunityPage() {
   return (
     <div>
       <PageHeader
-        title="Community Issues"
-        description="Problems reported by other students. Names and contact numbers are never shown."
+        title="সবার সমস্যা"
+        description="অন্য শিক্ষার্থীদের জানানো সমস্যা। নাম ও যোগাযোগ নম্বর কখনো দেখানো হয় না।"
       />
 
       <div className="mb-4 flex items-center gap-2 rounded-lg border border-border bg-secondary/60 px-4 py-3 text-xs text-muted-foreground">
         <ShieldCheck className="size-4 shrink-0 text-primary" />
-        Privacy protected: you can only see the problem, its category and the official response.
+        গোপনীয়তা সুরক্ষিত: শুধু সমস্যা, ধরন এবং অফিসিয়াল উত্তর দেখা যাবে।
       </div>
 
       <div className="card-panel mb-4 grid gap-3 p-4 sm:grid-cols-[1.6fr_1fr_1fr]">
@@ -66,32 +74,32 @@ function CommunityPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by keyword, category or ticket ID"
+            placeholder="কিওয়ার্ড, ধরন বা টিকিট আইডি দিয়ে খুঁজুন"
             className="h-10 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger>
-            <SelectValue placeholder="All categories" />
+            <SelectValue placeholder="সব ধরন" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All categories</SelectItem>
+            <SelectItem value="all">সব ধরন</SelectItem>
             {CATEGORIES.map((c) => (
               <SelectItem key={c} value={c}>
-                {c}
+                {labelCategory(c)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={setStatus}>
           <SelectTrigger>
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder="সব অবস্থা" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="all">সব অবস্থা</SelectItem>
             {STATUSES.map((s) => (
               <SelectItem key={s} value={s}>
-                {s}
+                {labelStatus(s)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -116,14 +124,14 @@ function CommunityPage() {
                   <StatusBadge status={ticket.status} short />
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {ticket.ticket_number} · {ticket.category}
-                  {ticket.course ? ` · ${ticket.course}` : ""} ·{" "}
-                  {formatDateShort(ticket.created_at)}
+                  {bn(ticket.ticket_number)} · {labelCategory(ticket.category)}
+                  {ticket.course ? ` · ${labelCourse(ticket.course)}` : ""} ·{" "}
+                  {formatDateShortBn(ticket.created_at)}
                 </p>
                 <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{ticket.description}</p>
                 {ticket.official_response ? (
                   <p className="mt-2 line-clamp-2 rounded-md bg-primary/5 px-3 py-2 text-xs text-primary">
-                    Official response available
+                    অফিসিয়াল উত্তর দেওয়া হয়েছে
                   </p>
                 ) : null}
               </Link>
@@ -133,8 +141,8 @@ function CommunityPage() {
       ) : (
         <EmptyState
           icon={<Search className="size-5" />}
-          title="No similar issues found."
-          description="Nobody has reported this yet — you can be the first to report it."
+          title="একই ধরনের কোনো সমস্যা পাওয়া যায়নি।"
+          description="এখনো কেউ এটা জানায়নি — তুমিই প্রথম হয়ে এটা জানাতে পারো।"
         />
       )}
     </div>

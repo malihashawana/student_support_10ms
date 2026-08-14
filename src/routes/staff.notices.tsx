@@ -20,18 +20,18 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { deleteNotice, listNotices, saveNotice } from "@/lib/staff.functions";
-import { formatDate } from "@/lib/support-constants";
+import { formatDateBn } from "@/lib/support-constants";
 
 export const Route = createFileRoute("/staff/notices")({
   head: () => ({
     meta: [
-      { title: "Notice Management — Student Support Hub HSC 28" },
+      { title: "নোটিশ পরিচালনা — Student Support Hub HSC 28" },
       {
         name: "description",
-        content: "Publish, edit and remove notices shown to HSC 28 students.",
+        content: "HSC 28 শিক্ষার্থীদের দেখানো নোটিশ প্রকাশ, সম্পাদনা ও অপসারণ করুন।",
       },
-      { property: "og:title", content: "Notice Management — Student Support Hub HSC 28" },
-      { property: "og:description", content: "Control the student notice board." },
+      { property: "og:title", content: "নোটিশ পরিচালনা — Student Support Hub HSC 28" },
+      { property: "og:description", content: "শিক্ষার্থীদের নোটিশ বোর্ড নিয়ন্ত্রণ করুন।" },
     ],
   }),
   component: NoticeManagement,
@@ -78,23 +78,23 @@ function NoticeManagement() {
         },
       }),
     onSuccess: () => {
-      toast.success("Notice saved.");
+      toast.success("নোটিশ সংরক্ষণ করা হয়েছে।");
       setForm(null);
       void invalidate();
     },
     onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "We couldn't save this notice."),
+      toast.error(err instanceof Error ? err.message : "এই নোটিশটি সংরক্ষণ করা যায়নি।"),
   });
 
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
-        title="Notices"
-        description="Published notices appear on every student dashboard."
+        title="নোটিশ"
+        description="প্রকাশিত নোটিশ প্রতিটি শিক্ষার্থীর ড্যাশবোর্ডে দেখা যাবে।"
         action={
           <Button onClick={() => setForm({ ...emptyNotice })}>
             <Plus className="size-4" />
-            New notice
+            নতুন নোটিশ
           </Button>
         }
       />
@@ -111,8 +111,8 @@ function NoticeManagement() {
                 <div>
                   <h2 className="font-display text-base font-semibold">{notice.title}</h2>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {formatDate(notice.created_at)} ·{" "}
-                    {notice.published ? "Published" : "Draft (hidden from students)"}
+                    {formatDateBn(notice.created_at)} ·{" "}
+                    {notice.published ? "প্রকাশিত" : "খসড়া (শিক্ষার্থীদের থেকে লুকানো)"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -130,20 +130,20 @@ function NoticeManagement() {
                       })
                     }
                   >
-                    Edit
+                    সম্পাদনা
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={async () => {
-                      if (!confirm("Delete this notice?")) return;
+                      if (!confirm("এই নোটিশটি মুছে ফেলবেন?")) return;
                       try {
                         await remove({ data: { id: notice.id } });
-                        toast.success("Notice deleted.");
+                        toast.success("নোটিশ মুছে ফেলা হয়েছে।");
                         void invalidate();
                       } catch (err) {
                         toast.error(
-                          err instanceof Error ? err.message : "We couldn't delete this notice.",
+                          err instanceof Error ? err.message : "এই নোটিশটি মুছে ফেলা যায়নি।",
                         );
                       }
                     }}
@@ -161,8 +161,8 @@ function NoticeManagement() {
       ) : (
         <EmptyState
           icon={<Bell className="size-5" />}
-          title="No notices yet."
-          description="Create a notice to inform all students at once."
+          title="এখনো কোনো নোটিশ নেই।"
+          description="একসাথে সব শিক্ষার্থীকে জানাতে একটি নোটিশ তৈরি করুন।"
         />
       )}
 
@@ -171,12 +171,12 @@ function NoticeManagement() {
           <div className="card-panel w-full max-w-lg p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-sm font-semibold">
-                {form.id ? "Edit notice" : "New notice"}
+                {form.id ? "নোটিশ সম্পাদনা করুন" : "নতুন নোটিশ"}
               </h2>
               <button
                 onClick={() => setForm(null)}
                 className="text-muted-foreground hover:text-foreground"
-                aria-label="Close"
+                aria-label="বন্ধ করুন"
               >
                 <X className="size-5" />
               </button>
@@ -189,7 +189,7 @@ function NoticeManagement() {
               }}
             >
               <div className="space-y-1.5">
-                <Label htmlFor="n-title">Title *</Label>
+                <Label htmlFor="n-title">শিরোনাম *</Label>
                 <Input
                   id="n-title"
                   value={form.title}
@@ -198,7 +198,7 @@ function NoticeManagement() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="n-content">Description *</Label>
+                <Label htmlFor="n-content">বিবরণ *</Label>
                 <Textarea
                   id="n-content"
                   rows={5}
@@ -209,7 +209,7 @@ function NoticeManagement() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Priority</Label>
+                  <Label>অগ্রাধিকার</Label>
                   <Select
                     value={form.priority}
                     onValueChange={(v) => setForm({ ...form, priority: v })}
@@ -218,9 +218,9 @@ function NoticeManagement() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Normal">Normal</SelectItem>
-                      <SelectItem value="Important">Important</SelectItem>
-                      <SelectItem value="Urgent">Urgent</SelectItem>
+                      <SelectItem value="Normal">সাধারণ</SelectItem>
+                      <SelectItem value="Important">গুরুত্বপূর্ণ</SelectItem>
+                      <SelectItem value="Urgent">অতি জরুরি</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -230,16 +230,16 @@ function NoticeManagement() {
                     checked={form.published}
                     onChange={(e) => setForm({ ...form, published: e.target.checked })}
                   />
-                  Publish to students
+                  শিক্ষার্থীদের কাছে প্রকাশ করুন
                 </label>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="ghost" onClick={() => setForm(null)}>
-                  Cancel
+                  বাতিল
                 </Button>
                 <Button type="submit" disabled={saveMutation.isPending}>
                   {saveMutation.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-                  Save notice
+                  নোটিশ সংরক্ষণ করুন
                 </Button>
               </div>
             </form>

@@ -67,8 +67,8 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-surface: var(--surface);
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Hind Siliguri", "Noto Sans Bengali", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Anek Bangla", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
   --shadow-card: 0 1px 2px oklch(0.25 0.05 240 / 0.06), 0 8px 24px -12px oklch(0.25 0.05 240 / 0.18);
   --shadow-panel: 0 24px 60px -30px oklch(0.25 0.05 240 / 0.35);
   --background-image-gradient-brand: linear-gradient(135deg, oklch(0.44 0.11 218) 0%, oklch(0.36 0.1 246) 100%);
@@ -172,19 +172,34 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    line-height: 1.65;
+    background-image:
+      radial-gradient(1100px 520px at 12% -12%, oklch(0.44 0.11 218 / 0.10), transparent 60%),
+      radial-gradient(900px 480px at 100% 0%, oklch(0.62 0.13 65 / 0.10), transparent 62%);
+    background-repeat: no-repeat;
   }
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
+    line-height: 1.35;
   }
 }
 
 @utility card-panel {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background-color: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-border) 80%, transparent);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
+  backdrop-filter: blur(8px);
+}
+
+@utility card-panel-hover {
+  transition: box-shadow 200ms ease, transform 200ms ease;
+  &:hover {
+    box-shadow: var(--shadow-panel);
+    transform: translateY(-2px);
+  }
 }
 
 @utility sheet-scroll {

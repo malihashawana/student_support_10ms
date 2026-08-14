@@ -25,21 +25,24 @@ import {
   COURSES,
   MAX_FILES,
   MAX_FILE_MB,
-  formatBytes,
-  formatDate,
+  bn,
+  formatBytesBn,
+  formatDateBn,
+  labelCategory,
+  labelCourse,
 } from "@/lib/support-constants";
 
 export const Route = createFileRoute("/student/report")({
   head: () => ({
     meta: [
-      { title: "Report a Problem — Student Support Hub HSC 28" },
+      { title: "সমস্যা জানান — Student Support Hub HSC 28" },
       {
         name: "description",
         content:
-          "Submit a new HSC 28 support ticket with a category, description, attachments or links.",
+          "ধরন, বিবরণ, সংযুক্তি বা লিংকসহ নতুন HSC 28 সাপোর্ট টিকেট জমা দাও।",
       },
-      { property: "og:title", content: "Report a Problem — Student Support Hub HSC 28" },
-      { property: "og:description", content: "Tell the support team what went wrong." },
+      { property: "og:title", content: "সমস্যা জানান — Student Support Hub HSC 28" },
+      { property: "og:description", content: "সাপোর্ট টিমকে জানাও কী সমস্যা হয়েছে।" },
     ],
   }),
   component: ReportPage,
@@ -74,15 +77,15 @@ function ReportPage() {
     const next: File[] = [...files];
     for (const file of Array.from(list)) {
       if (next.length >= MAX_FILES) {
-        toast.error(`You can attach up to ${MAX_FILES} files.`);
+        toast.error(`তুমি সর্বোচ্চ ${bn(MAX_FILES)}টি ফাইল যুক্ত করতে পারবে।`);
         break;
       }
       if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-        toast.error(`${file.name}: this file type is not supported.`);
+        toast.error(`${file.name}: এই ফাইল টাইপ সাপোর্ট করে না।`);
         continue;
       }
       if (file.size > MAX_FILE_MB * 1024 * 1024) {
-        toast.error(`${file.name}: files must be smaller than ${MAX_FILE_MB} MB.`);
+        toast.error(`${file.name}: ফাইল অবশ্যই ${bn(MAX_FILE_MB)} MB-এর কম হতে হবে।`);
         continue;
       }
       next.push(file);
@@ -128,13 +131,13 @@ function ReportPage() {
           });
         } catch (err) {
           toast.error(
-            err instanceof Error ? err.message : `Upload failed for ${file.name}.`,
+            err instanceof Error ? err.message : `${file.name} আপলোড ব্যর্থ হয়েছে।`,
           );
         }
       }
       setDone(ticket);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "We couldn't submit your problem.");
+      toast.error(err instanceof Error ? err.message : "তোমার সমস্যা জমা দেওয়া যায়নি।");
     } finally {
       setBusy(false);
     }
@@ -148,37 +151,37 @@ function ReportPage() {
             <CheckCircle2 className="size-7" />
           </div>
           <h1 className="font-display mt-4 text-xl font-semibold">
-            Your problem has been submitted successfully.
+            তোমার সমস্যা সফলভাবে জমা হয়েছে।
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Our support team will review it and respond on this ticket.
+            আমাদের সাপোর্ট টিম এটি পর্যালোচনা করে এই টিকেটে উত্তর দেবে।
           </p>
           <dl className="mt-6 grid gap-3 text-left text-sm">
             <div className="flex justify-between border-b border-border pb-2">
-              <dt className="text-muted-foreground">Ticket ID</dt>
-              <dd className="font-display font-semibold">{done.ticket_number}</dd>
+              <dt className="text-muted-foreground">টিকেট আইডি</dt>
+              <dd className="font-display font-semibold">{bn(done.ticket_number)}</dd>
             </div>
             <div className="flex justify-between border-b border-border pb-2">
-              <dt className="text-muted-foreground">Category</dt>
-              <dd>{done.category}</dd>
+              <dt className="text-muted-foreground">ধরন</dt>
+              <dd>{labelCategory(done.category)}</dd>
             </div>
             <div className="flex justify-between border-b border-border pb-2">
-              <dt className="text-muted-foreground">Status</dt>
+              <dt className="text-muted-foreground">অবস্থা</dt>
               <dd>
                 <StatusBadge status={done.status} />
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Submitted</dt>
-              <dd>{formatDate(done.created_at)}</dd>
+              <dt className="text-muted-foreground">জমা দেওয়া হয়েছে</dt>
+              <dd>{formatDateBn(done.created_at)}</dd>
             </div>
           </dl>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Button onClick={() => navigate({ to: "/student/issues/$id", params: { id: done.id } })}>
-              View ticket
+              টিকেট দেখুন
             </Button>
             <Button variant="outline" asChild>
-              <Link to="/student">Back to dashboard</Link>
+              <Link to="/student">ড্যাশবোর্ডে ফিরুন</Link>
             </Button>
           </div>
         </div>
@@ -189,36 +192,36 @@ function ReportPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
-        title="Report a Problem"
-        description="Describe what happened. You don't need to choose a team — support will route it internally."
+        title="সমস্যা জানান"
+        description="কী হয়েছে তা লিখো। নির্দিষ্ট টিম বেছে নেওয়ার দরকার নেই — সাপোর্ট টিম নিজেরাই পাঠিয়ে দেবে।"
       />
       <form onSubmit={handleSubmit} className="card-panel space-y-5 p-5">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label>Problem category *</Label>
+            <Label>সমস্যার ধরন *</Label>
             <Select value={category} onValueChange={setCategory} required>
               <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
+                <SelectValue placeholder="একটি ধরন বেছে নাও" />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>
-                    {c}
+                    {labelCategory(c)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Related course / subject</Label>
+            <Label>সংশ্লিষ্ট বিষয়</Label>
             <Select value={course} onValueChange={setCourse}>
               <SelectTrigger>
-                <SelectValue placeholder="Optional" />
+                <SelectValue placeholder="ঐচ্ছিক" />
               </SelectTrigger>
               <SelectContent>
                 {COURSES.map((c) => (
                   <SelectItem key={c} value={c}>
-                    {c}
+                    {labelCourse(c)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -227,10 +230,10 @@ function ReportPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="title">Problem title *</Label>
+          <Label htmlFor="title">সমস্যার শিরোনাম *</Label>
           <Input
             id="title"
-            placeholder="Physics class audio is not working"
+            placeholder="পদার্থবিজ্ঞান ক্লাসের অডিও কাজ করছে না"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={150}
@@ -239,32 +242,32 @@ function ReportPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Problem description *</Label>
+          <Label htmlFor="description">সমস্যার বিবরণ *</Label>
           <Textarea
             id="description"
-            placeholder="Please describe your problem clearly."
+            placeholder="তোমার সমস্যাটি স্পষ্টভাবে লেখো।"
             rows={6}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={4000}
             required
           />
-          <p className="text-xs text-muted-foreground">{description.length}/4000</p>
+          <p className="text-xs text-muted-foreground">{bn(description.length)}/{bn(4000)}</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="classExam">Related class / exam</Label>
+            <Label htmlFor="classExam">সংশ্লিষ্ট ক্লাস / পরীক্ষা</Label>
             <Input
               id="classExam"
-              placeholder="Lecture 12 / Weekly Exam 04"
+              placeholder="লেকচার ১২ / সাপ্তাহিক পরীক্ষা ০৪"
               value={classExam}
               onChange={(e) => setClassExam(e.target.value)}
               maxLength={120}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="link">Video / Drive / other link</Label>
+            <Label htmlFor="link">ভিডিও / ড্রাইভ / অন্য লিংক</Label>
             <Input
               id="link"
               placeholder="https://..."
@@ -276,7 +279,7 @@ function ReportPage() {
         </div>
 
         <div className="space-y-2">
-          <Label>Attachments</Label>
+          <Label>সংযুক্তি</Label>
           <div className="rounded-lg border border-dashed border-border p-4">
             <input
               ref={fileInput}
@@ -289,11 +292,11 @@ function ReportPage() {
             <div className="flex flex-wrap items-center gap-3">
               <Button type="button" variant="outline" onClick={() => fileInput.current?.click()}>
                 <Upload className="size-4" />
-                Choose files
+                ফাইল বেছে নাও
               </Button>
               <p className="text-xs text-muted-foreground">
-                PNG, JPG, WebP, PDF, MP3, WAV, MP4, WebM · up to {MAX_FILE_MB} MB each · max{" "}
-                {MAX_FILES} files
+                PNG, JPG, WebP, PDF, MP3, WAV, MP4, WebM · প্রতিটি সর্বোচ্চ {bn(MAX_FILE_MB)} MB · সর্বোচ্চ{" "}
+                {bn(MAX_FILES)}টি ফাইল
               </p>
             </div>
             {files.length ? (
@@ -305,12 +308,12 @@ function ReportPage() {
                   >
                     <Paperclip className="size-4 shrink-0 text-muted-foreground" />
                     <span className="min-w-0 flex-1 truncate">{file.name}</span>
-                    <span className="text-xs text-muted-foreground">{formatBytes(file.size)}</span>
+                    <span className="text-xs text-muted-foreground">{formatBytesBn(file.size)}</span>
                     <button
                       type="button"
                       onClick={() => setFiles(files.filter((_, i) => i !== index))}
                       className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Remove ${file.name}`}
+                      aria-label={`${file.name} সরান`}
                     >
                       <X className="size-4" />
                     </button>
@@ -323,11 +326,11 @@ function ReportPage() {
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" asChild>
-            <Link to="/student">Cancel</Link>
+            <Link to="/student">বাতিল</Link>
           </Button>
           <Button type="submit" disabled={busy}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-            Submit Problem
+            সমস্যা জমা দিন
           </Button>
         </div>
       </form>

@@ -17,7 +17,7 @@ export const uploadAttachment = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await readSession();
     if (session.role !== "student" || !session.studentId) {
-      throw friendly("Your session has expired. Please sign in again.");
+      throw friendly("আপনার সেশনের সময় শেষ হয়েছে। আবার লগইন করুন।");
     }
     const { data: ticket } = await db
       .from("tickets")
@@ -25,10 +25,10 @@ export const uploadAttachment = createServerFn({ method: "POST" })
       .eq("id", data.ticketId)
       .eq("student_id", session.studentId)
       .maybeSingle();
-    if (!ticket) throw friendly("This ticket was not found in your account.");
+    if (!ticket) throw friendly("এই সমস্যাটি আপনার অ্যাকাউন্টে পাওয়া যায়নি।");
 
     if (!ALLOWED_FILE_TYPES.includes(data.fileType)) {
-      throw friendly("Upload failed. This file type is not supported.");
+      throw friendly("আপলোড হয়নি। এই ধরনের ফাইল সমর্থিত নয়।");
     }
     if (data.fileSize > MAX_FILE_MB * 1024 * 1024) {
       throw friendly(`Upload failed. Files must be smaller than ${MAX_FILE_MB} MB.`);
@@ -40,7 +40,7 @@ export const uploadAttachment = createServerFn({ method: "POST" })
     const { error: uploadError } = await db.storage
       .from("ticket-attachments")
       .upload(path, binary, { contentType: data.fileType, upsert: false });
-    if (uploadError) throw friendly("Upload failed. Please check the file type and size.");
+    if (uploadError) throw friendly("আপলোড হয়নি। ফাইলের ধরন ও আকার দেখে নিন।");
 
     const { data: row, error } = await db
       .from("attachments")
@@ -53,7 +53,7 @@ export const uploadAttachment = createServerFn({ method: "POST" })
       })
       .select("id, file_name, file_type, file_size, created_at")
       .single();
-    if (error) throw friendly("Upload failed. Please try again.");
+    if (error) throw friendly("আপলোড হয়নি। আবার চেষ্টা করুন।");
     return row;
   });
 
@@ -62,7 +62,7 @@ export const addLinkAttachment = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await readSession();
     if (session.role !== "student" || !session.studentId) {
-      throw friendly("Your session has expired. Please sign in again.");
+      throw friendly("আপনার সেশনের সময় শেষ হয়েছে। আবার লগইন করুন।");
     }
     const url = (data.url ?? "").trim();
     if (!/^https?:\/\//i.test(url) || url.length > 500) {
@@ -74,7 +74,7 @@ export const addLinkAttachment = createServerFn({ method: "POST" })
       .eq("id", data.ticketId)
       .eq("student_id", session.studentId)
       .maybeSingle();
-    if (!ticket) throw friendly("This ticket was not found in your account.");
+    if (!ticket) throw friendly("এই সমস্যাটি আপনার অ্যাকাউন্টে পাওয়া যায়নি।");
     await db
       .from("attachments")
       .insert({ ticket_id: data.ticketId, file_name: url, file_type: "link", external_url: url });
@@ -90,7 +90,7 @@ export const getAttachmentUrl = createServerFn({ method: "POST" })
       .select("id, storage_path, external_url, ticket_id, file_type")
       .eq("id", data.id)
       .maybeSingle();
-    if (!attachment) throw friendly("This attachment could not be found.");
+    if (!attachment) throw friendly("সংযুক্তিটি খুঁজে পাওয়া যায়নি।");
 
     if (session.role === "student") {
       const { data: ticket } = await db
@@ -99,16 +99,16 @@ export const getAttachmentUrl = createServerFn({ method: "POST" })
         .eq("id", attachment.ticket_id)
         .eq("student_id", session.studentId ?? "")
         .maybeSingle();
-      if (!ticket) throw friendly("You don't have permission to open this attachment.");
+      if (!ticket) throw friendly("এই সংযুক্তি দেখার অনুমতি আপনার নেই।");
     } else if (session.role !== "staff") {
-      throw friendly("Your session has expired. Please sign in again.");
+      throw friendly("আপনার সেশনের সময় শেষ হয়েছে। আবার লগইন করুন।");
     }
 
     if (attachment.external_url) return { url: attachment.external_url };
-    if (!attachment.storage_path) throw friendly("This attachment is unavailable.");
+    if (!attachment.storage_path) throw friendly("সংযুক্তিটি এখন পাওয়া যাচ্ছে না।");
     const { data: signed, error } = await db.storage
       .from("ticket-attachments")
       .createSignedUrl(attachment.storage_path, 60 * 30);
-    if (error || !signed) throw friendly("This attachment could not be opened right now.");
+    if (error || !signed) throw friendly("সংযুক্তিটি এখন খোলা যাচ্ছে না।");
     return { url: signed.signedUrl };
   });

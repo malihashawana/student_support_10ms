@@ -32,7 +32,7 @@ export function AppShell({
       await router.invalidate();
       await navigate({ to: "/", replace: true });
     } catch {
-      toast.error("Sign out failed. Please try again.");
+      toast.error("সাইন আউট করা যায়নি। আবার চেষ্টা করুন।");
     }
   }
 
@@ -43,7 +43,7 @@ export function AppShell({
           <button
             className="rounded-md p-2 text-muted-foreground lg:hidden"
             onClick={() => setOpen((v) => !v)}
-            aria-label="Toggle navigation"
+            aria-label="মেনু খুলুন বা বন্ধ করুন"
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -52,8 +52,8 @@ export function AppShell({
               <GraduationCap className="size-5" />
             </span>
             <span className="leading-tight">
-              <span className="font-display block text-sm font-semibold">Student Support Hub</span>
-              <span className="block text-xs text-muted-foreground">HSC 28</span>
+              <span className="font-display block text-sm font-semibold">স্টুডেন্ট সাপোর্ট হাব</span>
+              <span className="block text-xs text-muted-foreground">এইচএসসি ২৮</span>
             </span>
           </Link>
           <div className="ml-auto flex items-center gap-3">
@@ -63,7 +63,7 @@ export function AppShell({
             </div>
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="size-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden sm:inline">লগআউট</span>
             </Button>
           </div>
         </div>
