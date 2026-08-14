@@ -102,3 +102,96 @@ export function downloadCsv(fileName: string, csv: string): void {
   anchor.click();
   URL.revokeObjectURL(url);
 }
+
+/* ---------------------------------------------------------------
+ * Bangla labels. Database values stay English; UI shows Bangla.
+ * --------------------------------------------------------------- */
+
+export const CATEGORY_BN: Record<string, string> = {
+  Sound: "সাউন্ড",
+  Video: "ভিডিও",
+  Exam: "পরীক্ষা",
+  "Recorded Lecture": "রেকর্ডেড লেকচার",
+  "Live Class": "লাইভ ক্লাস",
+  "App / Website": "অ্যাপ / ওয়েবসাইট",
+  "Payment / Subscription": "পেমেন্ট / সাবস্ক্রিপশন",
+  "Study Material": "স্টাডি ম্যাটেরিয়াল",
+  "Account / Login": "অ্যাকাউন্ট / লগইন",
+  Other: "অন্যান্য",
+};
+
+export const COURSE_BN: Record<string, string> = {
+  "Physics 1st Paper": "পদার্থবিজ্ঞান ১ম পত্র",
+  "Physics 2nd Paper": "পদার্থবিজ্ঞান ২য় পত্র",
+  "Chemistry 1st Paper": "রসায়ন ১ম পত্র",
+  "Chemistry 2nd Paper": "রসায়ন ২য় পত্র",
+  "Higher Math 1st Paper": "উচ্চতর গণিত ১ম পত্র",
+  "Higher Math 2nd Paper": "উচ্চতর গণিত ২য় পত্র",
+  Biology: "জীববিজ্ঞান",
+  ICT: "আইসিটি",
+  English: "ইংরেজি",
+  Bangla: "বাংলা",
+};
+
+export const STATUS_BN: Record<string, string> = {
+  Open: "নতুন",
+  "In Review": "পর্যালোচনায়",
+  "Waiting for Information": "তথ্যের অপেক্ষায়",
+  Resolved: "সমাধান হয়েছে",
+  Closed: "বন্ধ",
+};
+
+export const STATUS_BN_SHORT: Record<string, string> = {
+  Open: "নতুন",
+  "In Review": "পর্যালোচনায়",
+  "Waiting for Information": "অপেক্ষায়",
+  Resolved: "সমাধান",
+  Closed: "বন্ধ",
+};
+
+export const PRIORITY_BN: Record<string, string> = {
+  Normal: "সাধারণ",
+  normal: "সাধারণ",
+  High: "গুরুত্বপূর্ণ",
+  high: "গুরুত্বপূর্ণ",
+  Urgent: "অতি জরুরি",
+  urgent: "অতি জরুরি",
+  Low: "কম",
+  low: "কম",
+};
+
+export function labelCategory(value: string | null | undefined): string {
+  if (!value) return "—";
+  return CATEGORY_BN[value] ?? value;
+}
+
+export function labelCourse(value: string | null | undefined): string {
+  if (!value) return "—";
+  return COURSE_BN[value] ?? value;
+}
+
+export function labelStatus(value: string | null | undefined, short = false): string {
+  if (!value) return "—";
+  return (short ? STATUS_BN_SHORT[value] : STATUS_BN[value]) ?? value;
+}
+
+export function labelPriority(value: string | null | undefined): string {
+  if (!value) return "—";
+  return PRIORITY_BN[value] ?? value;
+}
+
+const BN_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+
+/** Converts ASCII digits inside any string/number to Bangla digits. */
+export function bn(value: string | number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return String(value).replace(/[0-9]/g, (d) => BN_DIGITS[Number(d)]);
+}
+
+export function formatDateBn(value: string | null | undefined): string {
+  return value ? bn(formatDate(value)) : "—";
+}
+
+export function formatDateShortBn(value: string | null | undefined): string {
+  return value ? bn(formatDateShort(value)) : "—";
+}
