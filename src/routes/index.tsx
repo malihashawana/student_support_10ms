@@ -11,16 +11,16 @@ import { getCurrentUser, staffLogin, studentLogin } from "@/lib/auth.functions";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Sign in — Student Support Hub HSC 28" },
+      { title: "লগইন — স্টুডেন্ট সাপোর্ট হাব এইচএসসি ২৮" },
       {
         name: "description",
         content:
-          "Sign in with your registered contact number to report and track HSC 28 study problems, or use the support team login.",
+          "রেজিস্টার্ড মোবাইল নম্বর দিয়ে লগইন করে এইচএসসি ২৮ কোর্সের যেকোনো সমস্যা জানান ও সমাধান ট্র্যাক করুন।",
       },
-      { property: "og:title", content: "Sign in — Student Support Hub HSC 28" },
+      { property: "og:title", content: "লগইন — স্টুডেন্ট সাপোর্ট হাব এইচএসসি ২৮" },
       {
         property: "og:description",
-        content: "Report a problem, track your tickets and see resolved issues for HSC 28.",
+        content: "সমস্যা জানান, অবস্থা দেখুন এবং সমাধান হওয়া সমস্যাগুলো খুঁজুন।",
       },
     ],
   }),
@@ -50,7 +50,7 @@ function LoginPage() {
       await router.invalidate();
       await navigate({ to: "/student", replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign in failed. Please try again.");
+      setError(err instanceof Error ? err.message : "লগইন করা যায়নি। আবার চেষ্টা করুন।");
     } finally {
       setBusy(null);
     }
@@ -65,7 +65,7 @@ function LoginPage() {
       await router.invalidate();
       await navigate({ to: "/staff", replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign in failed. Please try again.");
+      setError(err instanceof Error ? err.message : "লগইন করা যায়নি। আবার চেষ্টা করুন।");
     } finally {
       setBusy(null);
     }
@@ -79,30 +79,30 @@ function LoginPage() {
             <GraduationCap className="size-6" />
           </span>
           <div>
-            <p className="font-display text-lg font-semibold">Student Support Hub</p>
-            <p className="text-sm opacity-80">HSC 28</p>
+            <p className="font-display text-lg font-semibold">স্টুডেন্ট সাপোর্ট হাব</p>
+            <p className="text-sm opacity-80">এইচএসসি ২৮</p>
           </div>
         </div>
         <div className="max-w-lg space-y-6">
           <h1 className="font-display text-4xl leading-tight font-semibold">
-            One place for every HSC 28 problem — reported, tracked and resolved.
+            এইচএসসি ২৮-এর সব সমস্যার এক ঠিকানা — জানান, ট্র্যাক করুন, সমাধান পান।
           </h1>
           <ul className="space-y-4 text-sm opacity-90">
             <li className="flex gap-3">
               <LifeBuoy className="mt-0.5 size-5 shrink-0" />
-              Report class, exam, sound, video or payment problems in seconds.
+              ক্লাস, পরীক্ষা, সাউন্ড, ভিডিও বা পেমেন্টের সমস্যা মাত্র কয়েক সেকেন্ডে জানান।
             </li>
             <li className="flex gap-3">
               <Search className="mt-0.5 size-5 shrink-0" />
-              Search issues other students already reported before opening a new one.
+              নতুন রিপোর্ট করার আগে অন্য শিক্ষার্থীদের জানানো সমস্যাগুলো খুঁজে দেখুন।
             </li>
             <li className="flex gap-3">
               <ShieldCheck className="mt-0.5 size-5 shrink-0" />
-              Your identity stays private on the community issue board.
+              সবার সমস্যার বোর্ডে আপনার পরিচয় গোপন থাকে।
             </li>
           </ul>
         </div>
-        <p className="text-xs opacity-70">Central issue database & resolution system</p>
+        <p className="text-xs opacity-70">কেন্দ্রীয় সমস্যা ডেটাবেজ ও সমাধান ব্যবস্থা</p>
       </section>
 
       <section className="flex items-center justify-center px-4 py-12">
@@ -112,26 +112,26 @@ function LoginPage() {
               <GraduationCap className="size-5" />
             </span>
             <div>
-              <p className="font-display font-semibold">Student Support Hub</p>
-              <p className="text-xs text-muted-foreground">HSC 28</p>
+              <p className="font-display font-semibold">স্টুডেন্ট সাপোর্ট হাব</p>
+              <p className="text-xs text-muted-foreground">এইচএসসি ২৮</p>
             </div>
           </div>
 
-          <h2 className="font-display text-2xl font-semibold">Sign in</h2>
+          <h2 className="font-display text-2xl font-semibold">লগইন করুন</h2>
           <p className="mt-1 mb-6 text-sm text-muted-foreground">
-            Students sign in with their registered contact number.
+            শিক্ষার্থীরা রেজিস্টার্ড মোবাইল নম্বর দিয়ে লগইন করবে।
           </p>
 
           <Tabs defaultValue="student" onValueChange={() => setError(null)}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="student">Student</TabsTrigger>
-              <TabsTrigger value="staff">Support Team</TabsTrigger>
+              <TabsTrigger value="student">শিক্ষার্থী</TabsTrigger>
+              <TabsTrigger value="staff">সাপোর্ট টিম</TabsTrigger>
             </TabsList>
 
             <TabsContent value="student" className="mt-6">
               <form onSubmit={handleStudent} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contact">Contact / Login Number</Label>
+                  <Label htmlFor="contact">মোবাইল / লগইন নম্বর</Label>
                   <Input
                     id="contact"
                     inputMode="numeric"
@@ -143,7 +143,7 @@ function LoginPage() {
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Use the number registered with your HSC 28 course.
+                    এইচএসসি ২৮ কোর্সে যে নম্বরটি রেজিস্টার করা আছে সেটি দিন।
                   </p>
                 </div>
                 {error ? (
@@ -153,7 +153,7 @@ function LoginPage() {
                 ) : null}
                 <Button type="submit" className="w-full" disabled={busy === "student"}>
                   {busy === "student" ? <Loader2 className="size-4 animate-spin" /> : null}
-                  Continue
+                  পরবর্তী ধাপ
                 </Button>
               </form>
             </TabsContent>
@@ -161,7 +161,7 @@ function LoginPage() {
             <TabsContent value="staff" className="mt-6">
               <form onSubmit={handleStaff} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username">ইউজারনেম</Label>
                   <Input
                     id="username"
                     autoComplete="username"
@@ -171,7 +171,7 @@ function LoginPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">পাসওয়ার্ড</Label>
                   <Input
                     id="password"
                     type="password"
@@ -192,7 +192,7 @@ function LoginPage() {
                   ) : (
                     <Headset className="size-4" />
                   )}
-                  Support Team Login
+                  সাপোর্ট টিম লগইন
                 </Button>
               </form>
             </TabsContent>
