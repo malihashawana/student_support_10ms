@@ -185,7 +185,7 @@ const BN_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮"
 /** Converts ASCII digits inside any string/number to Bangla digits. */
 export function bn(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return "—";
-  return String(value).replace(/[0-9]/g, (d) => BN_DIGITS[Number(d)]);
+  return String(value).replace(/[0-9]/g, (d) => BN_DIGITS[Number(d)] ?? d);
 }
 
 export function formatDateBn(value: string | null | undefined): string {
