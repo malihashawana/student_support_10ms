@@ -7,18 +7,18 @@ import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { PriorityBadge } from "@/components/StatusBadge";
 import { publishedNotices } from "@/lib/student.functions";
-import { formatDate } from "@/lib/support-constants";
+import { formatDateBn } from "@/lib/support-constants";
 
 export const Route = createFileRoute("/student/notices")({
   head: () => ({
     meta: [
-      { title: "Notices — Student Support Hub HSC 28" },
+      { title: "নোটিশ — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
       {
         name: "description",
-        content: "Official announcements and updates from the HSC 28 support team.",
+        content: "HSC 28 সাপোর্ট টিমের অফিসিয়াল ঘোষণা ও আপডেট।",
       },
-      { property: "og:title", content: "Notices — Student Support Hub HSC 28" },
-      { property: "og:description", content: "Latest HSC 28 announcements for students." },
+      { property: "og:title", content: "নোটিশ — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
+      { property: "og:description", content: "শিক্ষার্থীদের জন্য HSC 28-এর সর্বশেষ ঘোষণা।" },
     ],
   }),
   component: NoticesPage,
@@ -33,7 +33,7 @@ function NoticesPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Notices" description="Announcements from the support team." />
+      <PageHeader title="নোটিশ" description="সাপোর্ট টিমের ঘোষণা।" />
       {isLoading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
@@ -49,12 +49,12 @@ function NoticesPage() {
               <p className="mt-2 text-sm whitespace-pre-wrap text-foreground/85">
                 {notice.content}
               </p>
-              <p className="mt-2 text-xs text-muted-foreground">{formatDate(notice.created_at)}</p>
+              <p className="mt-2 text-xs text-muted-foreground">{formatDateBn(notice.created_at)}</p>
             </li>
           ))}
         </ul>
       ) : (
-        <EmptyState icon={<Bell className="size-5" />} title="No new notices." />
+        <EmptyState icon={<Bell className="size-5" />} title="নতুন কোনো নোটিশ নেই।" />
       )}
     </div>
   );

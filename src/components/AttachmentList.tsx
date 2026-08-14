@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { getAttachmentUrl } from "@/lib/attachments.functions";
-import { formatBytes, formatDateShort } from "@/lib/support-constants";
+import { formatBytesBn, formatDateShortBn } from "@/lib/support-constants";
 
 export type AttachmentRow = {
   id: string;
@@ -38,7 +38,7 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
       setUrls((prev) => ({ ...prev, [id]: url }));
       return url;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "This attachment could not be opened.");
+      toast.error(err instanceof Error ? err.message : "এই সংযুক্তিটি খোলা যায়নি।");
       return null;
     } finally {
       setLoading(null);
@@ -46,7 +46,7 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
   }
 
   if (!attachments.length) {
-    return <p className="px-4 py-6 text-sm text-muted-foreground">No attachments on this ticket.</p>;
+    return <p className="px-4 py-6 text-sm text-muted-foreground">এই টিকিটে কোনো সংযুক্তি নেই।</p>;
   }
 
   return (
@@ -65,9 +65,9 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{attachment.file_name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {isLink ? "External link" : (attachment.file_type ?? "file")} ·{" "}
-                  {isLink ? "—" : formatBytes(attachment.file_size)} ·{" "}
-                  {formatDateShort(attachment.created_at)}
+                  {isLink ? "এক্সটার্নাল লিংক" : (attachment.file_type ?? "ফাইল")} ·{" "}
+                  {isLink ? "—" : formatBytesBn(attachment.file_size)} ·{" "}
+                  {formatDateShortBn(attachment.created_at)}
                 </p>
               </div>
               {isLink ? (
@@ -78,14 +78,14 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
                     rel="noopener noreferrer nofollow"
                   >
                     <ExternalLink className="size-4" />
-                    Open link
+                    লিংক খুলুন
                   </a>
                 </Button>
               ) : url ? (
                 <Button size="sm" variant="outline" asChild>
                   <a href={url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="size-4" />
-                    Open
+                    খুলুন
                   </a>
                 </Button>
               ) : (
@@ -95,7 +95,7 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
                   disabled={loading === attachment.id}
                   onClick={() => load(attachment.id)}
                 >
-                  {isImage || isAudio || isVideo ? "Preview" : "Download"}
+                  {isImage || isAudio || isVideo ? "প্রিভিউ" : "ডাউনলোড"}
                 </Button>
               )}
             </div>

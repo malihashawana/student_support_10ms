@@ -38,7 +38,7 @@ export const studentLogin = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const contact = normalizeContact(data.contact ?? "");
     if (contact.length < 6) {
-      throw friendly("Please enter a valid contact / login number.");
+      throw friendly("সঠিক মোবাইল / লগইন নম্বর দিন।");
     }
     const { data: student } = await db
       .from("students")
@@ -47,11 +47,11 @@ export const studentLogin = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!student) {
       throw friendly(
-        "Your contact number was not found in the registered student list. Please contact the support team.",
+        "আপনার নম্বরটি রেজিস্টার্ড শিক্ষার্থী তালিকায় পাওয়া যায়নি। সাপোর্ট টিমের সাথে যোগাযোগ করুন।",
       );
     }
     if (student.status !== "active") {
-      throw friendly("Your student account is inactive. Please contact the support team.");
+      throw friendly("আপনার শিক্ষার্থী অ্যাকাউন্টটি বন্ধ আছে। সাপোর্ট টিমের সাথে যোগাযোগ করুন।");
     }
     const session = await getSupportSession();
     await session.update({ role: "student", studentId: student.id });
@@ -70,7 +70,7 @@ export const staffLogin = createServerFn({ method: "POST" })
       .maybeSingle();
     const ok = staff ? await verifyPassword(data.password ?? "", staff.password_hash) : false;
     if (!staff || !ok) {
-      throw friendly("Incorrect username or password.");
+      throw friendly("ইউজারনেম বা পাসওয়ার্ড ভুল হয়েছে।");
     }
     const session = await getSupportSession();
     await session.update({ role: "staff", staffId: staff.id, username: staff.username });

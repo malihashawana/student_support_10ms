@@ -5,17 +5,18 @@ import { ShieldCheck } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
 import { studentDashboard } from "@/lib/student.functions";
+import { bn } from "@/lib/support-constants";
 
 export const Route = createFileRoute("/student/profile")({
   head: () => ({
     meta: [
-      { title: "My Profile — Student Support Hub HSC 28" },
+      { title: "প্রোফাইল — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
       {
         name: "description",
-        content: "Your registered HSC 28 student details and reporting summary.",
+        content: "তোমার নিবন্ধিত HSC 28 শিক্ষার্থী তথ্য ও রিপোর্টের সারাংশ।",
       },
-      { property: "og:title", content: "My Profile — Student Support Hub HSC 28" },
-      { property: "og:description", content: "Registered student details and ticket summary." },
+      { property: "og:title", content: "প্রোফাইল — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
+      { property: "og:description", content: "নিবন্ধিত শিক্ষার্থীর তথ্য ও টিকিট সারাংশ।" },
     ],
   }),
   component: ProfilePage,
@@ -30,17 +31,17 @@ function ProfilePage() {
   });
 
   const rows: Array<[string, string]> = [
-    ["Name", student.name],
-    ["Contact number", student.contact_number],
-    ["Student ID", student.student_code || "—"],
-    ["Total issues reported", String(data?.stats.total ?? 0)],
-    ["Open issues", String(data?.stats.open ?? 0)],
-    ["Resolved issues", String(data?.stats.resolved ?? 0)],
+    ["নাম", student.name],
+    ["যোগাযোগ নম্বর", bn(student.contact_number)],
+    ["শিক্ষার্থী আইডি", student.student_code ? bn(student.student_code) : "—"],
+    ["মোট সমস্যা জানানো হয়েছে", bn(data?.stats.total ?? 0)],
+    ["চলমান সমস্যা", bn(data?.stats.open ?? 0)],
+    ["সমাধান হয়েছে", bn(data?.stats.resolved ?? 0)],
   ];
 
   return (
     <div className="mx-auto max-w-xl">
-      <PageHeader title="My Profile" description="Details registered by the support team." />
+      <PageHeader title="প্রোফাইল" description="সাপোর্ট টিমের দেওয়া তথ্য।" />
       <div className="card-panel divide-y divide-border">
         {rows.map(([label, value]) => (
           <div key={label} className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
@@ -51,8 +52,8 @@ function ProfilePage() {
       </div>
       <p className="mt-4 flex items-start gap-2 rounded-lg bg-secondary/60 px-4 py-3 text-xs text-muted-foreground">
         <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-        Your name and contact number are never shown on the community board. To change these
-        details, contact the support team.
+        তোমার নাম ও যোগাযোগ নম্বর কখনো সবার সমস্যা বোর্ডে দেখানো হয় না। এই তথ্য পরিবর্তন করতে
+        সাপোর্ট টিমের সাথে যোগাযোগ করো।
       </p>
     </div>
   );

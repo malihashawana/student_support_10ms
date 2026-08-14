@@ -119,7 +119,7 @@ export const staffTicketDetail = createServerFn({ method: "GET" })
       .select("*, students(id, name, contact_number, student_code, email)")
       .eq("id", data.id)
       .maybeSingle();
-    if (!ticket) throw friendly("This ticket could not be found.");
+    if (!ticket) throw friendly("সমস্যাটি খুঁজে পাওয়া যায়নি।");
     const [{ data: messages }, { data: attachments }] = await Promise.all([
       db
         .from("ticket_messages")
@@ -154,7 +154,7 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
       handled_by?: string;
     } = {};
     if (data.status) {
-      if (!STATUSES.includes(data.status as never)) throw friendly("Invalid status selected.");
+      if (!STATUSES.includes(data.status as never)) throw friendly("সঠিক অবস্থা নির্বাচন করুন।");
       patch.status = data.status;
       if (data.status === "Resolved") patch.resolved_at = new Date().toISOString();
     }
@@ -163,7 +163,7 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
       patch.handled_by = data.handled_by.trim() || username;
 
     const { error } = await db.from("tickets").update(patch).eq("id", data.id);
-    if (error) throw friendly("We couldn't update this ticket. Please try again.");
+    if (error) throw friendly("সমস্যাটি আপডেট করা যায়নি। আবার চেষ্টা করুন।");
 
     if (data.sendResponse && data.response?.trim()) {
       await db.from("ticket_messages").insert({
@@ -181,7 +181,7 @@ export const staffAddMessage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { username } = await requireStaff();
     const message = (data.message ?? "").trim();
-    if (message.length < 2) throw friendly("Please write a message before sending.");
+    if (message.length < 2) throw friendly("পাঠানোর আগে বার্তাটি লিখুন।");
     await db.from("ticket_messages").insert({
       ticket_id: data.ticketId,
       sender_type: "staff",
@@ -249,10 +249,10 @@ export const previewStudentCsv = createServerFn({ method: "POST" })
   .inputValidator((input: { text: string }) => input)
   .handler(async ({ data }) => {
     await requireStaff();
-    if (!data.text?.trim()) throw friendly("Upload failed. The file appears to be empty.");
+    if (!data.text?.trim()) throw friendly("আপলোড হয়নি। ফাইলটি ফাঁকা মনে হচ্ছে।");
     const analysis = await analyzeStudentCsv(data.text);
     if (analysis.detected === 0) {
-      throw friendly("Upload failed. Please check the file type and its column headers.");
+      throw friendly("আপলোড হয়নি। ফাইলের ধরন ও কলাম হেডার দেখে নিন।");
     }
     return {
       detected: analysis.detected,
@@ -282,7 +282,7 @@ export const importStudentCsv = createServerFn({ method: "POST" })
           email: s.email,
         })),
       );
-      if (error) throw friendly("Import failed. Please check the file and try again.");
+      if (error) throw friendly("ইমপোর্ট হয়নি। ফাইলটি দেখে আবার চেষ্টা করুন।");
       inserted = analysis.valid.length;
     }
     if (data.updateExisting) {
@@ -312,8 +312,8 @@ export const saveStudent = createServerFn({ method: "POST" })
     await requireStaff();
     const name = (data.name ?? "").trim();
     const contact = normalizeContact(data.contact_number ?? "");
-    if (!name) throw friendly("Please enter the student's name.");
-    if (contact.length < 6) throw friendly("Please enter a valid contact number.");
+    if (!name) throw friendly("শিক্ষার্থীর নাম লিখুন।");
+    if (contact.length < 6) throw friendly("সঠিক মোবাইল নম্বর লিখুন।");
     const payload = {
       name,
       contact_number: contact,
@@ -327,8 +327,8 @@ export const saveStudent = createServerFn({ method: "POST" })
     if (error) {
       throw friendly(
         error.code === "23505"
-          ? "That contact number already exists in the student database."
-          : "We couldn't save this student. Please try again.",
+          ? "এই মোবাইল নম্বরটি ডেটাবেজে আগে থেকেই আছে।"
+          : "শিক্ষার্থীর তথ্য সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
       );
     }
     return { ok: true };
@@ -339,7 +339,7 @@ export const deleteStudent = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireStaff();
     const { error } = await db.from("students").delete().eq("id", data.id);
-    if (error) throw friendly("We couldn't delete this student. Please try again.");
+    if (error) throw friendly("শিক্ষার্থীটি মুছে ফেলা যায়নি। আবার চেষ্টা করুন।");
     return { ok: true };
   });
 
@@ -387,8 +387,8 @@ export const saveNotice = createServerFn({ method: "POST" })
     await requireStaff();
     const title = (data.title ?? "").trim();
     const content = (data.content ?? "").trim();
-    if (title.length < 3) throw friendly("Please enter a notice title.");
-    if (content.length < 3) throw friendly("Please enter the notice description.");
+    if (title.length < 3) throw friendly("নোটিশের শিরোনাম লিখুন।");
+    if (content.length < 3) throw friendly("নোটিশের বিবরণ লিখুন।");
     const payload = {
       title,
       content,
@@ -398,7 +398,7 @@ export const saveNotice = createServerFn({ method: "POST" })
     const { error } = data.id
       ? await db.from("notices").update(payload).eq("id", data.id)
       : await db.from("notices").insert(payload);
-    if (error) throw friendly("We couldn't save this notice. Please try again.");
+    if (error) throw friendly("নোটিশটি সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।");
     return { ok: true };
   });
 
@@ -435,7 +435,7 @@ export const updateSetting = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireStaff();
     const allowed = ["categories", "upload", "courses"];
-    if (!allowed.includes(data.key)) throw friendly("This setting cannot be changed.");
+    if (!allowed.includes(data.key)) throw friendly("এই সেটিংটি পরিবর্তন করা যাবে না।");
     await db
       .from("app_settings")
       .upsert(
@@ -456,20 +456,20 @@ export const updateStaffCredentials = createServerFn({ method: "POST" })
       .select("id, password_hash")
       .eq("id", staffId)
       .maybeSingle();
-    if (!staff) throw friendly("Your session has expired. Please sign in again.");
+    if (!staff) throw friendly("আপনার সেশনের সময় শেষ হয়েছে। আবার লগইন করুন।");
     if (!(await verifyPassword(data.currentPassword ?? "", staff.password_hash))) {
-      throw friendly("Your current password is incorrect.");
+      throw friendly("আপনার বর্তমান পাসওয়ার্ড ভুল।");
     }
     const patch: { username?: string; password_hash?: string } = {};
     if (data.username?.trim()) patch.username = data.username.trim();
     if (data.newPassword) {
       if (data.newPassword.length < 8) {
-        throw friendly("The new password must be at least 8 characters.");
+        throw friendly("নতুন পাসওয়ার্ড অন্তত ৮ অক্ষরের হতে হবে।");
       }
       patch.password_hash = await hashPassword(data.newPassword);
     }
-    if (Object.keys(patch).length === 0) throw friendly("Nothing to update.");
+    if (Object.keys(patch).length === 0) throw friendly("আপডেট করার কিছু নেই।");
     const { error } = await db.from("staff_users").update(patch).eq("id", staffId);
-    if (error) throw friendly("We couldn't update the credentials. Please try again.");
+    if (error) throw friendly("লগইন তথ্য আপডেট করা যায়নি। আবার চেষ্টা করুন।");
     return { ok: true };
   });

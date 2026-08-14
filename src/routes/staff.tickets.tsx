@@ -32,22 +32,26 @@ import {
   CATEGORIES,
   COURSES,
   STATUSES,
+  bn,
   downloadCsv,
-  formatDate,
-  formatDateShort,
+  formatDateBn,
+  formatDateShortBn,
+  labelCategory,
+  labelCourse,
+  labelStatus,
 } from "@/lib/support-constants";
 
 export const Route = createFileRoute("/staff/tickets")({
   head: () => ({
     meta: [
-      { title: "Issue Workspace — Student Support Hub HSC 28" },
+      { title: "সমস্যা ওয়ার্কস্পেস — স্টুডেন্ট সাপোর্ট হাব HSC ২৮" },
       {
         name: "description",
         content:
-          "Spreadsheet-style workspace to filter, respond to and resolve HSC 28 student issues.",
+          "HSC ২৮ শিক্ষার্থীদের সমস্যা ফিল্টার, উত্তর দেওয়া এবং সমাধানের জন্য স্প্রেডশিট-স্টাইল ওয়ার্কস্পেস।",
       },
-      { property: "og:title", content: "Issue Workspace — Student Support Hub HSC 28" },
-      { property: "og:description", content: "Filter, answer and export student issues." },
+      { property: "og:title", content: "সমস্যা ওয়ার্কস্পেস — স্টুডেন্ট সাপোর্ট হাব HSC ২৮" },
+      { property: "og:description", content: "শিক্ষার্থীদের সমস্যা ফিল্টার, উত্তর দিন এবং এক্সপোর্ট করুন।" },
     ],
   }),
   component: TicketWorkspace,
@@ -76,9 +80,9 @@ function TicketWorkspace() {
     try {
       const csv = await exportCsv({ data: filters });
       downloadCsv(`hsc28-issues-${new Date().toISOString().slice(0, 10)}.csv`, csv);
-      toast.success("CSV export downloaded.");
+      toast.success("সিএসভি ডাউনলোড হয়েছে।");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Export failed. Please try again.");
+      toast.error(err instanceof Error ? err.message : "এক্সপোর্ট ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
     } finally {
       setExporting(false);
     }
@@ -87,8 +91,8 @@ function TicketWorkspace() {
   return (
     <div>
       <PageHeader
-        title="Issue Workspace"
-        description={`${data?.length ?? 0} issues match the current filters.`}
+        title="সমস্যা ওয়ার্কস্পেস"
+        description={`বর্তমান ফিল্টারে ${bn(data?.length ?? 0)}টি সমস্যা মিলেছে।`}
         action={
           <Button variant="outline" onClick={handleExport} disabled={exporting}>
             {exporting ? (
@@ -96,7 +100,7 @@ function TicketWorkspace() {
             ) : (
               <Download className="size-4" />
             )}
-            Export CSV
+            সিএসভি ডাউনলোড
           </Button>
         }
       />
@@ -107,7 +111,7 @@ function TicketWorkspace() {
           <Input
             value={filters.search ?? ""}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            placeholder="Search ticket, student, contact or keyword"
+            placeholder="টিকেট, শিক্ষার্থী, যোগাযোগ বা কীওয়ার্ড খুঁজুন"
             className="h-10 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
@@ -119,10 +123,10 @@ function TicketWorkspace() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
             {STATUSES.map((s) => (
               <SelectItem key={s} value={s}>
-                {s}
+                {labelStatus(s)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -135,10 +139,10 @@ function TicketWorkspace() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All categories</SelectItem>
+            <SelectItem value="all">সব বিভাগ</SelectItem>
             {CATEGORIES.map((c) => (
               <SelectItem key={c} value={c}>
-                {c}
+                {labelCategory(c)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -154,12 +158,12 @@ function TicketWorkspace() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All time</SelectItem>
-            <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="yesterday">Yesterday</SelectItem>
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="custom">Custom range</SelectItem>
+            <SelectItem value="all">সব সময়</SelectItem>
+            <SelectItem value="today">আজ</SelectItem>
+            <SelectItem value="yesterday">গতকাল</SelectItem>
+            <SelectItem value="7d">গত ৭ দিন</SelectItem>
+            <SelectItem value="30d">গত ৩০ দিন</SelectItem>
+            <SelectItem value="custom">কাস্টম রেঞ্জ</SelectItem>
           </SelectContent>
         </Select>
         {filters.range === "custom" ? (
@@ -169,7 +173,7 @@ function TicketWorkspace() {
               value={filters.from ?? ""}
               onChange={(e) => setFilters({ ...filters, from: e.target.value })}
             />
-            <span className="text-xs text-muted-foreground">to</span>
+            <span className="text-xs text-muted-foreground">থেকে</span>
             <Input
               type="date"
               value={filters.to ?? ""}
@@ -185,10 +189,10 @@ function TicketWorkspace() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All courses</SelectItem>
+            <SelectItem value="all">সব কোর্স</SelectItem>
             {COURSES.map((c) => (
               <SelectItem key={c} value={c}>
-                {c}
+                {labelCourse(c)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -205,14 +209,14 @@ function TicketWorkspace() {
             <table className="w-full min-w-[1100px] text-sm">
               <thead className="sticky top-0 z-10 bg-secondary text-xs tracking-wide text-muted-foreground uppercase">
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">Ticket</th>
-                  <th className="px-3 py-2 text-left font-medium">Student</th>
-                  <th className="px-3 py-2 text-left font-medium">Contact</th>
-                  <th className="px-3 py-2 text-left font-medium">Category</th>
-                  <th className="px-3 py-2 text-left font-medium">Problem</th>
-                  <th className="px-3 py-2 text-left font-medium">Date</th>
-                  <th className="px-3 py-2 text-left font-medium">Status</th>
-                  <th className="px-3 py-2 text-left font-medium">Response</th>
+                  <th className="px-3 py-2 text-left font-medium">টিকেট</th>
+                  <th className="px-3 py-2 text-left font-medium">শিক্ষার্থী</th>
+                  <th className="px-3 py-2 text-left font-medium">যোগাযোগ</th>
+                  <th className="px-3 py-2 text-left font-medium">বিভাগ</th>
+                  <th className="px-3 py-2 text-left font-medium">সমস্যা</th>
+                  <th className="px-3 py-2 text-left font-medium">তারিখ</th>
+                  <th className="px-3 py-2 text-left font-medium">স্ট্যাটাস</th>
+                  <th className="px-3 py-2 text-left font-medium">উত্তর</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -229,19 +233,19 @@ function TicketWorkspace() {
                     <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
                       {ticket.students?.contact_number ?? "—"}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">{ticket.category}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{labelCategory(ticket.category)}</td>
                     <td className="max-w-[320px] px-3 py-2">
                       <span className="line-clamp-1">{ticket.title}</span>
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
-                      {formatDateShort(ticket.created_at)}
+                      {formatDateShortBn(ticket.created_at)}
                     </td>
                     <td className="px-3 py-2">
                       <StatusBadge status={ticket.status} short />
                     </td>
                     <td className="max-w-[240px] px-3 py-2 text-muted-foreground">
                       <span className="line-clamp-1">
-                        {ticket.official_response ?? "No response yet"}
+                        {ticket.official_response ?? "এখনো কোনো উত্তর নেই"}
                       </span>
                     </td>
                   </tr>
@@ -252,8 +256,8 @@ function TicketWorkspace() {
         ) : (
           <EmptyState
             icon={<Search className="size-5" />}
-            title="No issues found matching your filters."
-            description="Try clearing the search or widening the date range."
+            title="আপনার ফিল্টার অনুযায়ী কোনো সমস্যা পাওয়া যায়নি।"
+            description="সার্চ মুছে ফেলুন বা তারিখের রেঞ্জ বাড়িয়ে দেখুন।"
           />
         )}
       </div>
@@ -291,33 +295,33 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 
       }),
     onSuccess: () => {
-      toast.success("Ticket updated.");
+      toast.success("টিকেট আপডেট হয়েছে।");
       void queryClient.invalidateQueries({ queryKey: ["staff-ticket", id] });
       void queryClient.invalidateQueries({ queryKey: ["staff-tickets"] });
       void queryClient.invalidateQueries({ queryKey: ["staff-overview"] });
     },
     onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "We couldn't update this ticket."),
+      toast.error(err instanceof Error ? err.message : "টিকেটটি আপডেট করা যায়নি।"),
   });
 
   const messageMutation = useMutation({
     mutationFn: () => addMessage({ data: { ticketId: id, message: note, internal } }),
     onSuccess: () => {
       setNote("");
-      toast.success(internal ? "Internal note saved." : "Message sent to the student.");
+      toast.success(internal ? "অভ্যন্তরীণ নোট সংরক্ষণ হয়েছে।" : "শিক্ষার্থীকে বার্তা পাঠানো হয়েছে।");
       void queryClient.invalidateQueries({ queryKey: ["staff-ticket", id] });
     },
     onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Your message could not be sent."),
+      toast.error(err instanceof Error ? err.message : "বার্তা পাঠানো যায়নি।"),
   });
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-foreground/30 backdrop-blur-sm">
-      <button className="flex-1" aria-label="Close panel" onClick={onClose} />
+      <button className="flex-1" aria-label="প্যানেল বন্ধ করুন" onClick={onClose} />
       <aside className="flex h-full w-full max-w-xl flex-col overflow-y-auto bg-surface shadow-2xl">
         <div className="sticky top-0 flex items-center justify-between border-b border-border bg-surface px-4 py-3">
           <h2 className="font-display text-sm font-semibold">
-            {data?.ticket.ticket_number ?? "Ticket"}
+            {data?.ticket.ticket_number ?? "টিকেট"}
           </h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="size-5" />
@@ -336,10 +340,10 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 <StatusBadge status={data.ticket.status} />
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                {data.ticket.category}
-                {data.ticket.course ? ` · ${data.ticket.course}` : ""}
+                {labelCategory(data.ticket.category)}
+                {data.ticket.course ? ` · ${labelCourse(data.ticket.course)}` : ""}
                 {data.ticket.class_exam ? ` · ${data.ticket.class_exam}` : ""} ·{" "}
-                {formatDate(data.ticket.created_at)}
+                {formatDateBn(data.ticket.created_at)}
               </p>
               <p className="mt-3 text-sm whitespace-pre-wrap">{data.ticket.description}</p>
             </div>
@@ -347,7 +351,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 
             <div className="rounded-lg bg-secondary/60 p-3 text-sm">
               <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                Student
+                শিক্ষার্থী
               </p>
               <p className="mt-1 font-medium">{data.ticket.students?.name ?? "—"}</p>
               <p className="text-xs text-muted-foreground">
@@ -360,7 +364,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label>Status</Label>
+                <Label>স্ট্যাটাস</Label>
                 <Select
                   value={status ?? data.ticket.status}
                   onValueChange={(v) => setStatus(v)}
@@ -371,19 +375,19 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   <SelectContent>
                     {STATUSES.map((s) => (
                       <SelectItem key={s} value={s}>
-                        {s}
+                        {labelStatus(s)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Official response (visible to the student)</Label>
+                <Label>অফিশিয়াল উত্তর (শিক্ষার্থী দেখতে পাবে)</Label>
                 <Textarea
                   rows={4}
                   value={response ?? data.ticket.official_response ?? ""}
                   onChange={(e) => setResponse(e.target.value)}
-                  placeholder="Write the official answer for this issue..."
+                  placeholder="এই সমস্যার অফিশিয়াল উত্তর লিখুন..."
                 />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -394,7 +398,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   onClick={() => saveMutation.mutate(false)}
                 >
                   <Save className="size-4" />
-                  Save
+                  সংরক্ষণ
                 </Button>
                 <Button
                   size="sm"
@@ -406,7 +410,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   ) : (
                     <Send className="size-4" />
                   )}
-                  Save &amp; send response
+                  সংরক্ষণ ও উত্তর পাঠান
                 </Button>
               </div>
             </div>
@@ -414,7 +418,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             <div>
               <p className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 <Paperclip className="size-4" />
-                Attachments
+                সংযুক্তি
               </p>
               <div className="rounded-lg border border-border">
                 <AttachmentList attachments={data.attachments} />
@@ -423,7 +427,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 
             <div>
               <p className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                Conversation
+                কথোপকথন
               </p>
               <div className="space-y-2">
                 {data.messages.length ? (
@@ -440,17 +444,17 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                     >
                       <p className="text-xs text-muted-foreground">
                         {message.internal
-                          ? `Internal note · ${message.sender_name ?? "Support"}`
+                          ? `অভ্যন্তরীণ নোট · ${message.sender_name ?? "সাপোর্ট"}`
                           : message.sender_type === "staff"
-                            ? `Support · ${message.sender_name ?? ""}`
-                            : "Student"}{" "}
-                        · {formatDate(message.created_at)}
+                            ? `সাপোর্ট · ${message.sender_name ?? ""}`
+                            : "শিক্ষার্থী"}{" "}
+                        · {formatDateBn(message.created_at)}
                       </p>
                       <p className="mt-1 text-sm whitespace-pre-wrap">{message.message}</p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">No messages yet.</p>
+                  <p className="text-sm text-muted-foreground">এখনো কোনো বার্তা নেই।</p>
                 )}
               </div>
               <Textarea
@@ -458,7 +462,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 rows={3}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Write a message or internal note..."
+                placeholder="একটি বার্তা বা অভ্যন্তরীণ নোট লিখুন..."
               />
               <div className="mt-2 flex items-center justify-between">
                 <label className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -467,7 +471,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                     checked={internal}
                     onChange={(e) => setInternal(e.target.checked)}
                   />
-                  Internal note (hidden from student)
+                  অভ্যন্তরীণ নোট (শিক্ষার্থীর কাছে গোপন)
                 </label>
                 <Button
                   size="sm"
@@ -479,7 +483,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   ) : (
                     <Send className="size-4" />
                   )}
-                  Send
+                  পাঠান
                 </Button>
               </div>
             </div>
