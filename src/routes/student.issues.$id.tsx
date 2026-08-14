@@ -9,19 +9,19 @@ import { AttachmentList } from "@/components/AttachmentList";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { formatDate } from "@/lib/support-constants";
+import { bn, formatDateBn, labelCategory, labelCourse } from "@/lib/support-constants";
 import { addStudentMessage, myTicketDetail } from "@/lib/student.functions";
 
 export const Route = createFileRoute("/student/issues/$id")({
   head: () => ({
     meta: [
-      { title: "Ticket Details — Student Support Hub HSC 28" },
+      { title: "টিকেটের বিস্তারিত — Student Support Hub HSC 28" },
       {
         name: "description",
-        content: "Full conversation, official response and attachments for your support ticket.",
+        content: "তোমার সাপোর্ট টিকেটের সম্পূর্ণ কথোপকথন, অফিসিয়াল উত্তর ও সংযুক্তি।",
       },
-      { property: "og:title", content: "Ticket Details — Student Support Hub HSC 28" },
-      { property: "og:description", content: "See the official response on your ticket." },
+      { property: "og:title", content: "টিকেটের বিস্তারিত — Student Support Hub HSC 28" },
+      { property: "og:description", content: "তোমার টিকেটে অফিসিয়াল উত্তর দেখো।" },
     ],
   }),
   component: TicketDetail,
@@ -43,11 +43,11 @@ function TicketDetail() {
     mutationFn: (message: string) => sendMessage({ data: { ticketId: id, message } }),
     onSuccess: () => {
       setReply("");
-      toast.success("Your message was sent to the support team.");
+      toast.success("তোমার বার্তা সাপোর্ট টিমের কাছে পাঠানো হয়েছে।");
       void queryClient.invalidateQueries({ queryKey: ["my-ticket", id] });
     },
     onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Your message could not be sent."),
+      toast.error(err instanceof Error ? err.message : "তোমার বার্তা পাঠানো যায়নি।"),
   });
 
   if (isLoading) {
@@ -62,10 +62,10 @@ function TicketDetail() {
     return (
       <div className="card-panel p-8 text-center">
         <p className="text-sm text-muted-foreground">
-          {error instanceof Error ? error.message : "This ticket was not found in your account."}
+          {error instanceof Error ? error.message : "তোমার অ্যাকাউন্টে এই টিকেট পাওয়া যায়নি।"}
         </p>
         <Button asChild variant="outline" className="mt-4">
-          <Link to="/student/issues">Back to my issues</Link>
+          <Link to="/student/issues">আমার সমস্যায় ফিরুন</Link>
         </Button>
       </div>
     );
@@ -80,20 +80,20 @@ function TicketDetail() {
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        My Issues
+        আমার সমস্যা
       </Link>
 
       <div className="card-panel p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="font-display text-xs font-semibold tracking-wide text-primary">
-              {ticket.ticket_number}
+              {bn(ticket.ticket_number)}
             </p>
             <h1 className="font-display mt-1 text-xl font-semibold">{ticket.title}</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              {ticket.category}
-              {ticket.course ? ` · ${ticket.course}` : ""}
-              {ticket.class_exam ? ` · ${ticket.class_exam}` : ""} · {formatDate(ticket.created_at)}
+              {labelCategory(ticket.category)}
+              {ticket.course ? ` · ${labelCourse(ticket.course)}` : ""}
+              {ticket.class_exam ? ` · ${ticket.class_exam}` : ""} · {formatDateBn(ticket.created_at)}
             </p>
           </div>
           <StatusBadge status={ticket.status} />
@@ -102,13 +102,13 @@ function TicketDetail() {
         {ticket.official_response ? (
           <div className="mt-4 rounded-lg border border-primary/25 bg-primary/5 p-4">
             <p className="text-xs font-semibold tracking-wide text-primary uppercase">
-              Official response
+              অফিসিয়াল উত্তর
             </p>
             <p className="mt-2 text-sm whitespace-pre-wrap">{ticket.official_response}</p>
           </div>
         ) : (
           <p className="mt-4 rounded-lg bg-secondary px-4 py-3 text-sm text-muted-foreground">
-            The support team has not responded yet. You will see their reply here.
+            সাপোর্ট টিম এখনো উত্তর দেয়নি। উত্তর এলে এখানে দেখা যাবে।
           </p>
         )}
       </div>
@@ -116,14 +116,14 @@ function TicketDetail() {
       <div className="card-panel">
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <Paperclip className="size-4 text-muted-foreground" />
-          <h2 className="text-sm font-semibold">Attachments</h2>
+          <h2 className="text-sm font-semibold">সংযুক্তি</h2>
         </div>
         <AttachmentList attachments={attachments} />
       </div>
 
       <div className="card-panel">
         <div className="border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold">Conversation</h2>
+          <h2 className="text-sm font-semibold">কথোপকথন</h2>
         </div>
         <div className="space-y-3 p-4">
           {messages.length ? (
@@ -137,20 +137,20 @@ function TicketDetail() {
                 }
               >
                 <p className="text-xs font-medium text-muted-foreground">
-                  {message.sender_type === "staff" ? "Support team" : "You"} ·{" "}
-                  {formatDate(message.created_at)}
+                  {message.sender_type === "staff" ? "সাপোর্ট টিম" : "তুমি"} ·{" "}
+                  {formatDateBn(message.created_at)}
                 </p>
                 <p className="mt-1 text-sm whitespace-pre-wrap">{message.message}</p>
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">No messages yet.</p>
+            <p className="text-sm text-muted-foreground">এখনো কোনো বার্তা নেই।</p>
           )}
         </div>
         <div className="border-t border-border p-4">
           <Textarea
             rows={3}
-            placeholder="Add more information for the support team..."
+            placeholder="সাপোর্ট টিমের জন্য আরও তথ্য যোগ করো..."
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             maxLength={2000}
@@ -166,7 +166,7 @@ function TicketDetail() {
               ) : (
                 <Send className="size-4" />
               )}
-              Send message
+              বার্তা পাঠান
             </Button>
           </div>
         </div>

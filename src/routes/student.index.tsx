@@ -8,19 +8,19 @@ import { EmptyState } from "@/components/EmptyState";
 import { PriorityBadge, StatusBadge } from "@/components/StatusBadge";
 import { StatCard } from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
-import { formatDateShort } from "@/lib/support-constants";
+import { bn, formatDateShortBn, labelCategory } from "@/lib/support-constants";
 import { studentDashboard } from "@/lib/student.functions";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
     meta: [
-      { title: "Student Dashboard — Student Support Hub HSC 28" },
+      { title: "ড্যাশবোর্ড — Student Support Hub HSC 28" },
       {
         name: "description",
-        content: "Track your reported problems, read notices and report new issues for HSC 28.",
+        content: "তোমার জানানো সমস্যা, নোটিশ দেখো এবং নতুন সমস্যা জানাও HSC 28-এর জন্য।",
       },
-      { property: "og:title", content: "Student Dashboard — Student Support Hub HSC 28" },
-      { property: "og:description", content: "Your HSC 28 support tickets and notices." },
+      { property: "og:title", content: "ড্যাশবোর্ড — Student Support Hub HSC 28" },
+      { property: "og:description", content: "তোমার HSC 28 সাপোর্ট টিকেট ও নোটিশ।" },
     ],
   }),
   component: StudentHome,
@@ -36,20 +36,20 @@ function StudentHome() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Dashboard"
-        description="Report a problem, follow your tickets and stay updated."
+        title="ড্যাশবোর্ড"
+        description="সমস্যা জানাও, টিকেট ফলো করো এবং আপডেট থাকো।"
         action={
           <div className="flex gap-2">
             <Button asChild variant="outline">
               <Link to="/student/community">
                 <Search className="size-4" />
-                Search issues
+                সমস্যা খুঁজুন
               </Link>
             </Button>
             <Button asChild>
               <Link to="/student/report">
                 <FilePlus2 className="size-4" />
-                Report a Problem
+                সমস্যা জানান
               </Link>
             </Button>
           </div>
@@ -64,20 +64,20 @@ function StudentHome() {
         <>
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard
-              label="My open issues"
-              value={data?.stats.open ?? 0}
+              label="আমার চলমান সমস্যা"
+              value={bn(data?.stats.open ?? 0)}
               tone="open"
               icon={<Inbox className="size-5" />}
             />
             <StatCard
-              label="My resolved issues"
-              value={data?.stats.resolved ?? 0}
+              label="আমার সমাধান হওয়া সমস্যা"
+              value={bn(data?.stats.resolved ?? 0)}
               tone="resolved"
               icon={<CheckCircle2 className="size-5" />}
             />
             <StatCard
-              label="Total submitted"
-              value={data?.stats.total ?? 0}
+              label="মোট জমা দেওয়া"
+              value={bn(data?.stats.total ?? 0)}
               icon={<Ticket className="size-5" />}
             />
           </div>
@@ -85,9 +85,9 @@ function StudentHome() {
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
             <div className="card-panel">
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <h2 className="text-sm font-semibold">Recent tickets</h2>
+                <h2 className="text-sm font-semibold">সাম্প্রতিক টিকেট</h2>
                 <Link to="/student/issues" className="text-xs font-medium text-primary">
-                  View all
+                  সব দেখুন
                 </Link>
               </div>
               {data?.tickets.length ? (
@@ -102,8 +102,8 @@ function StudentHome() {
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{ticket.title}</p>
                           <p className="text-xs text-muted-foreground">
-                            {ticket.ticket_number} · {ticket.category} ·{" "}
-                            {formatDateShort(ticket.created_at)}
+                            {bn(ticket.ticket_number)} · {labelCategory(ticket.category)} ·{" "}
+                            {formatDateShortBn(ticket.created_at)}
                           </p>
                         </div>
                         <StatusBadge status={ticket.status} short />
@@ -114,11 +114,11 @@ function StudentHome() {
               ) : (
                 <EmptyState
                   icon={<Inbox className="size-5" />}
-                  title="No problems reported yet."
-                  description="When you report a problem it will appear here with its status."
+                  title="এখনো কোনো সমস্যা জানানো হয়নি।"
+                  description="সমস্যা জানালে তার অবস্থাসহ এখানে দেখা যাবে।"
                   action={
                     <Button asChild size="sm">
-                      <Link to="/student/report">Report a Problem</Link>
+                      <Link to="/student/report">সমস্যা জানান</Link>
                     </Button>
                   }
                 />
@@ -129,10 +129,10 @@ function StudentHome() {
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <h2 className="flex items-center gap-2 text-sm font-semibold">
                   <Bell className="size-4 text-primary" />
-                  Notice board
+                  নোটিশ বোর্ড
                 </h2>
                 <Link to="/student/notices" className="text-xs font-medium text-primary">
-                  All notices
+                  সব নোটিশ
                 </Link>
               </div>
               {data?.notices.length ? (
@@ -147,13 +147,13 @@ function StudentHome() {
                         {notice.content}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground/70">
-                        {formatDateShort(notice.created_at)}
+                        {formatDateShortBn(notice.created_at)}
                       </p>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <EmptyState title="No new notices." />
+                <EmptyState title="নতুন কোনো নোটিশ নেই।" />
               )}
             </div>
           </div>
