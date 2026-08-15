@@ -29,12 +29,15 @@ export async function getSupportSession() {
   return useSession<SupportSession>(sessionConfig());
 }
 
-export class AppError extends Error {}
-
-/** Friendly, non-technical errors only — never leak internals to users. */
-export function friendly(message: string): AppError {
-  return new AppError(message);
+/**
+ * Friendly, non-technical errors only — never leak internals to users.
+ * Must be a plain `Error`: custom Error subclasses cannot be serialized
+ * back to the client by server functions and surface as a blank 500 page.
+ */
+export function friendly(message: string): Error {
+  return new Error(message);
 }
+
 
 export async function readSession(): Promise<SupportSession> {
   const session = await getSupportSession();
