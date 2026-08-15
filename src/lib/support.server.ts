@@ -3,22 +3,27 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { hashPassword } from "./session.server";
 
 export const db = supabaseAdmin;
-
+export function normalizeContact(value: string): string {
+  return value.replace(/[^0-9]/g, "");
+}
 const DEFAULT_STAFF_USERNAME = "TENMS";
 const DEFAULT_STAFF_PASSWORD = "tenten10";
 
 /** Creates the initial support-team account (hashed) the first time it is needed. */
 export async function ensureDefaultStaff() {
-  const { count } = await db.from("staff_users").select("id", { count: "exact", head: true });
-  if ((count ?? 0) > 0) return;
-  const password_hash = await hashPassword(DEFAULT_STAFF_PASSWORD);
-  await db
+  const { count } = await db
     .from("staff_users")
-    .insert({ username: DEFAULT_STAFF_USERNAME, password_hash, role: "admin" });
-}
+    .select("id", { count: "exact", head: true });
 
-export function normalizeContact(value: string): string {
-  return value.replace(/[^0-9]/g, "");
+  if ((count ?? 0) > 0) return;
+
+  const password_hash = await hashPassword(DEFAULT_STAFF_PASSWORD);
+
+  await db.from("staff_users").insert({
+    username: DEFAULT_STAFF_USERNAME,
+    password_hash,
+    role: "admin",
+  });
 }
 
 export type PublicTicket = {
