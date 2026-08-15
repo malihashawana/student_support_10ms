@@ -12,6 +12,24 @@ The application should be production-ready in structure but initially use the pr
 
 ---
 
+## Local Development Setup
+
+To run this project locally you need your own Supabase backend, because the service-role key and database password used by Lovable Cloud are not retrievable from the platform.
+
+1. Create a free Supabase project at https://supabase.com.
+2. Copy `supabase/migrations/` SQL files and run them in your project's SQL Editor (or use the Supabase CLI).
+3. Copy `.env.example` to `.env` and fill in the values from your own Supabase project settings:
+   - `SUPABASE_URL` / `VITE_SUPABASE_URL` — Project Settings → API → Project URL
+   - `SUPABASE_PUBLISHABLE_KEY` / `VITE_SUPABASE_PUBLISHABLE_KEY` — Project Settings → API → Project API keys → `anon public`
+   - `SUPABASE_SERVICE_ROLE_KEY` — Project Settings → API → Project API keys → `service role` (keep this secret)
+   - `SESSION_SECRET` — generate locally with `openssl rand -hex 32`
+4. Install dependencies: `bun install` (or `npm install`)
+5. Start the dev server: `bun dev` (or `npm run dev`)
+
+Inside Lovable and on the published site these values are injected automatically, so no manual `.env` is required there.
+
+---
+
 1. Overall Goal
 
 The platform should create one central place where HSC 28 students can:
