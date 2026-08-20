@@ -19,11 +19,13 @@ export async function ensureDefaultStaff() {
 
   const password_hash = await hashPassword(DEFAULT_STAFF_PASSWORD);
 
-  await db.from("staff_users").insert({
-    username: DEFAULT_STAFF_USERNAME,
-    password_hash,
-    role: "admin",
-  });
+  await db
+    .from("staff_users")
+    .insert({
+      username: DEFAULT_STAFF_USERNAME,
+      password_hash,
+      role: "admin",
+    });
 }
 
 export type PublicTicket = {
