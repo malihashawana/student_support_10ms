@@ -45,9 +45,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          পেজটি লোড হয়নি
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">পেজটি লোড হয়নি</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           আমাদের দিকে কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন বা হোমে ফিরে যান।
         </p>
@@ -81,8 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "স্টুডেন্ট সাপোর্ট হাব — এইচএসসি ২৮" },
       {
         name: "description",
-        content:
-          "এইচএসসি ২৮ শিক্ষার্থীদের সব সমস্যা এক জায়গায় — রিপোর্ট, ট্র্যাকিং ও সমাধান।",
+        content: "এইচএসসি ২৮ শিক্ষার্থীদের সব সমস্যা এক জায়গায় — রিপোর্ট, ট্র্যাকিং ও সমাধান।",
       },
       { name: "author", content: "স্টুডেন্ট সাপোর্ট হাব" },
       { property: "og:title", content: "স্টুডেন্ট সাপোর্ট হাব — এইচএসসি ২৮" },

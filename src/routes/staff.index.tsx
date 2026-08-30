@@ -44,7 +44,11 @@ function StaffOverview() {
       <PageHeader title="ওভারভিউ" description="HSC ২৮ শিক্ষার্থীদের রিপোর্ট করা সব কিছু।" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="মোট সমস্যা" value={bn(data?.total ?? 0)} icon={<Inbox className="size-5" />} />
+        <StatCard
+          label="মোট সমস্যা"
+          value={bn(data?.total ?? 0)}
+          icon={<Inbox className="size-5" />}
+        />
         <StatCard
           label="আজ রিপোর্ট হয়েছে"
           value={bn(data?.today ?? 0)}
@@ -95,7 +99,9 @@ function StaffOverview() {
               ))}
             </ul>
           ) : (
-            <p className="px-4 py-6 text-sm text-muted-foreground">এখনো কোনো সমস্যা রিপোর্ট হয়নি।</p>
+            <p className="px-4 py-6 text-sm text-muted-foreground">
+              এখনো কোনো সমস্যা রিপোর্ট হয়নি।
+            </p>
           )}
         </div>
       </div>

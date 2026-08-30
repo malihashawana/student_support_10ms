@@ -1,7 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, Loader2, Plus, Search, Trash2, Upload, UserPlus, X } from "lucide-react";
+import {
+  Download,
+  Loader2,
+  Plus,
+  RotateCcw,
+  Search,
+  UserPlus,
+  UserX,
+  Upload,
+  X,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -10,12 +20,14 @@ import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  deleteStudent,
+  deactivateStudent,
   exportStudentsCsv,
   importStudentCsv,
   listStudents,
   previewStudentCsv,
+  reactivateStudent,
   saveStudent,
 } from "@/lib/staff.functions";
 import { bn, downloadCsv, formatDateShortBn } from "@/lib/support-constants";
@@ -27,7 +39,7 @@ export const Route = createFileRoute("/staff/students")({
       {
         name: "description",
         content:
-          "কন্টাক্ট নম্বর দিয়ে লগইনের জন্য ব্যবহৃত নিবন্ধিত HSC 28 শিক্ষার্থী তালিকা আপলোড, সম্পাদনা ও এক্সপোর্ট করুন।",
+          "লগইন নম্বর ও TMS ট্রানজেকশন আইডি দিয়ে লগইনের জন্য ব্যবহৃত নিবন্ধিত HSC 28 শিক্ষার্থী তালিকা আপলোড, সম্পাদনা ও এক্সপোর্ট করুন।",
       },
       { property: "og:title", content: "শিক্ষার্থী ডেটাবেজ — Student Support Hub HSC 28" },
       { property: "og:description", content: "নিবন্ধিত শিক্ষার্থী ও CSV ইম্পোর্ট পরিচালনা করুন।" },
@@ -39,19 +51,33 @@ export const Route = createFileRoute("/staff/students")({
 type StudentForm = {
   id?: string;
   name: string;
-  contact_number: string;
+  login_number: string;
+  tms_transaction_ids: string; // comma-separated in the form, split server-side
+  course_names: string; // one per line in the form, split server-side
   student_code: string;
   email: string;
+  account_role: "student" | "captain";
+  status: "active" | "inactive";
 };
 
-const emptyForm: StudentForm = { name: "", contact_number: "", student_code: "", email: "" };
+const emptyForm: StudentForm = {
+  name: "",
+  login_number: "",
+  tms_transaction_ids: "",
+  course_names: "",
+  student_code: "",
+  email: "",
+  account_role: "student",
+  status: "active",
+};
 
 function StudentDatabase() {
   const fetchStudents = useServerFn(listStudents);
   const preview = useServerFn(previewStudentCsv);
   const doImport = useServerFn(importStudentCsv);
   const save = useServerFn(saveStudent);
-  const remove = useServerFn(deleteStudent);
+  const deactivate = useServerFn(deactivateStudent);
+  const reactivate = useServerFn(reactivateStudent);
   const exportCsv = useServerFn(exportStudentsCsv);
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -68,7 +94,15 @@ function StudentDatabase() {
   });
 
   const rows = (data ?? []).filter((s) =>
-    [s.name, s.contact_number, s.student_code, s.email]
+    [
+      s.name,
+      s.login_number,
+      s.contact_number,
+      s.student_code,
+      s.email,
+      ...(s.tms_transaction_ids ?? []),
+      ...(s.course_names ?? []),
+    ]
       .filter(Boolean)
       .some((v) => String(v).toLowerCase().includes(search.toLowerCase())),
   );
@@ -81,9 +115,13 @@ function StudentDatabase() {
         data: {
           ...(values.id ? { id: values.id } : {}),
           name: values.name,
-          contact_number: values.contact_number,
+          login_number: values.login_number,
+          tms_transaction_ids: values.tms_transaction_ids,
+          course_names: values.course_names,
           student_code: values.student_code || null,
           email: values.email || null,
+          account_role: values.account_role,
+          status: values.status,
         },
       }),
     onSuccess: () => {
@@ -134,7 +172,36 @@ function StudentDatabase() {
       const csv = await exportCsv();
       downloadCsv(`hsc28-students-${new Date().toISOString().slice(0, 10)}.csv`, csv);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "এক্সপোর্ট ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
+      toast.error(
+        err instanceof Error ? err.message : "এক্সপোর্ট ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+      );
+    }
+  }
+
+  async function handleDeactivate(id: string, name: string) {
+    if (
+      !confirm(
+        `${name}-কে নিষ্ক্রিয় করতে চান? তার আগের টিকেট ও ইতিহাস থেকে যাবে, শুধু লগইন বন্ধ হবে।`,
+      )
+    )
+      return;
+    const reason = window.prompt("নিষ্ক্রিয় করার কারণ (ঐচ্ছিক):") ?? undefined;
+    try {
+      await deactivate({ data: { id, reason } });
+      toast.success("শিক্ষার্থীকে নিষ্ক্রিয় করা হয়েছে।");
+      void invalidate();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "নিষ্ক্রিয় করা যায়নি।");
+    }
+  }
+
+  async function handleReactivate(id: string) {
+    try {
+      await reactivate({ data: { id } });
+      toast.success("শিক্ষার্থীকে আবার সক্রিয় করা হয়েছে।");
+      void invalidate();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "সক্রিয় করা যায়নি।");
     }
   }
 
@@ -142,7 +209,7 @@ function StudentDatabase() {
     <div>
       <PageHeader
         title="শিক্ষার্থী ডেটাবেজ"
-        description={`${bn(data?.length ?? 0)} জন নিবন্ধিত শিক্ষার্থী তাদের কন্টাক্ট নম্বর দিয়ে সাইন ইন করতে পারবে।`}
+        description={`${bn(data?.length ?? 0)} জন নিবন্ধিত শিক্ষার্থী লগইন নম্বর ও TMS আইডি দিয়ে সাইন ইন করতে পারবে।`}
         action={
           <div className="flex flex-wrap gap-2">
             <input
@@ -197,9 +264,18 @@ function StudentDatabase() {
           {analysis.sample.length ? (
             <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
               {analysis.sample.map((row, index) => (
-                <li key={`${row.contact_number}-${index}`}>
-                  {row.name} · {row.contact_number}
-                  {row.student_code ? ` · ${row.student_code}` : ""}
+                <li key={`${row.login_number}-${index}`}>
+                  {row.name} · {row.login_number} · {row.tms_transaction_ids.join(", ")}
+                  {row.account_role === "captain" ? " · ক্যাপ্টেন" : ""}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {analysis.invalid.length ? (
+            <ul className="mt-3 space-y-1 text-xs text-destructive">
+              {analysis.invalid.slice(0, 5).map((row, index) => (
+                <li key={`invalid-${index}`}>
+                  লাইন {bn(row.line)}: {row.name || "(নাম নেই)"} — {row.issue}
                 </li>
               ))}
             </ul>
@@ -215,7 +291,7 @@ function StudentDatabase() {
               disabled={busy || analysis.duplicateCount === 0}
               onClick={() => confirmImport(true)}
             >
-              ইম্পোর্ট করুন ও ডুপ্লিকেট আপডেট করুন
+              ইম্পোর্ট করুন ও ডুপ্লিকেট মার্জ করুন
             </Button>
           </div>
         </div>
@@ -227,7 +303,7 @@ function StudentDatabase() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="নাম, কন্টাক্ট নম্বর বা আইডি দিয়ে শিক্ষার্থী খুঁজুন"
+            placeholder="নাম, লগইন নম্বর, TMS আইডি বা কোর্স দিয়ে খুঁজুন"
             className="h-9 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
@@ -237,13 +313,16 @@ function StudentDatabase() {
           </div>
         ) : rows.length ? (
           <div className="sheet-scroll max-h-[65vh]">
-            <table className="w-full min-w-[860px] text-sm">
+            <table className="w-full min-w-[1100px] text-sm">
               <thead className="sticky top-0 bg-secondary text-xs tracking-wide text-muted-foreground uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">নাম</th>
-                  <th className="px-3 py-2 text-left font-medium">কন্টাক্ট নম্বর</th>
-                  <th className="px-3 py-2 text-left font-medium">শিক্ষার্থী আইডি</th>
+                  <th className="px-3 py-2 text-left font-medium">লগইন নম্বর</th>
+                  <th className="px-3 py-2 text-left font-medium">TMS আইডি</th>
                   <th className="px-3 py-2 text-left font-medium">ইমেইল</th>
+                  <th className="px-3 py-2 text-left font-medium">কোর্স</th>
+                  <th className="px-3 py-2 text-left font-medium">রোল</th>
+                  <th className="px-3 py-2 text-left font-medium">অবস্থা</th>
                   <th className="px-3 py-2 text-left font-medium">যোগ হয়েছে</th>
                   <th className="px-3 py-2 text-right font-medium">কার্যক্রম</th>
                 </tr>
@@ -252,11 +331,34 @@ function StudentDatabase() {
                 {rows.map((student) => (
                   <tr key={student.id} className="transition-colors hover:bg-secondary/50">
                     <td className="px-3 py-2 font-medium">{student.name}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{bn(student.contact_number)}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{bn(student.login_number)}</td>
                     <td className="px-3 py-2 text-muted-foreground">
-                      {student.student_code ?? "—"}
+                      {(student.tms_transaction_ids ?? []).join(", ") || "—"}
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">{student.email ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {(student.course_names ?? []).join(", ") || "—"}
+                    </td>
+                    <td className="px-3 py-2">
+                      {student.account_role === "captain" ? (
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                          ক্যাপ্টেন
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">শিক্ষার্থী</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {student.status === "inactive" ? (
+                        <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                          নিষ্ক্রিয়
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600">
+                          সক্রিয়
+                        </span>
+                      )}
+                    </td>
                     <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
                       {formatDateShortBn(student.created_at)}
                     </td>
@@ -268,32 +370,36 @@ function StudentDatabase() {
                           setForm({
                             id: student.id,
                             name: student.name,
-                            contact_number: student.contact_number,
+                            login_number: student.login_number ?? student.contact_number,
+                            tms_transaction_ids: (student.tms_transaction_ids ?? []).join(", "),
+                            course_names: (student.course_names ?? []).join("\n"),
                             student_code: student.student_code ?? "",
                             email: student.email ?? "",
+                            account_role:
+                              student.account_role === "captain" ? "captain" : "student",
+                            status: student.status === "inactive" ? "inactive" : "active",
                           })
                         }
                       >
                         সম্পাদনা
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={async () => {
-                          if (!confirm(`${student.name}-কে ডেটাবেজ থেকে সরাতে চান?`)) return;
-                          try {
-                            await remove({ data: { id: student.id } });
-                            toast.success("শিক্ষার্থী সরানো হয়েছে।");
-                            void invalidate();
-                          } catch (err) {
-                            toast.error(
-                              err instanceof Error ? err.message : "এই শিক্ষার্থীকে সরানো যায়নি।",
-                            );
-                          }
-                        }}
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
+                      {student.status === "inactive" ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleReactivate(student.id)}
+                        >
+                          <RotateCcw className="size-4 text-emerald-600" />
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeactivate(student.id, student.name)}
+                        >
+                          <UserX className="size-4 text-destructive" />
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -310,7 +416,7 @@ function StudentDatabase() {
 
       {form ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4 backdrop-blur-sm">
-          <div className="card-panel w-full max-w-md p-5">
+          <div className="card-panel max-h-[90vh] w-full max-w-md overflow-y-auto p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-sm font-semibold">
                 {form.id ? "শিক্ষার্থী সম্পাদনা করুন" : "শিক্ষার্থী যোগ করুন"}
@@ -340,30 +446,83 @@ function StudentDatabase() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="s-contact">কন্টাক্ট নম্বর *</Label>
+                <Label htmlFor="s-login">লগইন নম্বর *</Label>
                 <Input
-                  id="s-contact"
-                  value={form.contact_number}
-                  onChange={(e) => setForm({ ...form, contact_number: e.target.value })}
+                  id="s-login"
+                  value={form.login_number}
+                  onChange={(e) => setForm({ ...form, login_number: e.target.value })}
                   required
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="s-code">শিক্ষার্থী আইডি</Label>
+                <Label htmlFor="s-tms">
+                  TMS ট্রানজেকশন আইডি * (একাধিক হলে কমা দিয়ে আলাদা করুন)
+                </Label>
                 <Input
-                  id="s-code"
-                  value={form.student_code}
-                  onChange={(e) => setForm({ ...form, student_code: e.target.value })}
+                  id="s-tms"
+                  value={form.tms_transaction_ids}
+                  onChange={(e) => setForm({ ...form, tms_transaction_ids: e.target.value })}
+                  placeholder="TMS12345678, TMS87654321"
+                  required
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="s-email">ইমেইল</Label>
-                <Input
-                  id="s-email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                <Label htmlFor="s-courses">কোর্স (প্রতি লাইনে একটি)</Label>
+                <Textarea
+                  id="s-courses"
+                  rows={3}
+                  value={form.course_names}
+                  onChange={(e) => setForm({ ...form, course_names: e.target.value })}
                 />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="s-code">শিক্ষার্থী আইডি</Label>
+                  <Input
+                    id="s-code"
+                    value={form.student_code}
+                    onChange={(e) => setForm({ ...form, student_code: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="s-email">ইমেইল (ঐচ্ছিক)</Label>
+                  <Input
+                    id="s-email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="s-role">রোল</Label>
+                  <select
+                    id="s-role"
+                    value={form.account_role}
+                    onChange={(e) =>
+                      setForm({ ...form, account_role: e.target.value as "student" | "captain" })
+                    }
+                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                  >
+                    <option value="student">শিক্ষার্থী</option>
+                    <option value="captain">ক্যাপ্টেন</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="s-status">অবস্থা</Label>
+                  <select
+                    id="s-status"
+                    value={form.status}
+                    onChange={(e) =>
+                      setForm({ ...form, status: e.target.value as "active" | "inactive" })
+                    }
+                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                  >
+                    <option value="active">সক্রিয়</option>
+                    <option value="inactive">নিষ্ক্রিয়</option>
+                  </select>
+                </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="ghost" onClick={() => setForm(null)}>

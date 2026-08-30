@@ -38,8 +38,7 @@ export const Route = createFileRoute("/student/report")({
       { title: "সমস্যা জানান — Student Support Hub HSC 28" },
       {
         name: "description",
-        content:
-          "ধরন, বিবরণ, সংযুক্তি বা লিংকসহ নতুন HSC 28 সাপোর্ট টিকেট জমা দাও।",
+        content: "ধরন, বিবরণ, সংযুক্তি বা লিংকসহ নতুন HSC 28 সাপোর্ট টিকেট জমা দাও।",
       },
       { property: "og:title", content: "সমস্যা জানান — Student Support Hub HSC 28" },
       { property: "og:description", content: "সাপোর্ট টিমকে জানাও কী সমস্যা হয়েছে।" },
@@ -130,9 +129,7 @@ function ReportPage() {
             },
           });
         } catch (err) {
-          toast.error(
-            err instanceof Error ? err.message : `${file.name} আপলোড ব্যর্থ হয়েছে।`,
-          );
+          toast.error(err instanceof Error ? err.message : `${file.name} আপলোড ব্যর্থ হয়েছে।`);
         }
       }
       setDone(ticket);
@@ -177,7 +174,9 @@ function ReportPage() {
             </div>
           </dl>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
-            <Button onClick={() => navigate({ to: "/student/issues/$id", params: { id: done.id } })}>
+            <Button
+              onClick={() => navigate({ to: "/student/issues/$id", params: { id: done.id } })}
+            >
               টিকেট দেখুন
             </Button>
             <Button variant="outline" asChild>
@@ -252,7 +251,9 @@ function ReportPage() {
             maxLength={4000}
             required
           />
-          <p className="text-xs text-muted-foreground">{bn(description.length)}/{bn(4000)}</p>
+          <p className="text-xs text-muted-foreground">
+            {bn(description.length)}/{bn(4000)}
+          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -295,8 +296,8 @@ function ReportPage() {
                 ফাইল বেছে নাও
               </Button>
               <p className="text-xs text-muted-foreground">
-                PNG, JPG, WebP, PDF, MP3, WAV, MP4, WebM · প্রতিটি সর্বোচ্চ {bn(MAX_FILE_MB)} MB · সর্বোচ্চ{" "}
-                {bn(MAX_FILES)}টি ফাইল
+                PNG, JPG, WebP, PDF, MP3, WAV, MP4, WebM · প্রতিটি সর্বোচ্চ {bn(MAX_FILE_MB)} MB ·
+                সর্বোচ্চ {bn(MAX_FILES)}টি ফাইল
               </p>
             </div>
             {files.length ? (
@@ -308,7 +309,9 @@ function ReportPage() {
                   >
                     <Paperclip className="size-4 shrink-0 text-muted-foreground" />
                     <span className="min-w-0 flex-1 truncate">{file.name}</span>
-                    <span className="text-xs text-muted-foreground">{formatBytesBn(file.size)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatBytesBn(file.size)}
+                    </span>
                     <button
                       type="button"
                       onClick={() => setFiles(files.filter((_, i) => i !== index))}

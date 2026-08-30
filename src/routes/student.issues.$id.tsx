@@ -93,7 +93,8 @@ function TicketDetail() {
             <p className="mt-1 text-xs text-muted-foreground">
               {labelCategory(ticket.category)}
               {ticket.course ? ` · ${labelCourse(ticket.course)}` : ""}
-              {ticket.class_exam ? ` · ${ticket.class_exam}` : ""} · {formatDateBn(ticket.created_at)}
+              {ticket.class_exam ? ` · ${ticket.class_exam}` : ""} ·{" "}
+              {formatDateBn(ticket.created_at)}
             </p>
           </div>
           <StatusBadge status={ticket.status} />

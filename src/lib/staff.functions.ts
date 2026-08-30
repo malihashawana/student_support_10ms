@@ -1,7 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
-
+import { logAudit } from "./audit.server";
+import { sendResolutionEmail } from "./email.server";
 import { friendly, hashPassword, requireStaff, verifyPassword } from "./session.server";
-import { analyzeStudentCsv, db, normalizeContact, toCsv } from "./support.server";
+import {
+  analyzeStudentCsv,
+  db,
+  isValidTmsTransactionId,
+  normalizeLoginNumber,
+  splitTmsField,
+  toCsv,
+} from "./support.server";
 import { STATUSES } from "./support-constants";
 
 export type StaffTicketFilters = {
@@ -9,6 +17,7 @@ export type StaffTicketFilters = {
   status?: string;
   category?: string;
   course?: string;
+  priority?: string;
   range?: "all" | "today" | "yesterday" | "7d" | "30d" | "custom";
   from?: string;
   to?: string;
@@ -18,12 +27,16 @@ export const staffOverview = createServerFn({ method: "GET" }).handler(async () 
   await requireStaff();
   const { data: tickets } = await db
     .from("tickets")
-    .select("id, ticket_number, title, category, status, created_at, updated_at, official_response")
+    .select(
+      "id, ticket_number, title, category, status, created_at, updated_at, official_response",
+    )
     .order("updated_at", { ascending: false })
     .limit(2000);
+
   const list = tickets ?? [];
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
+
   const byStatus: Record<string, number> = {};
   for (const s of STATUSES) byStatus[s] = 0;
   const byCategory: Record<string, number> = {};
@@ -31,9 +44,11 @@ export const staffOverview = createServerFn({ method: "GET" }).handler(async () 
     byStatus[t.status] = (byStatus[t.status] ?? 0) + 1;
     byCategory[t.category] = (byCategory[t.category] ?? 0) + 1;
   }
+
   const { count: studentCount } = await db
     .from("students")
     .select("id", { count: "exact", head: true });
+
   return {
     total: list.length,
     byStatus,
@@ -54,7 +69,7 @@ export const staffTickets = createServerFn({ method: "POST" })
     let query = db
       .from("tickets")
       .select(
-        "id, ticket_number, category, title, description, course, class_exam, status, official_response, handled_by, created_at, updated_at, is_demo, students(name, contact_number, student_code)",
+        "id, ticket_number, category, title, description, course, class_exam, status, priority, source_role, official_response, handled_by, created_at, updated_at, is_demo, students(name, contact_number, student_code)",
       )
       .order("created_at", { ascending: false })
       .limit(2000);
@@ -62,6 +77,7 @@ export const staffTickets = createServerFn({ method: "POST" })
     if (data.status && data.status !== "all") query = query.eq("status", data.status);
     if (data.category && data.category !== "all") query = query.eq("category", data.category);
     if (data.course && data.course !== "all") query = query.eq("course", data.course);
+    if (data.priority && data.priority !== "all") query = query.eq("priority", data.priority);
 
     const now = new Date();
     const startOfDay = (d: Date) => {
@@ -69,6 +85,7 @@ export const staffTickets = createServerFn({ method: "POST" })
       c.setHours(0, 0, 0, 0);
       return c;
     };
+
     if (data.range === "today") query = query.gte("created_at", startOfDay(now).toISOString());
     else if (data.range === "yesterday") {
       const y = new Date(now);
@@ -91,23 +108,31 @@ export const staffTickets = createServerFn({ method: "POST" })
 
     const { data: rows } = await query;
     const search = (data.search ?? "").trim().toLowerCase();
-    const list = rows ?? [];
-    if (!search) return list;
-    return list.filter((t) =>
-      [
-        t.ticket_number,
-        t.title,
-        t.description,
-        t.category,
-        t.course,
-        t.class_exam,
-        t.students?.name,
-        t.students?.contact_number,
-        t.students?.student_code,
-      ]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(search)),
-    );
+    let list = rows ?? [];
+    if (search) {
+      list = list.filter((t) =>
+        [
+          t.ticket_number,
+          t.title,
+          t.description,
+          t.category,
+          t.course,
+          t.class_exam,
+          t.students?.name,
+          t.students?.contact_number,
+          t.students?.student_code,
+        ]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(search)),
+      );
+    }
+
+    const PRIORITY_RANK: Record<string, number> = { urgent: 0, high: 1, normal: 2 };
+    return [...list].sort((a, b) => {
+      const rankDiff = (PRIORITY_RANK[a.priority] ?? 2) - (PRIORITY_RANK[b.priority] ?? 2);
+      if (rankDiff !== 0) return rankDiff;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
   });
 
 export const staffTicketDetail = createServerFn({ method: "GET" })
@@ -120,6 +145,7 @@ export const staffTicketDetail = createServerFn({ method: "GET" })
       .eq("id", data.id)
       .maybeSingle();
     if (!ticket) throw friendly("সমস্যাটি খুঁজে পাওয়া যায়নি।");
+
     const [{ data: messages }, { data: attachments }] = await Promise.all([
       db
         .from("ticket_messages")
@@ -132,6 +158,7 @@ export const staffTicketDetail = createServerFn({ method: "GET" })
         .eq("ticket_id", ticket.id)
         .order("created_at", { ascending: true }),
     ]);
+
     return { ticket, messages: messages ?? [], attachments: attachments ?? [] };
   });
 
@@ -146,13 +173,14 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
     }) => input,
   )
   .handler(async ({ data }) => {
-    const { username } = await requireStaff();
+    const { staffId, username } = await requireStaff();
     const patch: {
       status?: string;
       resolved_at?: string;
       official_response?: string | null;
       handled_by?: string;
     } = {};
+
     if (data.status) {
       if (!STATUSES.includes(data.status as never)) throw friendly("সঠিক অবস্থা নির্বাচন করুন।");
       patch.status = data.status;
@@ -165,6 +193,18 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
     const { error } = await db.from("tickets").update(patch).eq("id", data.id);
     if (error) throw friendly("সমস্যাটি আপডেট করা যায়নি। আবার চেষ্টা করুন।");
 
+    if (patch.status) {
+      await logAudit({
+        actorType: "staff",
+        actorId: staffId,
+        actorName: username,
+        eventType: "ticket.status_changed",
+        targetType: "ticket",
+        targetId: data.id,
+        metadata: { status: patch.status },
+      });
+    }
+
     if (data.sendResponse && data.response?.trim()) {
       await db.from("ticket_messages").insert({
         ticket_id: data.id,
@@ -172,14 +212,82 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
         sender_name: username,
         message: data.response.trim(),
       });
+      await logAudit({
+        actorType: "staff",
+        actorId: staffId,
+        actorName: username,
+        eventType: "ticket.response_sent",
+        targetType: "ticket",
+        targetId: data.id,
+      });
     }
-    return { ok: true };
+
+    // A failed email must never fail the ticket update itself — the result
+    // is surfaced to staff so they can retry via resendResolutionEmail.
+    const emailStatus =
+      data.status === "Resolved" ? await tryResolutionEmail(data.id) : "not_applicable";
+
+    return { ok: true, emailStatus };
+  });
+
+/**
+ * Sends at most once per ticket, guarded by resolved_email_sent_at. Never
+ * throws: a delivery failure is reported back as a status string, not an
+ * exception, so it can't take down the ticket update that triggered it.
+ */
+async function tryResolutionEmail(
+  ticketId: string,
+): Promise<"not_applicable" | "sent" | "already_sent" | "failed"> {
+  const { data: ticket } = await db
+    .from("tickets")
+    .select(
+      "id, ticket_number, title, status, official_response, resolved_email_sent_at, students(email, name)",
+    )
+    .eq("id", ticketId)
+    .maybeSingle();
+
+  if (!ticket || ticket.status !== "Resolved") return "not_applicable";
+  if (ticket.resolved_email_sent_at) return "already_sent";
+  const email = ticket.students?.email;
+  if (!email) return "not_applicable";
+
+  try {
+    await sendResolutionEmail({
+      to: email,
+      studentName: ticket.students?.name ?? "শিক্ষার্থী",
+      ticketNumber: ticket.ticket_number,
+      title: ticket.title,
+      officialResponse: ticket.official_response,
+    });
+    await db
+      .from("tickets")
+      .update({ resolved_email_sent_at: new Date().toISOString() })
+      .eq("id", ticketId);
+    return "sent";
+  } catch (err) {
+    console.error("resolution email failed", err);
+    return "failed";
+  }
+}
+
+export const resendResolutionEmail = createServerFn({ method: "POST" })
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data }) => {
+    await requireStaff();
+    const status = await tryResolutionEmail(data.id);
+    if (status === "failed") throw friendly("ইমেইল পাঠানো যায়নি। আবার চেষ্টা করুন।");
+    if (status === "not_applicable") {
+      throw friendly(
+        "এই টিকেটের জন্য ইমেইল পাঠানো সম্ভব নয় (স্ট্যাটাস Resolved নয় অথবা শিক্ষার্থীর ইমেইল নেই)।",
+      );
+    }
+    return { status };
   });
 
 export const staffAddMessage = createServerFn({ method: "POST" })
   .inputValidator((input: { ticketId: string; message: string; internal?: boolean }) => input)
   .handler(async ({ data }) => {
-    const { username } = await requireStaff();
+    const { staffId, username } = await requireStaff();
     const message = (data.message ?? "").trim();
     if (message.length < 2) throw friendly("পাঠানোর আগে বার্তাটি লিখুন।");
     await db.from("ticket_messages").insert({
@@ -188,6 +296,14 @@ export const staffAddMessage = createServerFn({ method: "POST" })
       sender_name: username,
       message,
       internal: Boolean(data.internal),
+    });
+    await logAudit({
+      actorType: "staff",
+      actorId: staffId,
+      actorName: username,
+      eventType: "ticket.message_sent",
+      targetType: "ticket",
+      targetId: data.ticketId,
     });
     return { ok: true };
   });
@@ -209,6 +325,8 @@ export const exportTicketsCsv = createServerFn({ method: "POST" })
         "Course",
         "Class/Exam",
         "Status",
+        "Priority",
+        "Source",
         "Response",
         "Handled By",
         "Submitted Date",
@@ -225,6 +343,8 @@ export const exportTicketsCsv = createServerFn({ method: "POST" })
         t.course,
         t.class_exam,
         t.status,
+        t.priority,
+        t.source_role,
         t.official_response,
         t.handled_by,
         t.created_at,
@@ -233,13 +353,15 @@ export const exportTicketsCsv = createServerFn({ method: "POST" })
     );
   });
 
-/* ----------------------------- Student database ---------------------------- */
+/* -------------------------------- Student database -------------------------------- */
 
 export const listStudents = createServerFn({ method: "GET" }).handler(async () => {
   await requireStaff();
   const { data } = await db
     .from("students")
-    .select("id, name, contact_number, student_code, email, status, is_demo, created_at")
+    .select(
+      "id, name, contact_number, login_number, tms_transaction_ids, course_names, student_code, email, account_role, status, deactivated_at, deactivation_reason, is_demo, created_at",
+    )
     .order("created_at", { ascending: false })
     .limit(5000);
   return data ?? [];
@@ -273,27 +395,55 @@ export const importStudentCsv = createServerFn({ method: "POST" })
     const analysis = await analyzeStudentCsv(data.text);
     let inserted = 0;
     let updated = 0;
+
     if (analysis.valid.length) {
       const { error } = await db.from("students").insert(
         analysis.valid.map((s) => ({
           name: s.name,
           contact_number: s.contact_number,
+          login_number: s.login_number,
+          tms_transaction_ids: s.tms_transaction_ids,
+          course_names: s.course_names,
           student_code: s.student_code,
           email: s.email,
+          account_role: s.account_role,
+          status: s.status,
         })),
       );
       if (error) throw friendly("ইমপোর্ট হয়নি। ফাইলটি দেখে আবার চেষ্টা করুন।");
       inserted = analysis.valid.length;
     }
+
     if (data.updateExisting) {
       for (const row of analysis.duplicates) {
-        await db
+        const { data: existing } = await db
           .from("students")
-          .update({ name: row.name, student_code: row.student_code, email: row.email })
-          .eq("contact_number", row.contact_number);
-        updated++;
+          .select("tms_transaction_ids, course_names")
+          .eq("login_number", row.login_number)
+          .maybeSingle();
+
+        const mergedTms = [
+          ...new Set([...(existing?.tms_transaction_ids ?? []), ...row.tms_transaction_ids]),
+        ];
+        const mergedCourses = [
+          ...new Set([...(existing?.course_names ?? []), ...row.course_names]),
+        ];
+
+        const { error } = await db
+          .from("students")
+          .update({
+            name: row.name,
+            student_code: row.student_code,
+            email: row.email,
+            tms_transaction_ids: mergedTms,
+            course_names: mergedCourses,
+            account_role: row.account_role,
+          })
+          .eq("login_number", row.login_number);
+        if (!error) updated++;
       }
     }
+
     return { inserted, updated, skipped: analysis.invalid.length };
   });
 
@@ -302,44 +452,137 @@ export const saveStudent = createServerFn({ method: "POST" })
     (input: {
       id?: string;
       name: string;
-      contact_number: string;
+      login_number: string;
+      tms_transaction_ids: string;
+      course_names?: string;
       student_code?: string | null;
       email?: string | null;
-      status?: string;
+      account_role?: "student" | "captain";
+      status?: "active" | "inactive";
     }) => input,
   )
   .handler(async ({ data }) => {
-    await requireStaff();
+    const { staffId, username } = await requireStaff();
+
     const name = (data.name ?? "").trim();
-    const contact = normalizeContact(data.contact_number ?? "");
     if (!name) throw friendly("শিক্ষার্থীর নাম লিখুন।");
-    if (contact.length < 6) throw friendly("সঠিক মোবাইল নম্বর লিখুন।");
+
+    const login_number = normalizeLoginNumber(data.login_number ?? "");
+    if (login_number.length < 6) throw friendly("সঠিক লগইন নম্বর লিখুন।");
+
+    const tms_transaction_ids = splitTmsField(data.tms_transaction_ids ?? "");
+    const invalidTms = tms_transaction_ids.filter((code) => !isValidTmsTransactionId(code));
+    if (tms_transaction_ids.length === 0)
+      throw friendly("অন্তত একটি সঠিক TMS ট্রানজেকশন আইডি দিন।");
+    if (invalidTms.length)
+      throw friendly(`TMS আইডি এমন হতে হবে: TMS44500684 (ভুল: ${invalidTms[0]})`);
+
+    const course_names = (data.course_names ?? "")
+      .split("\n")
+      .map((c) => c.trim())
+      .filter(Boolean);
+
+    const email = data.email?.trim() || null;
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      throw friendly("সঠিক ইমেইল ঠিকানা লিখুন।");
+
+    let previousRole: string | null = null;
+    if (data.id) {
+      const { data: existing } = await db
+        .from("students")
+        .select("account_role")
+        .eq("id", data.id)
+        .maybeSingle();
+      previousRole = existing?.account_role ?? null;
+    }
+
     const payload = {
       name,
-      contact_number: contact,
+      contact_number: login_number,
+      login_number,
+      tms_transaction_ids,
+      course_names,
       student_code: data.student_code?.trim() || null,
-      email: data.email?.trim() || null,
-      status: data.status || "active",
+      email,
+      account_role: data.account_role === "captain" ? "captain" : "student",
+      status: data.status === "inactive" ? "inactive" : "active",
     };
+
     const { error } = data.id
       ? await db.from("students").update(payload).eq("id", data.id)
       : await db.from("students").insert(payload);
+
     if (error) {
       throw friendly(
         error.code === "23505"
-          ? "এই মোবাইল নম্বরটি ডেটাবেজে আগে থেকেই আছে।"
+          ? "এই লগইন নম্বরটি ডেটাবেজে আগে থেকেই আছে।"
           : "শিক্ষার্থীর তথ্য সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
       );
     }
+
+    if (data.id && previousRole !== payload.account_role) {
+      await logAudit({
+        actorType: "staff",
+        actorId: staffId,
+        actorName: username,
+        eventType:
+          payload.account_role === "captain" ? "captain.role_granted" : "captain.role_removed",
+        targetType: "student",
+        targetId: data.id,
+      });
+    }
+
     return { ok: true };
   });
 
-export const deleteStudent = createServerFn({ method: "POST" })
+/**
+ * Soft-delete only. Hard-deleting used to cascade and destroy the student's
+ * tickets and messages, which is unsafe. A deactivated student keeps their
+ * history but can no longer log in (enforced in auth.functions.ts).
+ */
+export const deactivateStudent = createServerFn({ method: "POST" })
+  .inputValidator((input: { id: string; reason?: string }) => input)
+  .handler(async ({ data }) => {
+    const { staffId, username } = await requireStaff();
+    const reason = data.reason?.trim().slice(0, 200) || null;
+    const { error } = await db
+      .from("students")
+      .update({
+        status: "inactive",
+        deactivated_at: new Date().toISOString(),
+        deactivation_reason: reason,
+      })
+      .eq("id", data.id);
+    if (error) throw friendly("শিক্ষার্থীকে নিষ্ক্রিয় করা যায়নি। আবার চেষ্টা করুন।");
+    await logAudit({
+      actorType: "staff",
+      actorId: staffId,
+      actorName: username,
+      eventType: "student.deactivated",
+      targetType: "student",
+      targetId: data.id,
+      metadata: reason ? { reason } : {},
+    });
+    return { ok: true };
+  });
+
+export const reactivateStudent = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data }) => {
-    await requireStaff();
-    const { error } = await db.from("students").delete().eq("id", data.id);
-    if (error) throw friendly("শিক্ষার্থীটি মুছে ফেলা যায়নি। আবার চেষ্টা করুন।");
+    const { staffId, username } = await requireStaff();
+    const { error } = await db
+      .from("students")
+      .update({ status: "active", deactivated_at: null, deactivation_reason: null })
+      .eq("id", data.id);
+    if (error) throw friendly("শিক্ষার্থীকে সক্রিয় করা যায়নি। আবার চেষ্টা করুন।");
+    await logAudit({
+      actorType: "staff",
+      actorId: staffId,
+      actorName: username,
+      eventType: "student.reactivated",
+      targetType: "student",
+      targetId: data.id,
+    });
     return { ok: true };
   });
 
@@ -347,29 +590,42 @@ export const exportStudentsCsv = createServerFn({ method: "GET" }).handler(async
   await requireStaff();
   const { data } = await db
     .from("students")
-    .select("name, contact_number, student_code, email, status, created_at")
+    .select(
+      "name, login_number, tms_transaction_ids, email, course_names, account_role, status, student_code, created_at",
+    )
     .order("created_at", { ascending: false });
+
   return toCsv(
-    ["name", "contact_number", "student_id", "email", "status", "date_added"],
+    [
+      "name",
+      "login_number",
+      "tms_transaction_id",
+      "email",
+      "course_name",
+      "account_role",
+      "status",
+      "student_id",
+      "date_added",
+    ],
     (data ?? []).map((s) => [
       s.name,
-      s.contact_number,
-      s.student_code,
+      s.login_number,
+      (s.tms_transaction_ids ?? []).join(","),
       s.email,
+      (s.course_names ?? []).join(", "),
+      s.account_role,
       s.status,
+      s.student_code,
       s.created_at,
     ]),
   );
 });
 
-/* --------------------------------- Notices -------------------------------- */
+/* ---------------------------------- Notices ---------------------------------- */
 
 export const listNotices = createServerFn({ method: "GET" }).handler(async () => {
   await requireStaff();
-  const { data } = await db
-    .from("notices")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const { data } = await db.from("notices").select("*").order("created_at", { ascending: false });
   return data ?? [];
 });
 
@@ -410,7 +666,7 @@ export const deleteNotice = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/* -------------------------------- Settings -------------------------------- */
+/* ---------------------------------- Settings ---------------------------------- */
 
 export const getSettings = createServerFn({ method: "GET" }).handler(async () => {
   const { username } = await requireStaff();
@@ -421,7 +677,8 @@ export const getSettings = createServerFn({ method: "GET" }).handler(async () =>
     upload: { max_file_mb: 8, max_files: 5 },
   };
   for (const row of data ?? []) {
-    if (row.key === "categories" && Array.isArray(row.value)) settings.categories = row.value as string[];
+    if (row.key === "categories" && Array.isArray(row.value))
+      settings.categories = row.value as string[];
     if (row.key === "courses" && Array.isArray(row.value)) settings.courses = row.value as string[];
     if (row.key === "upload" && row.value && typeof row.value === "object")
       settings.upload = { ...settings.upload, ...(row.value as Record<string, number>) };
@@ -472,4 +729,20 @@ export const updateStaffCredentials = createServerFn({ method: "POST" })
     const { error } = await db.from("staff_users").update(patch).eq("id", staffId);
     if (error) throw friendly("লগইন তথ্য আপডেট করা যায়নি। আবার চেষ্টা করুন।");
     return { ok: true };
+  });
+
+export const listAuditLogs = createServerFn({ method: "POST" })
+  .inputValidator((input: { eventType?: string; limit?: number }) => input)
+  .handler(async ({ data }) => {
+    await requireStaff();
+    let query = db
+      .from("audit_logs")
+      .select(
+        "id, actor_type, actor_id, actor_name, event_type, target_type, target_id, metadata, created_at",
+      )
+      .order("created_at", { ascending: false })
+      .limit(Math.min(data.limit ?? 200, 500));
+    if (data.eventType && data.eventType !== "all") query = query.eq("event_type", data.eventType);
+    const { data: rows } = await query;
+    return rows ?? [];
   });

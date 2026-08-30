@@ -18,7 +18,8 @@ export const Route = createFileRoute("/staff/settings")({
       { title: "সাপোর্ট সেটিংস — Student Support Hub HSC 28" },
       {
         name: "description",
-        content: "সমস্যার ক্যাটাগরি, কোর্স, আপলোড সীমা এবং সাপোর্ট টিমের ক্রেডেনশিয়াল পরিচালনা করুন।",
+        content:
+          "সমস্যার ক্যাটাগরি, কোর্স, আপলোড সীমা এবং সাপোর্ট টিমের ক্রেডেনশিয়াল পরিচালনা করুন।",
       },
       { property: "og:title", content: "সাপোর্ট সেটিংস — Student Support Hub HSC 28" },
       { property: "og:description", content: "ক্যাটাগরি, কোর্স ও ক্রেডেনশিয়াল কনফিগার করুন।" },
@@ -146,7 +147,8 @@ function SettingsPage() {
           সাপোর্ট টিম লগইন
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          শেয়ার করা সাপোর্ট টিমের ইউজারনেম বা পাসওয়ার্ড আপডেট করুন। শিক্ষার্থীরা এই অংশে কখনো প্রবেশ করতে পারবে না।
+          শেয়ার করা সাপোর্ট টিমের ইউজারনেম বা পাসওয়ার্ড আপডেট করুন। শিক্ষার্থীরা এই অংশে কখনো
+          প্রবেশ করতে পারবে না।
         </p>
         <form className="mt-4 space-y-3" onSubmit={saveCreds}>
           <div className="space-y-1.5">

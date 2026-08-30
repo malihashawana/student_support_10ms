@@ -25,16 +25,18 @@ export function StatusBadge({
 }
 
 export function PriorityBadge({ priority }: { priority: string }) {
+  const key = (priority ?? "").toLowerCase();
   const styles: Record<string, string> = {
-    High: "border-status-waiting/30 bg-status-waiting/15 text-status-waiting",
-    Normal: "border-status-open/30 bg-status-open/15 text-status-open",
-    Low: "border-border bg-muted text-muted-foreground",
+    urgent: "border-destructive/30 bg-destructive/15 text-destructive",
+    high: "border-status-waiting/30 bg-status-waiting/15 text-status-waiting",
+    normal: "border-status-open/30 bg-status-open/15 text-status-open",
+    low: "border-border bg-muted text-muted-foreground",
   };
   return (
     <span
       className={cn(
         "inline-flex rounded-full border px-2 py-0.5 text-xs font-medium",
-        styles[priority] ?? styles["Normal"],
+        styles[key] ?? styles["normal"],
       )}
     >
       {labelPriority(priority)}

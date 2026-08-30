@@ -32,8 +32,7 @@ export const Route = createFileRoute("/student/community/")({
       { title: "সবার সমস্যা — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
       {
         name: "description",
-        content:
-          "অন্য HSC 28 শিক্ষার্থীদের জানানো সমস্যাগুলো খুঁজে দেখো এবং অফিসিয়াল উত্তর পড়ো।",
+        content: "অন্য HSC 28 শিক্ষার্থীদের জানানো সমস্যাগুলো খুঁজে দেখো এবং অফিসিয়াল উত্তর পড়ো।",
       },
       { property: "og:title", content: "সবার সমস্যা — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
       {

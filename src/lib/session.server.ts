@@ -26,6 +26,7 @@ function sessionConfig() {
 }
 
 export async function getSupportSession() {
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- TanStack Start's useSession() is a server cookie helper, not a React Hook.
   return useSession<SupportSession>(sessionConfig());
 }
 
@@ -37,7 +38,6 @@ export async function getSupportSession() {
 export function friendly(message: string): Error {
   return new Error(message);
 }
-
 
 export async function readSession(): Promise<SupportSession> {
   const session = await getSupportSession();
@@ -62,6 +62,46 @@ export async function requireStaff() {
     throw friendly("এই পেজে প্রবেশের অনুমতি আপনার নেই। সাপোর্ট টিম হিসেবে লগইন করুন।");
   }
   return { staffId: data.staffId, username: data.username ?? "Support Team" };
+}
+
+/* ------------------------------ Login rate limiting ------------------------------ *
+ * In-memory only: resets on server restart and is per-process, so it will not
+ * catch a distributed brute force across multiple server instances. For this
+ * app's scale it's enough to stop rapid, repeated TMS-id guesses against one
+ * login number. If this is ever deployed across multiple instances, move this
+ * to a shared store (a Supabase table, or Redis) instead.
+ */
+type LoginAttempt = { count: number; firstAttemptAt: number; lockedUntil?: number };
+const loginAttempts = new Map<string, LoginAttempt>();
+
+const ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+const MAX_ATTEMPTS_BEFORE_LOCK = 6;
+const LOCKOUT_MS = 15 * 60 * 1000;
+
+export function assertLoginNotRateLimited(key: string) {
+  const now = Date.now();
+  const entry = loginAttempts.get(key);
+  if (entry?.lockedUntil && entry.lockedUntil > now) {
+    const minutes = Math.max(1, Math.ceil((entry.lockedUntil - now) / 60_000));
+    throw friendly(`অনেকবার ভুল চেষ্টা হয়েছে। অনুগ্রহ করে ${minutes} মিনিট পর আবার চেষ্টা করুন।`);
+  }
+  if (entry && now - entry.firstAttemptAt > ATTEMPT_WINDOW_MS) {
+    loginAttempts.delete(key);
+  }
+}
+
+export function recordFailedLogin(key: string) {
+  const now = Date.now();
+  const entry = loginAttempts.get(key) ?? { count: 0, firstAttemptAt: now };
+  entry.count += 1;
+  if (entry.count >= MAX_ATTEMPTS_BEFORE_LOCK) {
+    entry.lockedUntil = now + LOCKOUT_MS;
+  }
+  loginAttempts.set(key, entry);
+}
+
+export function clearLoginAttempts(key: string) {
+  loginAttempts.delete(key);
 }
 
 const ITERATIONS = 100_000;

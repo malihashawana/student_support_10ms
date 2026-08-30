@@ -4,21 +4,13 @@ import {
   FilePlus2,
   LayoutDashboard,
   ListChecks,
+  ShieldCheck,
   UserRound,
   Users,
 } from "lucide-react";
 
 import { AppShell, type NavItem } from "@/components/AppShell";
 import { getCurrentUser } from "@/lib/auth.functions";
-
-const nav: NavItem[] = [
-  { to: "/student", label: "ড্যাশবোর্ড", icon: <LayoutDashboard className="size-4" />, exact: true },
-  { to: "/student/report", label: "সমস্যা জানান", icon: <FilePlus2 className="size-4" /> },
-  { to: "/student/issues", label: "আমার সমস্যা", icon: <ListChecks className="size-4" /> },
-  { to: "/student/community", label: "সবার সমস্যা", icon: <Users className="size-4" /> },
-  { to: "/student/notices", label: "নোটিশ", icon: <Bell className="size-4" /> },
-  { to: "/student/profile", label: "প্রোফাইল", icon: <UserRound className="size-4" /> },
-];
 
 export const Route = createFileRoute("/student")({
   ssr: false,
@@ -33,12 +25,34 @@ export const Route = createFileRoute("/student")({
 
 function StudentLayout() {
   const { student } = Route.useRouteContext();
+  const isCaptain = student.account_role === "captain";
+
+  const nav: NavItem[] = [
+    isCaptain
+      ? { to: "/captain", label: "ক্যাপ্টেন ড্যাশবোর্ড", icon: <ShieldCheck className="size-4" /> }
+      : {
+          to: "/student",
+          label: "ড্যাশবোর্ড",
+          icon: <LayoutDashboard className="size-4" />,
+          exact: true,
+        },
+    {
+      to: "/student/report",
+      label: isCaptain ? "প্রায়োরিটি সমস্যা জানান" : "সমস্যা জানান",
+      icon: <FilePlus2 className="size-4" />,
+    },
+    { to: "/student/issues", label: "আমার সমস্যা", icon: <ListChecks className="size-4" /> },
+    { to: "/student/community", label: "সবার সমস্যা", icon: <Users className="size-4" /> },
+    { to: "/student/notices", label: "নোটিশ", icon: <Bell className="size-4" /> },
+    { to: "/student/profile", label: "প্রোফাইল", icon: <UserRound className="size-4" /> },
+  ];
+
   return (
     <AppShell
       nav={nav}
       variant="student"
       title={student.name}
-      subtitle={student.contact_number}
+      subtitle={isCaptain ? `ক্যাপ্টেন · ${student.contact_number}` : student.contact_number}
     >
       <Outlet />
     </AppShell>

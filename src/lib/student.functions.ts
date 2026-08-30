@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { logAudit } from "./audit.server";
 import { friendly, requireStudent } from "./session.server";
 import { db } from "./support.server";
 import { CATEGORIES, STATUSES } from "./support-constants";
@@ -92,6 +93,16 @@ export const createTicket = createServerFn({ method: "POST" })
     if (description.length < 10 || description.length > 4000) {
       throw friendly("সমস্যাটি অন্তত ১০ অক্ষরে বর্ণনা করুন।");
     }
+
+    // Priority is decided here, from the authenticated session, never from
+    // whatever the browser sends — a captain's ticket is always high priority.
+    const { data: requester } = await db
+      .from("students")
+      .select("account_role")
+      .eq("id", studentId)
+      .maybeSingle();
+    const isCaptain = requester?.account_role === "captain";
+
     const { data: ticket, error } = await db
       .from("tickets")
       .insert({
@@ -102,6 +113,8 @@ export const createTicket = createServerFn({ method: "POST" })
         course: data.course?.trim() || null,
         class_exam: data.class_exam?.trim() || null,
         status: "Open",
+        priority: isCaptain ? "high" : "normal",
+        source_role: isCaptain ? "captain" : "student",
       })
       .select("id, ticket_number, category, status, created_at")
       .single();
@@ -119,13 +132,23 @@ export const createTicket = createServerFn({ method: "POST" })
       if (!/^https?:\/\//i.test(link) || link.length > 500) {
         throw friendly("Please provide a valid link starting with http:// or https://");
       }
-      await db.from("attachments").insert({
+            await db.from("attachments").insert({
         ticket_id: ticket.id,
         file_name: link,
         file_type: "link",
         external_url: link,
       });
     }
+
+    await logAudit({
+      actorType: "student",
+      actorId: studentId,
+      eventType: "ticket.created",
+      targetType: "ticket",
+      targetId: ticket.id,
+      metadata: { category: data.category, priority: isCaptain ? "high" : "normal" },
+    });
+
     return ticket;
   });
 
@@ -144,7 +167,7 @@ export const addStudentMessage = createServerFn({ method: "POST" })
       .eq("student_id", studentId)
       .maybeSingle();
     if (!ticket) throw friendly("এই সমস্যাটি আপনার অ্যাকাউন্টে পাওয়া যায়নি।");
-    await db.from("ticket_messages").insert({
+        await db.from("ticket_messages").insert({
       ticket_id: ticket.id,
       sender_type: "student",
       sender_name: "Student",
@@ -156,6 +179,15 @@ export const addStudentMessage = createServerFn({ method: "POST" })
       .from("tickets")
       .update({ status: STATUSES.includes(nextStatus as never) ? nextStatus : ticket.status })
       .eq("id", ticket.id);
+
+    await logAudit({
+      actorType: "student",
+      actorId: studentId,
+      eventType: "ticket.message_sent",
+      targetType: "ticket",
+      targetId: ticket.id,
+    });
+
     return { ok: true, status: nextStatus };
   });
 

@@ -47,12 +47,17 @@ export function AppShell({
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
-          <Link to={(variant === "staff" ? "/staff" : "/student") as never} className="flex items-center gap-3">
+          <Link
+            to={(variant === "staff" ? "/staff" : "/student") as never}
+            className="flex items-center gap-3"
+          >
             <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-brand text-brand-foreground">
               <GraduationCap className="size-5" />
             </span>
             <span className="leading-tight">
-              <span className="font-display block text-sm font-semibold">স্টুডেন্ট সাপোর্ট হাব</span>
+              <span className="font-display block text-sm font-semibold">
+                স্টুডেন্ট সাপোর্ট হাব
+              </span>
               <span className="block text-xs text-muted-foreground">এইচএসসি ২৮</span>
             </span>
           </Link>

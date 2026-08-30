@@ -49,7 +49,9 @@ function NoticesPage() {
               <p className="mt-2 text-sm whitespace-pre-wrap text-foreground/85">
                 {notice.content}
               </p>
-              <p className="mt-2 text-xs text-muted-foreground">{formatDateBn(notice.created_at)}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {formatDateBn(notice.created_at)}
+              </p>
             </li>
           ))}
         </ul>

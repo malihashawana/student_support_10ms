@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/AppShell";
 import { AttachmentList } from "@/components/AttachmentList";
 import { EmptyState } from "@/components/EmptyState";
-import { StatusBadge } from "@/components/StatusBadge";
+import { PriorityBadge, StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   exportTicketsCsv,
+  resendResolutionEmail,
   staffAddMessage,
   staffTicketDetail,
   staffTickets,
@@ -51,7 +52,10 @@ export const Route = createFileRoute("/staff/tickets")({
           "HSC ২৮ শিক্ষার্থীদের সমস্যা ফিল্টার, উত্তর দেওয়া এবং সমাধানের জন্য স্প্রেডশিট-স্টাইল ওয়ার্কস্পেস।",
       },
       { property: "og:title", content: "সমস্যা ওয়ার্কস্পেস — স্টুডেন্ট সাপোর্ট হাব HSC ২৮" },
-      { property: "og:description", content: "শিক্ষার্থীদের সমস্যা ফিল্টার, উত্তর দিন এবং এক্সপোর্ট করুন।" },
+      {
+        property: "og:description",
+        content: "শিক্ষার্থীদের সমস্যা ফিল্টার, উত্তর দিন এবং এক্সপোর্ট করুন।",
+      },
     ],
   }),
   component: TicketWorkspace,
@@ -65,6 +69,7 @@ function TicketWorkspace() {
     status: "all",
     category: "all",
     course: "all",
+    priority: "all",
     range: "all",
   });
   const [selected, setSelected] = useState<string | null>(null);
@@ -82,7 +87,9 @@ function TicketWorkspace() {
       downloadCsv(`hsc28-issues-${new Date().toISOString().slice(0, 10)}.csv`, csv);
       toast.success("সিএসভি ডাউনলোড হয়েছে।");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "এক্সপোর্ট ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
+      toast.error(
+        err instanceof Error ? err.message : "এক্সপোর্ট ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+      );
     } finally {
       setExporting(false);
     }
@@ -92,7 +99,7 @@ function TicketWorkspace() {
     <div>
       <PageHeader
         title="সমস্যা ওয়ার্কস্পেস"
-        description={`বর্তমান ফিল্টারে ${bn(data?.length ?? 0)}টি সমস্যা মিলেছে।`}
+        description={`বর্তমান ফিল্টারে ${bn(data?.length ?? 0)}টি সমস্যা মিলেছে। গুরুত্বপূর্ণ (High/Urgent) সমস্যা সবার উপরে দেখানো হচ্ছে।`}
         action={
           <Button variant="outline" onClick={handleExport} disabled={exporting}>
             {exporting ? (
@@ -148,11 +155,24 @@ function TicketWorkspace() {
           </SelectContent>
         </Select>
         <Select
+          value={filters.priority ?? "all"}
+          onValueChange={(v) => setFilters({ ...filters, priority: v })}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">সব প্রায়োরিটি</SelectItem>
+            <SelectItem value="urgent">অতি জরুরি</SelectItem>
+            <SelectItem value="high">গুরুত্বপূর্ণ</SelectItem>
+            <SelectItem value="normal">সাধারণ</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
           value={filters.range ?? "all"}
           onValueChange={(v) =>
             setFilters({ ...filters, range: v as NonNullable<StaffTicketFilters["range"]> })
           }
-
         >
           <SelectTrigger>
             <SelectValue />
@@ -206,7 +226,7 @@ function TicketWorkspace() {
           </div>
         ) : data?.length ? (
           <div className="sheet-scroll max-h-[70vh]">
-            <table className="w-full min-w-[1100px] text-sm">
+            <table className="w-full min-w-[1250px] text-sm">
               <thead className="sticky top-0 z-10 bg-secondary text-xs tracking-wide text-muted-foreground uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">টিকেট</th>
@@ -216,6 +236,7 @@ function TicketWorkspace() {
                   <th className="px-3 py-2 text-left font-medium">সমস্যা</th>
                   <th className="px-3 py-2 text-left font-medium">তারিখ</th>
                   <th className="px-3 py-2 text-left font-medium">স্ট্যাটাস</th>
+                  <th className="px-3 py-2 text-left font-medium">প্রায়োরিটি</th>
                   <th className="px-3 py-2 text-left font-medium">উত্তর</th>
                 </tr>
               </thead>
@@ -229,12 +250,21 @@ function TicketWorkspace() {
                     <td className="px-3 py-2 font-medium whitespace-nowrap text-primary">
                       {ticket.ticket_number}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">{ticket.students?.name ?? "—"}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      {ticket.students?.name ?? "—"}
+                      {ticket.source_role === "captain" ? (
+                        <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                          ক্যাপ্টেন
+                        </span>
+                      ) : null}
+                    </td>
                     <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
                       {ticket.students?.contact_number ?? "—"}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">{labelCategory(ticket.category)}</td>
-                    <td className="max-w-[320px] px-3 py-2">
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      {labelCategory(ticket.category)}
+                    </td>
+                    <td className="max-w-[280px] px-3 py-2">
                       <span className="line-clamp-1">{ticket.title}</span>
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
@@ -243,7 +273,10 @@ function TicketWorkspace() {
                     <td className="px-3 py-2">
                       <StatusBadge status={ticket.status} short />
                     </td>
-                    <td className="max-w-[240px] px-3 py-2 text-muted-foreground">
+                    <td className="px-3 py-2">
+                      <PriorityBadge priority={ticket.priority} />
+                    </td>
+                    <td className="max-w-[220px] px-3 py-2 text-muted-foreground">
                       <span className="line-clamp-1">
                         {ticket.official_response ?? "এখনো কোনো উত্তর নেই"}
                       </span>
@@ -292,27 +325,41 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
           response: response ?? data?.ticket.official_response ?? "",
           sendResponse,
         },
-
       }),
-    onSuccess: () => {
-      toast.success("টিকেট আপডেট হয়েছে।");
+    onSuccess: (result) => {
+      if (result.emailStatus === "sent") {
+        toast.success("টিকেট আপডেট হয়েছে এবং সমাধানের ইমেইল পাঠানো হয়েছে।");
+      } else if (result.emailStatus === "failed") {
+        toast.error("টিকেট আপডেট হয়েছে, কিন্তু সমাধানের ইমেইল পাঠানো যায়নি। নিচে রিট্রাই করুন।");
+      } else {
+        toast.success("টিকেট আপডেট হয়েছে।");
+      }
       void queryClient.invalidateQueries({ queryKey: ["staff-ticket", id] });
       void queryClient.invalidateQueries({ queryKey: ["staff-tickets"] });
       void queryClient.invalidateQueries({ queryKey: ["staff-overview"] });
     },
-    onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "টিকেটটি আপডেট করা যায়নি।"),
+    onError: (err) => toast.error(err instanceof Error ? err.message : "টিকেটটি আপডেট করা যায়নি।"),
+  });
+
+  const retryEmailMutation = useMutation({
+    mutationFn: () => resendResolutionEmail({ data: { id } }),
+    onSuccess: () => {
+      toast.success("সমাধানের ইমেইল পাঠানো হয়েছে।");
+      void queryClient.invalidateQueries({ queryKey: ["staff-ticket", id] });
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : "ইমেইল পাঠানো যায়নি।"),
   });
 
   const messageMutation = useMutation({
     mutationFn: () => addMessage({ data: { ticketId: id, message: note, internal } }),
     onSuccess: () => {
       setNote("");
-      toast.success(internal ? "অভ্যন্তরীণ নোট সংরক্ষণ হয়েছে।" : "শিক্ষার্থীকে বার্তা পাঠানো হয়েছে।");
+      toast.success(
+        internal ? "অভ্যন্তরীণ নোট সংরক্ষণ হয়েছে।" : "শিক্ষার্থীকে বার্তা পাঠানো হয়েছে।",
+      );
       void queryClient.invalidateQueries({ queryKey: ["staff-ticket", id] });
     },
-    onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "বার্তা পাঠানো যায়নি।"),
+    onError: (err) => toast.error(err instanceof Error ? err.message : "বার্তা পাঠানো যায়নি।"),
   });
 
   return (
@@ -337,17 +384,20 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             <div>
               <div className="flex items-start justify-between gap-3">
                 <h3 className="font-display text-lg font-semibold">{data.ticket.title}</h3>
-                <StatusBadge status={data.ticket.status} />
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <PriorityBadge priority={data.ticket.priority} />
+                  <StatusBadge status={data.ticket.status} />
+                </div>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 {labelCategory(data.ticket.category)}
                 {data.ticket.course ? ` · ${labelCourse(data.ticket.course)}` : ""}
                 {data.ticket.class_exam ? ` · ${data.ticket.class_exam}` : ""} ·{" "}
                 {formatDateBn(data.ticket.created_at)}
+                {data.ticket.source_role === "captain" ? " · ক্যাপ্টেন থেকে জমা" : ""}
               </p>
               <p className="mt-3 text-sm whitespace-pre-wrap">{data.ticket.description}</p>
             </div>
-
 
             <div className="rounded-lg bg-secondary/60 p-3 text-sm">
               <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
@@ -365,10 +415,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <Label>স্ট্যাটাস</Label>
-                <Select
-                  value={status ?? data.ticket.status}
-                  onValueChange={(v) => setStatus(v)}
-                >
+                <Select value={status ?? data.ticket.status} onValueChange={(v) => setStatus(v)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -413,6 +460,29 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   সংরক্ষণ ও উত্তর পাঠান
                 </Button>
               </div>
+              {data.ticket.status === "Resolved" && data.ticket.students?.email ? (
+                data.ticket.resolved_email_sent_at ? (
+                  <p className="text-xs text-muted-foreground">
+                    সমাধানের ইমেইল পাঠানো হয়েছে ·{" "}
+                    {formatDateBn(data.ticket.resolved_email_sent_at)}
+                  </p>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-destructive">ইমেইল এখনো পাঠানো হয়নি।</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={retryEmailMutation.isPending}
+                      onClick={() => retryEmailMutation.mutate()}
+                    >
+                      {retryEmailMutation.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : null}
+                      ইমেইল রিট্রাই করুন
+                    </Button>
+                  </div>
+                )
+              ) : null}
             </div>
 
             <div>

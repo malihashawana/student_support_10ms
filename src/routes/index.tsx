@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "রেজিস্টার্ড মোবাইল নম্বর দিয়ে লগইন করে এইচএসসি ২৮ কোর্সের যেকোনো সমস্যা জানান ও সমাধান ট্র্যাক করুন।",
+          "লগইন নম্বর ও TMS ট্রানজেকশন আইডি দিয়ে লগইন করে এইচএসসি ২৮ কোর্সের যেকোনো সমস্যা জানান ও সমাধান ট্র্যাক করুন।",
       },
       { property: "og:title", content: "লগইন — স্টুডেন্ট সাপোর্ট হাব এইচএসসি ২৮" },
       {
@@ -26,6 +26,8 @@ export const Route = createFileRoute("/")({
   }),
   beforeLoad: async () => {
     const user = await getCurrentUser();
+    if (user.role === "student" && user.account_role === "captain")
+      throw redirect({ to: "/captain" });
     if (user.role === "student") throw redirect({ to: "/student" });
     if (user.role === "staff") throw redirect({ to: "/staff" });
   },
@@ -35,7 +37,9 @@ export const Route = createFileRoute("/")({
 function LoginPage() {
   const navigate = useNavigate();
   const router = useRouter();
-  const [contact, setContact] = useState("");
+  const [loginNumber, setLoginNumber] = useState("");
+  const [tmsId, setTmsId] = useState("");
+  const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +50,13 @@ function LoginPage() {
     setError(null);
     setBusy("student");
     try {
-      await studentLogin({ data: { contact } });
+      await studentLogin({
+        data: {
+          login_number: loginNumber,
+          tms_transaction_id: tmsId,
+          email: email.trim() || undefined,
+        },
+      });
       await router.invalidate();
       await navigate({ to: "/student", replace: true });
     } catch (err) {
@@ -119,7 +129,7 @@ function LoginPage() {
 
           <h2 className="font-display text-2xl font-semibold">লগইন করুন</h2>
           <p className="mt-1 mb-6 text-sm text-muted-foreground">
-            শিক্ষার্থীরা রেজিস্টার্ড মোবাইল নম্বর দিয়ে লগইন করবে।
+            শিক্ষার্থীরা লগইন নম্বর ও TMS ট্রানজেকশন আইডি দিয়ে লগইন করবে।
           </p>
 
           <Tabs defaultValue="student" onValueChange={() => setError(null)}>
@@ -131,20 +141,43 @@ function LoginPage() {
             <TabsContent value="student" className="mt-6">
               <form onSubmit={handleStudent} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contact">মোবাইল / লগইন নম্বর</Label>
+                  <Label htmlFor="login-number">লগইন নম্বর</Label>
                   <Input
-                    id="contact"
+                    id="login-number"
                     inputMode="numeric"
-                    autoComplete="tel"
+                    autoComplete="username"
                     placeholder="01XXXXXXXXX"
-                    value={contact}
-                    onChange={(e) => setContact(e.target.value)}
+                    value={loginNumber}
+                    onChange={(e) => setLoginNumber(e.target.value)}
                     maxLength={20}
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tms-id">TMS ট্রানজেকশন আইডি</Label>
+                  <Input
+                    id="tms-id"
+                    autoComplete="off"
+                    placeholder="TMS12345678"
+                    value={tmsId}
+                    onChange={(e) => setTmsId(e.target.value)}
+                    maxLength={40}
+                    required
+                  />
                   <p className="text-xs text-muted-foreground">
-                    এইচএসসি ২৮ কোর্সে যে নম্বরটি রেজিস্টার করা আছে সেটি দিন।
+                    কোর্স কেনার সময় পাওয়া TMS ট্রানজেকশন আইডিটি দিন।
                   </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">ইমেইল (ঐচ্ছিক)</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="আপনার রেজিস্টার্ড ইমেইল থাকলে দিন"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 {error ? (
                   <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -153,7 +186,7 @@ function LoginPage() {
                 ) : null}
                 <Button type="submit" className="w-full" disabled={busy === "student"}>
                   {busy === "student" ? <Loader2 className="size-4 animate-spin" /> : null}
-                  পরবর্তী ধাপ
+                  লগইন করুন
                 </Button>
               </form>
             </TabsContent>
