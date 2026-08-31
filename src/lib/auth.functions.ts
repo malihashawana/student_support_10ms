@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { logAudit } from "./audit.server";
 import {
   assertLoginNotRateLimited,
   clearLoginAttempts,
@@ -9,7 +10,6 @@ import {
   recordFailedLogin,
   verifyPassword,
 } from "./session.server";
-import { logAudit } from "./audit.server";
 import { db, ensureDefaultStaff, normalizeLoginNumber } from "./support.server";
 
 export type CurrentUser =
@@ -35,7 +35,9 @@ export const getCurrentUser = createServerFn({ method: "GET" }).handler(
     if (data.role === "student" && data.studentId) {
       const { data: student } = await db
         .from("students")
-        .select("id, name, contact_number, login_number, student_code, email, account_role, status")
+        .select(
+          "id, name, contact_number, login_number, student_code, email, account_role, status",
+        )
         .eq("id", data.studentId)
         .maybeSingle();
       // A deactivated (or removed) account is treated as logged out, even if
@@ -81,13 +83,20 @@ export const studentLogin = createServerFn({ method: "POST" })
       throw friendly("লগইন নম্বর, TMS ট্রানজেকশন আইডি অথবা ইমেইল মিলছে না।");
     };
 
-    const { data: student } = await db
+        const { data: student } = await db
       .from("students")
       .select("id, name, status, tms_transaction_ids, email, account_role")
       .eq("login_number", login_number)
       .maybeSingle();
 
-    if (!student) deny();
+    // A direct throw here — not a call through deny() — is required: a
+    // *called* function typed to return `never` does not narrow `student`
+    // for TypeScript, only an inline throw/return does.
+    if (!student) {
+      recordFailedLogin(rateLimitKey);
+      throw friendly("লগইন নম্বর, TMS ট্রানজেকশন আইডি অথবা ইমেইল মিলছে না।");
+    }
+
     if (student.status !== "active") {
       // Distinct message on purpose: this is an account-state issue, not a
       // credential guess, so it doesn't count against the rate limit.
@@ -98,7 +107,7 @@ export const studentLogin = createServerFn({ method: "POST" })
     if (!(student.tms_transaction_ids ?? []).includes(tms)) deny();
     if (email && (student.email ?? "").trim().toLowerCase() !== email.toLowerCase()) deny();
 
-        clearLoginAttempts(rateLimitKey);
+    clearLoginAttempts(rateLimitKey);
 
     const session = await getSupportSession();
     await session.update({ role: "student", studentId: student.id });
@@ -122,6 +131,7 @@ export const studentLogin = createServerFn({ method: "POST" })
       account_role: student.account_role === "captain" ? "captain" : "student",
     };
   });
+
 export const staffLogin = createServerFn({ method: "POST" })
   .inputValidator((input: { username: string; password: string }) => input)
   .handler(async ({ data }) => {
@@ -136,7 +146,7 @@ export const staffLogin = createServerFn({ method: "POST" })
     if (!staff || !ok) {
       throw friendly("ইউজারনেম বা পাসওয়ার্ড ভুল হয়েছে।");
     }
-        const session = await getSupportSession();
+    const session = await getSupportSession();
     await session.update({ role: "staff", staffId: staff.id, username: staff.username });
     await logAudit({
       actorType: "staff",
@@ -161,7 +171,7 @@ export const logout = createServerFn({ method: "POST" }).handler(async () => {
     await logAudit({
       actorType: "staff",
       actorId: before.staffId,
-      actorName: before.username,
+      actorName: before.username ?? null,
       eventType: "staff.logout",
     });
   }

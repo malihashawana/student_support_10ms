@@ -209,20 +209,22 @@ export async function analyzeStudentCsv(text: string): Promise<CsvAnalysis> {
       if (key) record[key] = (cells[cellIndex] ?? "").trim();
     });
 
-    const login_number = normalizeLoginNumber(record.login_number ?? record.contact_number ?? "");
-    const contact_number = normalizeContact(record.contact_number ?? "") || login_number;
+        const login_number = normalizeLoginNumber(
+      record["login_number"] ?? record["contact_number"] ?? "",
+    );
+    const contact_number = normalizeContact(record["contact_number"] ?? "") || login_number;
 
     rawRows.push({
       line: index + 1,
-      name: (record.name ?? "").trim(),
+      name: (record["name"] ?? "").trim(),
       contact_number,
       login_number,
-      tmsCandidates: splitTmsField(record.tms_transaction_id ?? ""),
-      student_code: (record.student_code ?? "").trim() || null,
-      email: (record.email ?? "").trim() || null,
-      course_name: (record.course_name ?? "").trim() || null,
-      rawRole: (record.account_role ?? "student").trim().toLowerCase(),
-      rawStatus: (record.status ?? "active").trim().toLowerCase(),
+      tmsCandidates: splitTmsField(record["tms_transaction_id"] ?? ""),
+      student_code: (record["student_code"] ?? "").trim() || null,
+      email: (record["email"] ?? "").trim() || null,
+      course_name: (record["course_name"] ?? "").trim() || null,
+      rawRole: (record["account_role"] ?? "student").trim().toLowerCase(),
+      rawStatus: (record["status"] ?? "active").trim().toLowerCase(),
     });
   }
 
