@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -6,6 +7,7 @@ import { toast } from "sonner";
 import { acknowledgeResolvedNotifications, unseenResolvedTickets } from "@/lib/student.functions";
 
 export function ResolvedNotifications() {
+  const navigate = useNavigate();
   const fetchUnseen = useServerFn(unseenResolvedTickets);
   const acknowledge = useServerFn(acknowledgeResolvedNotifications);
 
@@ -25,6 +27,10 @@ export function ResolvedNotifications() {
       toast.success(`আপনার সমস্যা "${ticket.title}" সমাধান হয়েছে!`, {
         description: ticket.ticket_number,
         duration: 8000,
+        action: {
+          label: "টিকেট দেখুন",
+          onClick: () => navigate({ to: "/student/issues/$id", params: { id: ticket.id } }),
+        },
       });
     }
     acknowledgeMutation.mutate();

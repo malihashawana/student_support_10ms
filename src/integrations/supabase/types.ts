@@ -403,7 +403,93 @@ export type Database = {
           },
         ];
       };
-
+      course_notes: {
+        Row: {
+          id: string;
+          course_id: number;
+          author_id: string;
+          content: string;
+          status: string;
+          approved_by: string | null;
+          approved_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          course_id: number;
+          author_id: string;
+          content: string;
+          status?: string;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          course_id?: number;
+          author_id?: string;
+          content?: string;
+          status?: string;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "course_notes_course_id_fkey";
+            columns: ["course_id"];
+            isOneToOne: false;
+            referencedRelation: "tenms_courses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "course_notes_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      course_note_reactions: {
+        Row: {
+          id: string;
+          note_id: string;
+          student_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          note_id: string;
+          student_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          note_id?: string;
+          student_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "course_note_reactions_note_id_fkey";
+            columns: ["note_id"];
+            isOneToOne: false;
+            referencedRelation: "course_notes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "course_note_reactions_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       ticket_messages: {
         Row: {
           created_at: string;

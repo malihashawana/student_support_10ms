@@ -67,7 +67,7 @@ export const staffTickets = createServerFn({ method: "POST" })
     let query = db
       .from("tickets")
       .select(
-        "id, ticket_number, category, title, description, course, class_exam, status, priority, source_role, official_response, handled_by, created_at, updated_at, is_demo, students(name, contact_number, student_code)",
+        "id, ticket_number, category, title, description, course, class_exam, status, priority, source_role, official_response, handled_by, created_at, updated_at, is_demo, students!tickets_student_id_fkey(name, contact_number, student_code)",
       )
       .order("created_at", { ascending: false })
       .limit(2000);
@@ -139,7 +139,7 @@ export const staffTicketDetail = createServerFn({ method: "GET" })
     await requireStaff();
     const { data: ticket } = await db
       .from("tickets")
-      .select("*, students(id, name, contact_number, student_code, email)")
+      .select("*, students!tickets_student_id_fkey(id, name, contact_number, student_code, email)")
       .eq("id", data.id)
       .maybeSingle();
     if (!ticket) throw friendly("সমস্যাটি খুঁজে পাওয়া যায়নি।");
@@ -742,4 +742,32 @@ export const listAuditLogs = createServerFn({ method: "POST" })
     if (data.eventType && data.eventType !== "all") query = query.eq("event_type", data.eventType);
     const { data: rows } = await query;
     return rows ?? [];
+  });
+
+  export const pendingCourseNotes = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStaff();
+  const { data } = await db
+    .from("course_notes")
+    .select(
+      "id, content, status, created_at, course_id, tenms_courses(name_en, name_bn), students(name, login_number)",
+    )
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+  return data ?? [];
+});
+
+export const moderateCourseNote = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string; approve: boolean }) => data)
+  .handler(async ({ data }) => {
+    const { username } = await requireStaff();
+    const { error } = await db
+      .from("course_notes")
+      .update({
+        status: data.approve ? "approved" : "rejected",
+        approved_by: username,
+        approved_at: new Date().toISOString(),
+      })
+      .eq("id", data.id);
+    if (error) throw friendly("নোটটি আপডেট করা যায়নি। আবার চেষ্টা করুন।");
+    return { ok: true };
   });

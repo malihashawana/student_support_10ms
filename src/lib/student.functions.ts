@@ -421,3 +421,95 @@ export const tenmsCourseStructure = createServerFn({ method: "GET" }).handler(as
     courses: courseList.filter((c) => c.program_id === p.id),
   }));
 });
+
+export const courseNotesForCourse = createServerFn({ method: "GET" })
+  .inputValidator((data: { courseId: number }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    const { data: requester } = await db
+      .from("students")
+      .select("account_role")
+      .eq("id", studentId)
+      .maybeSingle();
+    const isCaptain = requester?.account_role === "captain";
+
+    const { data: notes } = await db
+      .from("course_notes")
+      .select("id, content, status, author_id, created_at, students(name)")
+      .eq("course_id", data.courseId)
+      .order("created_at", { ascending: false });
+
+    const list = notes ?? [];
+    const visible = list.filter((n) => n.status === "approved" || n.author_id === studentId);
+
+    const noteIds = visible.map((n) => n.id);
+    const { data: reactions } = noteIds.length
+      ? await db.from("course_note_reactions").select("note_id, student_id").in("note_id", noteIds)
+      : { data: [] as { note_id: string; student_id: string }[] };
+
+    const reactionList = reactions ?? [];
+    const countByNote: Record<string, number> = {};
+    const lovedByMe = new Set<string>();
+    for (const r of reactionList) {
+      countByNote[r.note_id] = (countByNote[r.note_id] ?? 0) + 1;
+      if (r.student_id === studentId) lovedByMe.add(r.note_id);
+    }
+
+    return {
+      isCaptain,
+      notes: visible.map((n) => ({
+        id: n.id,
+        content: n.content,
+        status: n.status,
+        isMine: n.author_id === studentId,
+        authorName: n.students?.name ?? "ক্যাপ্টেন",
+        created_at: n.created_at,
+        loveCount: countByNote[n.id] ?? 0,
+        lovedByMe: lovedByMe.has(n.id),
+      })),
+    };
+  });
+
+export const createCourseNote = createServerFn({ method: "POST" })
+  .inputValidator((data: { courseId: number; content: string }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    const { data: requester } = await db
+      .from("students")
+      .select("account_role")
+      .eq("id", studentId)
+      .maybeSingle();
+    if (requester?.account_role !== "captain") {
+      throw friendly("শুধু ক্যাপ্টেনরাই নোট লিখতে পারবেন।");
+    }
+    const content = (data.content ?? "").trim();
+    if (content.length < 5 || content.length > 2000) {
+      throw friendly("নোটটি ৫ থেকে ২০০০ অক্ষরের মধ্যে লিখুন।");
+    }
+    const { error } = await db.from("course_notes").insert({
+      course_id: data.courseId,
+      author_id: studentId,
+      content,
+      status: "pending",
+    });
+    if (error) throw friendly("নোটটি সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।");
+    return { ok: true };
+  });
+
+export const toggleNoteLove = createServerFn({ method: "POST" })
+  .inputValidator((data: { noteId: string }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    const { data: existing } = await db
+      .from("course_note_reactions")
+      .select("id")
+      .eq("note_id", data.noteId)
+      .eq("student_id", studentId)
+      .maybeSingle();
+    if (existing) {
+      await db.from("course_note_reactions").delete().eq("id", existing.id);
+      return { loved: false };
+    }
+    await db.from("course_note_reactions").insert({ note_id: data.noteId, student_id: studentId });
+    return { loved: true };
+  });

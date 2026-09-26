@@ -48,27 +48,37 @@ function NoticesPage() {
         <div className="flex justify-center py-16">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
-      ) : data?.length ? (
+            ) : data?.length ? (
         <ul className="space-y-4">
           {data.map((notice, index) => {
             const recent = isRecent(notice.created_at);
             const featured = index === 0;
+            const key = (notice.priority ?? "").toLowerCase();
+            const isImportant = key === "important" || key === "high";
+            const isUrgent = key === "urgent";
+            const boxClass = isUrgent
+              ? "border-red-800 bg-red-600 text-white shadow-md"
+              : isImportant
+                ? "border-amber-600 bg-amber-400 text-amber-950 shadow-md"
+                : featured
+                  ? "border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-background shadow-sm"
+                  : "border-border bg-card";
             return (
               <li
                 key={notice.id}
-                className={`group relative overflow-hidden rounded-2xl border p-5 transition-all hover:shadow-md ${
-                  featured
-                    ? "border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-background shadow-sm"
-                    : "border-border bg-card"
-                }`}
+                className={`group relative overflow-hidden rounded-2xl border p-5 transition-all hover:shadow-md ${boxClass}`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <span
                       className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full ${
-                        featured
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary text-foreground/70"
+                        isUrgent
+                          ? "bg-red-800 text-white"
+                          : isImportant
+                            ? "bg-amber-600 text-amber-950"
+                            : featured
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-secondary text-foreground/70"
                       }`}
                     >
                       <Bell className="size-4" />
@@ -83,14 +93,22 @@ function NoticesPage() {
                           </span>
                         ) : null}
                       </div>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p
+                        className={`mt-0.5 text-xs ${
+                          isImportant || isUrgent ? "opacity-80" : "text-muted-foreground"
+                        }`}
+                      >
                         {formatDateBn(notice.created_at)}
                       </p>
                     </div>
                   </div>
                   <PriorityBadge priority={notice.priority} />
                 </div>
-                <p className="mt-3 text-sm leading-relaxed whitespace-pre-wrap text-foreground/85">
+                <p
+                  className={`mt-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                    isImportant || isUrgent ? "" : "text-foreground/85"
+                  }`}
+                >
                   {notice.content}
                 </p>
               </li>

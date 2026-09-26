@@ -1,14 +1,16 @@
 export const CATEGORIES = [
-  "Sound",
-  "Video",
-  "Exam",
-  "Recorded Lecture",
   "Live Class",
-  "App / Website",
-  "Payment / Subscription",
-  "Study Material",
-  "Account / Login",
-  "Other",
+  "Recorded Class",
+  "Archive Class",
+  "Other Class",
+  "App/Website",
+  "Lecture Slide",
+  "FB Group Add",
+  "Messenger Group Add",
+  "Daily Exam",
+  "Monthly Exam",
+  "Reward",
+  "Others",
 ] as const;
 
 export const COURSES = [
@@ -22,30 +24,23 @@ export const COURSES = [
   "ICT",
   "English",
   "Bangla",
+  "Other",
 ] as const;
 
-export const STATUSES = [
-  "Open",
-  "In Review",
-  "Waiting for Information",
-  "Resolved",
-  "Closed",
-] as const;
+export const STATUSES = ["Open", "In Progress", "Resolved", "Closed"] as const;
 
 export type TicketStatus = (typeof STATUSES)[number];
 
 export const STATUS_STYLES: Record<string, string> = {
   Open: "bg-status-open/15 text-status-open border-status-open/30",
-  "In Review": "bg-status-review/15 text-status-review border-status-review/30",
-  "Waiting for Information": "bg-status-waiting/15 text-status-waiting border-status-waiting/30",
+  "In Progress": "bg-status-review/15 text-status-review border-status-review/30",
   Resolved: "bg-status-resolved/15 text-status-resolved border-status-resolved/30",
   Closed: "bg-status-closed/15 text-status-closed border-status-closed/30",
 };
 
 export const STATUS_SHORT: Record<string, string> = {
   Open: "Open",
-  "In Review": "In Review",
-  "Waiting for Information": "Waiting",
+  "In Progress": "In Progress",
   Resolved: "Resolved",
   Closed: "Closed",
 };
@@ -104,21 +99,9 @@ export function downloadCsv(fileName: string, csv: string): void {
 }
 
 /* ---------------------------------------------------------------
- * Bangla labels. Database values stay English; UI shows Bangla.
+ * Category & status are now shown in plain English for everyone
+ * (student + team). Course names stay in Bangla (not requested to change).
  * --------------------------------------------------------------- */
-
-export const CATEGORY_BN: Record<string, string> = {
-  Sound: "সাউন্ড",
-  Video: "ভিডিও",
-  Exam: "পরীক্ষা",
-  "Recorded Lecture": "রেকর্ডেড লেকচার",
-  "Live Class": "লাইভ ক্লাস",
-  "App / Website": "অ্যাপ / ওয়েবসাইট",
-  "Payment / Subscription": "পেমেন্ট / সাবস্ক্রিপশন",
-  "Study Material": "স্টাডি ম্যাটেরিয়াল",
-  "Account / Login": "অ্যাকাউন্ট / লগইন",
-  Other: "অন্যান্য",
-};
 
 export const COURSE_BN: Record<string, string> = {
   "Physics 1st Paper": "পদার্থবিজ্ঞান ১ম পত্র",
@@ -131,22 +114,7 @@ export const COURSE_BN: Record<string, string> = {
   ICT: "আইসিটি",
   English: "ইংরেজি",
   Bangla: "বাংলা",
-};
-
-export const STATUS_BN: Record<string, string> = {
-  Open: "নতুন",
-  "In Review": "পর্যালোচনায়",
-  "Waiting for Information": "তথ্যের অপেক্ষায়",
-  Resolved: "সমাধান হয়েছে",
-  Closed: "বন্ধ",
-};
-
-export const STATUS_BN_SHORT: Record<string, string> = {
-  Open: "নতুন",
-  "In Review": "পর্যালোচনায়",
-  "Waiting for Information": "অপেক্ষায়",
-  Resolved: "সমাধান",
-  Closed: "বন্ধ",
+  Other: "Other",
 };
 
 export const PRIORITY_BN: Record<string, string> = {
@@ -154,6 +122,8 @@ export const PRIORITY_BN: Record<string, string> = {
   normal: "সাধারণ",
   High: "গুরুত্বপূর্ণ",
   high: "গুরুত্বপূর্ণ",
+  Important: "গুরুত্বপূর্ণ",
+  important: "গুরুত্বপূর্ণ",
   Urgent: "অতি জরুরি",
   urgent: "অতি জরুরি",
   Low: "কম",
@@ -162,7 +132,7 @@ export const PRIORITY_BN: Record<string, string> = {
 
 export function labelCategory(value: string | null | undefined): string {
   if (!value) return "—";
-  return CATEGORY_BN[value] ?? value;
+  return value;
 }
 
 export function labelCourse(value: string | null | undefined): string {
@@ -172,7 +142,8 @@ export function labelCourse(value: string | null | undefined): string {
 
 export function labelStatus(value: string | null | undefined, short = false): string {
   if (!value) return "—";
-  return (short ? STATUS_BN_SHORT[value] : STATUS_BN[value]) ?? value;
+  if (short) return STATUS_SHORT[value] ?? value;
+  return value;
 }
 
 export function labelPriority(value: string | null | undefined): string {

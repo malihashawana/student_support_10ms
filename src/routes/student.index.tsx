@@ -143,18 +143,29 @@ function StudentHome() {
                   সব নোটিশ
                 </Link>
               </div>
-              {data?.notices.length ? (
+                            {data?.notices.length ? (
                 <ul className="divide-y divide-border">
                   {data.notices.map((notice, index) => {
                     const recent = isRecent(notice.created_at);
+                    const key = (notice.priority ?? "").toLowerCase();
+                    const isImportant = key === "important" || key === "high";
+                    const isUrgent = key === "urgent";
                     return (
                       <li
                         key={notice.id}
-                        className={index === 0 && recent ? "bg-primary/5 px-4 py-3" : "px-4 py-3"}
+                        className={
+                          isUrgent
+                            ? "border-l-4 border-red-800 bg-red-600 px-4 py-3 text-white"
+                            : isImportant
+                              ? "border-l-4 border-amber-600 bg-amber-400 px-4 py-3 text-amber-950"
+                              : index === 0 && recent
+                                ? "bg-primary/5 px-4 py-3"
+                                : "px-4 py-3"
+                        }
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-1.5">
-                            <p className="text-sm font-medium">{notice.title}</p>
+                            <p className="text-sm font-semibold">{notice.title}</p>
                             {recent ? (
                               <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600">
                                 <Sparkles className="size-2.5" />
@@ -164,10 +175,18 @@ function StudentHome() {
                           </div>
                           <PriorityBadge priority={notice.priority} />
                         </div>
-                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                        <p
+                          className={`mt-1 line-clamp-2 text-xs ${
+                            isImportant || isUrgent ? "opacity-90" : "text-muted-foreground"
+                          }`}
+                        >
                           {notice.content}
                         </p>
-                        <p className="mt-1 text-xs text-muted-foreground/70">
+                        <p
+                          className={`mt-1 text-xs ${
+                            isImportant || isUrgent ? "opacity-75" : "text-muted-foreground/70"
+                          }`}
+                        >
                           {formatDateShortBn(notice.created_at)}
                         </p>
                       </li>

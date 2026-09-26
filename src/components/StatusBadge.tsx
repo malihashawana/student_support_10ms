@@ -28,7 +28,8 @@ export function PriorityBadge({ priority }: { priority: string }) {
   const key = (priority ?? "").toLowerCase();
   const styles: Record<string, string> = {
     urgent: "border-destructive/30 bg-destructive/15 text-destructive",
-    high: "border-status-waiting/30 bg-status-waiting/15 text-status-waiting",
+    high: "border-amber-500 bg-amber-400 text-amber-950 font-semibold",
+    important: "border-amber-500 bg-amber-400 text-amber-950 font-semibold",
     normal: "border-status-open/30 bg-status-open/15 text-status-open",
     low: "border-border bg-muted text-muted-foreground",
   };
