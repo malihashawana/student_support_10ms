@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, Loader2 } from "lucide-react";
+import { Bell, Loader2, Sparkles } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
@@ -24,6 +24,12 @@ export const Route = createFileRoute("/student/notices")({
   component: NoticesPage,
 });
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function isRecent(dateStr: string) {
+  return Date.now() - new Date(dateStr).getTime() < 3 * DAY_MS;
+}
+
 function NoticesPage() {
   const fetchNotices = useServerFn(publishedNotices);
   const { data, isLoading } = useQuery({
@@ -32,31 +38,71 @@ function NoticesPage() {
   });
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <PageHeader title="নোটিশ" description="সাপোর্ট টিমের ঘোষণা।" />
+    <div className="mx-auto max-w-3xl space-y-6">
+      <PageHeader
+        title="নোটিশ বোর্ড"
+        description="সাপোর্ট টিমের সর্বশেষ ঘোষণা ও গুরুত্বপূর্ণ আপডেট এখানে দেখুন।"
+      />
+
       {isLoading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : data?.length ? (
-        <ul className="space-y-3">
-          {data.map((notice) => (
-            <li key={notice.id} className="card-panel p-4">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <h2 className="font-display text-base font-semibold">{notice.title}</h2>
-                <PriorityBadge priority={notice.priority} />
-              </div>
-              <p className="mt-2 text-sm whitespace-pre-wrap text-foreground/85">
-                {notice.content}
-              </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {formatDateBn(notice.created_at)}
-              </p>
-            </li>
-          ))}
+        <ul className="space-y-4">
+          {data.map((notice, index) => {
+            const recent = isRecent(notice.created_at);
+            const featured = index === 0;
+            return (
+              <li
+                key={notice.id}
+                className={`group relative overflow-hidden rounded-2xl border p-5 transition-all hover:shadow-md ${
+                  featured
+                    ? "border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-background shadow-sm"
+                    : "border-border bg-card"
+                }`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full ${
+                        featured
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-foreground/70"
+                      }`}
+                    >
+                      <Bell className="size-4" />
+                    </span>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="font-display text-base font-semibold">{notice.title}</h2>
+                        {recent ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-600">
+                            <Sparkles className="size-3" />
+                            নতুন
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {formatDateBn(notice.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <PriorityBadge priority={notice.priority} />
+                </div>
+                <p className="mt-3 text-sm leading-relaxed whitespace-pre-wrap text-foreground/85">
+                  {notice.content}
+                </p>
+              </li>
+            );
+          })}
         </ul>
       ) : (
-        <EmptyState icon={<Bell className="size-5" />} title="নতুন কোনো নোটিশ নেই।" />
+        <EmptyState
+          icon={<Bell className="size-5" />}
+          title="নতুন কোনো নোটিশ নেই।"
+          description="নতুন ঘোষণা এলে এখানে দেখানো হবে।"
+        />
       )}
     </div>
   );

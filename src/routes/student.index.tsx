@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, CheckCircle2, FilePlus2, Inbox, Loader2, Search, Ticket } from "lucide-react";
-
+import { Bell, CheckCircle2, FilePlus2, Inbox, Loader2, Search, Sparkles, Ticket } from "lucide-react";
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { PriorityBadge, StatusBadge } from "@/components/StatusBadge";
@@ -25,6 +24,12 @@ export const Route = createFileRoute("/student/")({
   }),
   component: StudentHome,
 });
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function isRecent(dateStr: string) {
+  return Date.now() - new Date(dateStr).getTime() < 3 * DAY_MS;
+}
 
 function StudentHome() {
   const fetchDashboard = useServerFn(studentDashboard);
@@ -125,10 +130,13 @@ function StudentHome() {
               )}
             </div>
 
-            <div className="card-panel">
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            
+                        <div className="card-panel overflow-hidden">
+              <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-primary/10 to-transparent px-4 py-3">
                 <h2 className="flex items-center gap-2 text-sm font-semibold">
-                  <Bell className="size-4 text-primary" />
+                  <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Bell className="size-3.5" />
+                  </span>
                   নোটিশ বোর্ড
                 </h2>
                 <Link to="/student/notices" className="text-xs font-medium text-primary">
@@ -137,20 +145,34 @@ function StudentHome() {
               </div>
               {data?.notices.length ? (
                 <ul className="divide-y divide-border">
-                  {data.notices.map((notice) => (
-                    <li key={notice.id} className="px-4 py-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-medium">{notice.title}</p>
-                        <PriorityBadge priority={notice.priority} />
-                      </div>
-                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                        {notice.content}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground/70">
-                        {formatDateShortBn(notice.created_at)}
-                      </p>
-                    </li>
-                  ))}
+                  {data.notices.map((notice, index) => {
+                    const recent = isRecent(notice.created_at);
+                    return (
+                      <li
+                        key={notice.id}
+                        className={index === 0 && recent ? "bg-primary/5 px-4 py-3" : "px-4 py-3"}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm font-medium">{notice.title}</p>
+                            {recent ? (
+                              <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600">
+                                <Sparkles className="size-2.5" />
+                                নতুন
+                              </span>
+                            ) : null}
+                          </div>
+                          <PriorityBadge priority={notice.priority} />
+                        </div>
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                          {notice.content}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground/70">
+                          {formatDateShortBn(notice.created_at)}
+                        </p>
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
                 <EmptyState title="নতুন কোনো নোটিশ নেই।" />

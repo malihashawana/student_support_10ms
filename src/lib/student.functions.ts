@@ -94,8 +94,10 @@ export const createTicket = createServerFn({ method: "POST" })
       throw friendly("সমস্যাটি অন্তত ১০ অক্ষরে বর্ণনা করুন।");
     }
 
-    // Priority is decided here, from the authenticated session, never from
-    // whatever the browser sends — a captain's ticket is always high priority.
+    // source_role is still recorded for context (shown as a small "captain"
+    // tag in staff/captain views), but it no longer elevates priority on its
+    // own -- priority now only changes when a captain explicitly approves
+    // the ticket (see captain.functions.ts: captainSetApproval).
     const { data: requester } = await db
       .from("students")
       .select("account_role")
@@ -113,7 +115,7 @@ export const createTicket = createServerFn({ method: "POST" })
         course: data.course?.trim() || null,
         class_exam: data.class_exam?.trim() || null,
         status: "Open",
-        priority: isCaptain ? "high" : "normal",
+        priority: "normal",
         source_role: isCaptain ? "captain" : "student",
       })
       .select("id, ticket_number, category, status, created_at")
@@ -132,7 +134,7 @@ export const createTicket = createServerFn({ method: "POST" })
       if (!/^https?:\/\//i.test(link) || link.length > 500) {
         throw friendly("Please provide a valid link starting with http:// or https://");
       }
-            await db.from("attachments").insert({
+      await db.from("attachments").insert({
         ticket_id: ticket.id,
         file_name: link,
         file_type: "link",
@@ -146,7 +148,11 @@ export const createTicket = createServerFn({ method: "POST" })
       eventType: "ticket.created",
       targetType: "ticket",
       targetId: ticket.id,
-      metadata: { category: data.category, priority: isCaptain ? "high" : "normal" },
+      metadata: {
+        category: data.category,
+        priority: "normal",
+        source_role: isCaptain ? "captain" : "student",
+      },
     });
 
     return ticket;
@@ -167,7 +173,7 @@ export const addStudentMessage = createServerFn({ method: "POST" })
       .eq("student_id", studentId)
       .maybeSingle();
     if (!ticket) throw friendly("এই সমস্যাটি আপনার অ্যাকাউন্টে পাওয়া যায়নি।");
-        await db.from("ticket_messages").insert({
+    await db.from("ticket_messages").insert({
       ticket_id: ticket.id,
       sender_type: "student",
       sender_name: "Student",
@@ -198,7 +204,7 @@ export const communityTickets = createServerFn({ method: "POST" })
     let query = db
       .from("tickets")
       .select(
-        "id, ticket_number, category, title, description, course, status, official_response, created_at, resolved_at",
+        "id, ticket_number, category, title, description, course, status, priority, source_role, approved_by_captain_name, approved_at, official_response, created_at, resolved_at",
       )
       .order("created_at", { ascending: false })
       .limit(200);
@@ -238,4 +244,180 @@ export const publishedNotices = createServerFn({ method: "GET" }).handler(async 
     .eq("published", true)
     .order("created_at", { ascending: false });
   return data ?? [];
+});
+export const unseenResolvedTickets = createServerFn({ method: "GET" }).handler(async () => {
+  const { studentId } = await requireStudent();
+  const { data: student } = await db
+    .from("students")
+    .select("resolved_notifications_seen_at")
+    .eq("id", studentId)
+    .maybeSingle();
+  const since = student?.resolved_notifications_seen_at ?? "1970-01-01T00:00:00.000Z";
+  const { data: tickets } = await db
+    .from("tickets")
+    .select("id, ticket_number, title, resolved_at")
+    .eq("student_id", studentId)
+    .eq("status", "Resolved")
+    .gt("resolved_at", since)
+    .order("resolved_at", { ascending: false });
+  return tickets ?? [];
+});
+
+export const acknowledgeResolvedNotifications = createServerFn({ method: "POST" }).handler(
+  async () => {
+    const { studentId } = await requireStudent();
+    await db
+      .from("students")
+      .update({ resolved_notifications_seen_at: new Date().toISOString() })
+      .eq("id", studentId);
+    return { ok: true };
+  },
+);
+
+export const studyTasksByRange = createServerFn({ method: "GET" })
+  .inputValidator((data: { from: string; to: string }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    const { data: tasks } = await db
+      .from("study_tasks")
+      .select("id, title, subject, task_date, is_done, created_at")
+      .eq("student_id", studentId)
+      .gte("task_date", data.from)
+      .lte("task_date", data.to)
+      .order("task_date", { ascending: true });
+    return tasks ?? [];
+  });
+
+export const createStudyTask = createServerFn({ method: "POST" })
+  .inputValidator((data: { title: string; subject?: string; task_date: string }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    const { data: task, error } = await db
+      .from("study_tasks")
+      .insert({
+        student_id: studentId,
+        title: data.title,
+        subject: data.subject ?? null,
+        task_date: data.task_date,
+      })
+      .select("id, title, subject, task_date, is_done, created_at")
+      .single();
+    if (error) throw new Error(error.message);
+    return task;
+  });
+
+export const toggleStudyTask = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string; is_done: boolean }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    await db
+      .from("study_tasks")
+      .update({ is_done: data.is_done })
+      .eq("id", data.id)
+      .eq("student_id", studentId);
+    return { ok: true };
+  });
+
+export const deleteStudyTask = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    await db.from("study_tasks").delete().eq("id", data.id).eq("student_id", studentId);
+    return { ok: true };
+  });
+
+  export const listStudyNotes = createServerFn({ method: "GET" }).handler(async () => {
+  const { studentId } = await requireStudent();
+  const { data } = await db
+    .from("student_notes")
+    .select("id, title, subject, content, created_at, updated_at")
+    .eq("student_id", studentId)
+    .order("updated_at", { ascending: false });
+  return data ?? [];
+});
+
+export const createStudyNote = createServerFn({ method: "POST" })
+  .inputValidator((data: { title: string; subject?: string; content: string }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    const { data: note, error } = await db
+      .from("student_notes")
+      .insert({
+        student_id: studentId,
+        title: data.title,
+        subject: data.subject ?? null,
+        content: data.content,
+      })
+      .select("id, title, subject, content, created_at, updated_at")
+      .single();
+    if (error) throw new Error(error.message);
+    return note;
+  });
+
+export const updateStudyNote = createServerFn({ method: "POST" })
+  .inputValidator(
+    (data: { id: string; title: string; subject?: string; content: string }) => data,
+  )
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    const { data: note, error } = await db
+      .from("student_notes")
+      .update({
+        title: data.title,
+        subject: data.subject ?? null,
+        content: data.content,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", data.id)
+      .eq("student_id", studentId)
+      .select("id, title, subject, content, created_at, updated_at")
+      .single();
+    if (error) throw new Error(error.message);
+    return note;
+  });
+
+export const deleteStudyNote = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const { studentId } = await requireStudent();
+    await db.from("student_notes").delete().eq("id", data.id).eq("student_id", studentId);
+    return { ok: true };
+  });
+
+
+  export const vocabQuizSet = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStudent();
+  const { data } = await db.from("vocab_words").select("id, word, meaning");
+  const words = data ?? [];
+  const shuffled = [...words].sort(() => Math.random() - 0.5);
+  const quizWords = shuffled.slice(0, 10);
+  const allMeanings = words.map((w) => w.meaning);
+
+  return quizWords.map((w) => {
+    const wrongPool = allMeanings.filter((m) => m !== w.meaning);
+    const wrongOptions = [...wrongPool].sort(() => Math.random() - 0.5).slice(0, 3);
+    const options = [...wrongOptions, w.meaning].sort(() => Math.random() - 0.5);
+    return { id: w.id, word: w.word, options, answer: w.meaning };
+  });
+});
+
+export const tenmsCourseStructure = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStudent();
+  const { data: programs } = await db
+    .from("tenms_programs")
+    .select("id, subject_name_en, subject_name_bn, group_label")
+    .order("group_label", { ascending: true })
+    .order("subject_name_bn", { ascending: true });
+  const { data: courses } = await db
+    .from("tenms_courses")
+    .select("id, program_id, name_en, name_bn")
+    .order("id", { ascending: true });
+
+  const programList = programs ?? [];
+  const courseList = courses ?? [];
+
+  return programList.map((p) => ({
+    ...p,
+    courses: courseList.filter((c) => c.program_id === p.id),
+  }));
 });

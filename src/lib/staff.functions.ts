@@ -27,9 +27,7 @@ export const staffOverview = createServerFn({ method: "GET" }).handler(async () 
   await requireStaff();
   const { data: tickets } = await db
     .from("tickets")
-    .select(
-      "id, ticket_number, title, category, status, created_at, updated_at, official_response",
-    )
+    .select("id, ticket_number, title, category, status, created_at, updated_at, official_response")
     .order("updated_at", { ascending: false })
     .limit(2000);
 
@@ -187,8 +185,7 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
       if (data.status === "Resolved") patch.resolved_at = new Date().toISOString();
     }
     if (typeof data.response === "string") patch.official_response = data.response.trim() || null;
-    if (typeof data.handled_by === "string")
-      patch.handled_by = data.handled_by.trim() || username;
+    if (typeof data.handled_by === "string") patch.handled_by = data.handled_by.trim() || username;
 
     const { error } = await db.from("tickets").update(patch).eq("id", data.id);
     if (error) throw friendly("সমস্যাটি আপডেট করা যায়নি। আবার চেষ্টা করুন।");

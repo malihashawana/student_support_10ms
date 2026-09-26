@@ -54,7 +54,7 @@ export const uploadAttachment = createServerFn({ method: "POST" })
       })
       .select("id, file_name, file_type, file_size, created_at")
       .single();
-        if (error) throw friendly("আপলোড হয়নি। আবার চেষ্টা করুন।");
+    if (error) throw friendly("আপলোড হয়নি। আবার চেষ্টা করুন।");
 
     await logAudit({
       actorType: "student",
@@ -86,7 +86,7 @@ export const addLinkAttachment = createServerFn({ method: "POST" })
       .eq("student_id", session.studentId)
       .maybeSingle();
     if (!ticket) throw friendly("এই সমস্যাটি আপনার অ্যাকাউন্টে পাওয়া যায়নি।");
-        await db
+    await db
       .from("attachments")
       .insert({ ticket_id: data.ticketId, file_name: url, file_type: "link", external_url: url });
 

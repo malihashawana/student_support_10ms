@@ -1,6 +1,7 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AppShell, type NavItem } from "@/components/AppShell";
+import { ResolvedNotifications } from "@/components/ResolvedNotifications";
 import { getCurrentUser } from "@/lib/auth.functions";
 
 const nav: NavItem[] = [{ to: "/captain", label: "ক্যাপ্টেন ড্যাশবোর্ড", icon: null, exact: true }];
@@ -21,6 +22,7 @@ function CaptainLayout() {
   const { captain } = Route.useRouteContext();
   return (
     <AppShell nav={nav} variant="student" title={captain.name} subtitle="ক্যাপ্টেন">
+      <ResolvedNotifications />
       <Outlet />
     </AppShell>
   );

@@ -1,7 +1,10 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { ResolvedNotifications } from "@/components/ResolvedNotifications";
 import {
   Bell,
+  BookMarked,
   FilePlus2,
+  GraduationCap,
   LayoutDashboard,
   ListChecks,
   ShieldCheck,
@@ -43,17 +46,20 @@ function StudentLayout() {
     },
     { to: "/student/issues", label: "আমার সমস্যা", icon: <ListChecks className="size-4" /> },
     { to: "/student/community", label: "সবার সমস্যা", icon: <Users className="size-4" /> },
+    { to: "/student/study", label: "স্টাডি হেল্প", icon: <GraduationCap className="size-4" /> },
+    { to: "/student/courses", label: "HSC 28 কোর্স", icon: <BookMarked className="size-4" /> },
     { to: "/student/notices", label: "নোটিশ", icon: <Bell className="size-4" /> },
     { to: "/student/profile", label: "প্রোফাইল", icon: <UserRound className="size-4" /> },
   ];
 
-  return (
+    return (
     <AppShell
       nav={nav}
       variant="student"
       title={student.name}
       subtitle={isCaptain ? `ক্যাপ্টেন · ${student.contact_number}` : student.contact_number}
     >
+      <ResolvedNotifications />
       <Outlet />
     </AppShell>
   );

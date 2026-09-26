@@ -1,7 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle, Bell, FilePlus2, ListChecks, Loader2, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  FilePlus2,
+  ListChecks,
+  Loader2,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
@@ -30,23 +38,34 @@ function CaptainDashboard() {
     <div>
       <PageHeader
         title={`স্বাগতম, ${captain.name}`}
-        description="ক্যাপ্টেন হিসেবে আপনার জানানো সমস্যা সরাসরি অগ্রাধিকার (High Priority) হিসেবে সাপোর্ট টিমের কাছে যাবে।"
+        description="সব শিক্ষার্থীর সমস্যা দেখুন এবং প্রয়োজনীয়গুলো অনুমোদন করে সাপোর্ট টিমের কাছে অগ্রাধিকার পাঠান।"
         action={
-          <Button asChild>
-            <Link to="/student/report">
-              <FilePlus2 className="size-4" />
-              প্রায়োরিটি সমস্যা জানান
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link to="/student/community">
+                <Users className="size-4" />
+                সবার সমস্যা দেখুন
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/student/report">
+                <FilePlus2 className="size-4" />
+                নতুন সমস্যা জানান
+              </Link>
+            </Button>
+          </div>
         }
       />
 
-      <div className="mb-4 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
-        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" />
+      <div className="mb-4 flex items-start gap-3 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 shadow-sm">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <ShieldCheck className="size-5" />
+        </span>
         <p className="text-sm text-foreground">
           আপনি এই ব্যাচের <span className="font-semibold">ক্যাপ্টেন</span> হিসেবে নিয়োগ পেয়েছেন।
-          আপনার জানানো প্রতিটি সমস্যা স্বয়ংক্রিয়ভাবে গুরুত্বপূর্ণ (High) হিসেবে চিহ্নিত হয়ে
-          সাপোর্ট টিমের কাছে অগ্রাধিকার পাবে। এখনো শুধু নিজের সমস্যাই দেখা ও পাঠানো যাবে।
+          এখন থেকে আপনি সব শিক্ষার্থীর জানানো সমস্যা দেখতে পারবেন এবং প্রয়োজনীয় সমস্যাগুলো{" "}
+          <span className="font-semibold">অনুমোদন (Approve)</span> করে সরাসরি সাপোর্ট টিমের কাছে
+          অগ্রাধিকার হিসেবে পাঠাতে পারবেন। কোন সমস্যা আপনি অনুমোদন করেছেন তা সবাই দেখতে পাবে।
         </p>
       </div>
 
@@ -78,12 +97,15 @@ function CaptainDashboard() {
 
           <div className="card-panel overflow-hidden">
             <div className="border-b border-border px-4 py-3">
-              <h2 className="font-display text-sm font-semibold">সাম্প্রতিক সমস্যা</h2>
+              <h2 className="font-display text-sm font-semibold">আপনার সাম্প্রতিক সমস্যা</h2>
             </div>
             {data?.tickets.length ? (
               <ul className="divide-y divide-border">
                 {data.tickets.map((ticket) => (
-                  <li key={ticket.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <li
+                    key={ticket.id}
+                    className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-secondary/60"
+                  >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{ticket.title}</p>
                       <p className="text-xs text-muted-foreground">
@@ -98,7 +120,7 @@ function CaptainDashboard() {
             ) : (
               <EmptyState
                 title="এখনো কোনো সমস্যা জানানো হয়নি।"
-                description="উপরের বাটনে ক্লিক করে আপনার প্রথম প্রায়োরিটি সমস্যাটি জানান।"
+                description="উপরের বাটনে ক্লিক করে আপনার প্রথম সমস্যাটি জানান।"
               />
             )}
           </div>

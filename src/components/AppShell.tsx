@@ -41,7 +41,7 @@ export function AppShell({
       <header className="sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[1500px] items-center gap-3 px-4">
           <button
-            className="rounded-md p-2 text-muted-foreground lg:hidden"
+            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label="মেনু খুলুন বা বন্ধ করুন"
           >
@@ -49,9 +49,9 @@ export function AppShell({
           </button>
           <Link
             to={(variant === "staff" ? "/staff" : "/student") as never}
-            className="flex items-center gap-3"
+            className="group flex items-center gap-3"
           >
-            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-brand text-brand-foreground">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-brand text-brand-foreground shadow-sm transition-transform group-hover:scale-105">
               <GraduationCap className="size-5" />
             </span>
             <span className="leading-tight">
@@ -72,6 +72,7 @@ export function AppShell({
             </Button>
           </div>
         </div>
+        <div className="h-0.5 w-full bg-gradient-to-r from-primary via-primary/30 to-transparent" />
       </header>
 
       <div className="mx-auto flex max-w-[1500px] gap-6 px-4 py-6">
@@ -88,10 +89,15 @@ export function AppShell({
                 to={item.to as never}
                 activeOptions={{ exact: item.exact ?? false }}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                activeProps={{ className: "bg-primary/10 text-primary hover:bg-primary/10" }}
+                className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+                activeProps={{
+                  className:
+                    "bg-gradient-to-r from-primary/15 to-primary/5 text-primary shadow-sm hover:bg-primary/10 hover:text-primary",
+                }}
               >
-                {item.icon}
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary/60 transition-colors group-hover:bg-background">
+                  {item.icon}
+                </span>
                 {item.label}
               </Link>
             ))}

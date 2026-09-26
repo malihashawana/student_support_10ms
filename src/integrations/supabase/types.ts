@@ -185,6 +185,8 @@ export type Database = {
           last_login_at: string | null;
           login_number: string;
           name: string;
+          password_hash: string | null;
+          resolved_notifications_seen_at: string | null;
           status: string;
           student_code: string | null;
           tms_transaction_id: string | null;
@@ -205,6 +207,8 @@ export type Database = {
           last_login_at?: string | null;
           login_number: string;
           name: string;
+          password_hash?: string | null;
+          resolved_notifications_seen_at: string | null;
           status?: string;
           student_code?: string | null;
           tms_transaction_id?: string | null;
@@ -225,6 +229,8 @@ export type Database = {
           last_login_at?: string | null;
           login_number?: string;
           name?: string;
+          password_hash?: string | null;
+          resolved_notifications_seen_at: string | null;
           status?: string;
           student_code?: string | null;
           tms_transaction_id?: string | null;
@@ -233,6 +239,171 @@ export type Database = {
         };
         Relationships: [];
       };
+            
+      study_tasks: {
+        Row: {
+          id: string;
+          student_id: string;
+          title: string;
+          subject: string | null;
+          task_date: string;
+          is_done: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          student_id: string;
+          title: string;
+          subject?: string | null;
+          task_date?: string;
+          is_done?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          student_id?: string;
+          title?: string;
+          subject?: string | null;
+          task_date?: string;
+          is_done?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "study_tasks_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+
+
+            student_notes: {
+        Row: {
+          id: string;
+          student_id: string;
+          title: string;
+          subject: string | null;
+          content: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          student_id: string;
+          title: string;
+          subject?: string | null;
+          content?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          student_id?: string;
+          title?: string;
+          subject?: string | null;
+          content?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_notes_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+
+      vocab_words: {
+        Row: {
+          id: string;
+          word: string;
+          meaning: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          word: string;
+          meaning: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          word?: string;
+          meaning?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+
+            tenms_programs: {
+        Row: {
+          id: number;
+          catalog_product_id: number;
+          subject_name_en: string;
+          subject_name_bn: string;
+          group_label: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id: number;
+          catalog_product_id: number;
+          subject_name_en: string;
+          subject_name_bn: string;
+          group_label?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          catalog_product_id?: number;
+          subject_name_en?: string;
+          subject_name_bn?: string;
+          group_label?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      tenms_courses: {
+        Row: {
+          id: number;
+          program_id: number;
+          name_en: string;
+          name_bn: string;
+          thumbnail: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id: number;
+          program_id: number;
+          name_en: string;
+          name_bn: string;
+          thumbnail?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          program_id?: number;
+          name_en?: string;
+          name_bn?: string;
+          thumbnail?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tenms_courses_program_id_fkey";
+            columns: ["program_id"];
+            isOneToOne: false;
+            referencedRelation: "tenms_programs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+
       ticket_messages: {
         Row: {
           created_at: string;
@@ -273,6 +444,9 @@ export type Database = {
       };
       tickets: {
         Row: {
+          approved_at: string | null;
+          approved_by_captain_id: string | null;
+          approved_by_captain_name: string | null;
           category: string;
           class_exam: string | null;
           course: string | null;
@@ -293,6 +467,9 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          approved_at?: string | null;
+          approved_by_captain_id?: string | null;
+          approved_by_captain_name?: string | null;
           category: string;
           class_exam?: string | null;
           course?: string | null;
@@ -313,6 +490,9 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          approved_at?: string | null;
+          approved_by_captain_id?: string | null;
+          approved_by_captain_name?: string | null;
           category?: string;
           class_exam?: string | null;
           course?: string | null;
@@ -336,6 +516,13 @@ export type Database = {
           {
             foreignKeyName: "tickets_student_id_fkey";
             columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tickets_approved_by_captain_id_fkey";
+            columns: ["approved_by_captain_id"];
             isOneToOne: false;
             referencedRelation: "students";
             referencedColumns: ["id"];

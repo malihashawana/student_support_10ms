@@ -21,9 +21,11 @@ import { Route as StaffSettingsRouteImport } from './routes/staff.settings'
 import { Route as StaffStudentsRouteImport } from './routes/staff.students'
 import { Route as StaffTicketsRouteImport } from './routes/staff.tickets'
 import { Route as StudentIndexRouteImport } from './routes/student.index'
+import { Route as StudentCoursesRouteImport } from './routes/student.courses'
 import { Route as StudentNoticesRouteImport } from './routes/student.notices'
 import { Route as StudentProfileRouteImport } from './routes/student.profile'
 import { Route as StudentReportRouteImport } from './routes/student.report'
+import { Route as StudentStudyRouteImport } from './routes/student.study'
 import { Route as StudentCommunityIndexRouteImport } from './routes/student.community.index'
 import { Route as StudentCommunityIdRouteImport } from './routes/student.community.$id'
 import { Route as StudentIssuesIndexRouteImport } from './routes/student.issues.index'
@@ -89,6 +91,11 @@ const StudentIndexRoute = StudentIndexRouteImport.update({
   path: '/',
   getParentRoute: () => StudentRoute,
 } as any)
+const StudentCoursesRoute = StudentCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => StudentRoute,
+} as any)
 const StudentNoticesRoute = StudentNoticesRouteImport.update({
   id: '/notices',
   path: '/notices',
@@ -102,6 +109,11 @@ const StudentProfileRoute = StudentProfileRouteImport.update({
 const StudentReportRoute = StudentReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentStudyRoute = StudentStudyRouteImport.update({
+  id: '/study',
+  path: '/study',
   getParentRoute: () => StudentRoute,
 } as any)
 const StudentCommunityIndexRoute = StudentCommunityIndexRouteImport.update({
@@ -135,9 +147,11 @@ export interface FileRoutesByFullPath {
   '/staff/settings': typeof StaffSettingsRoute
   '/staff/students': typeof StaffStudentsRoute
   '/staff/tickets': typeof StaffTicketsRoute
+  '/student/courses': typeof StudentCoursesRoute
   '/student/notices': typeof StudentNoticesRoute
   '/student/profile': typeof StudentProfileRoute
   '/student/report': typeof StudentReportRoute
+  '/student/study': typeof StudentStudyRoute
   '/captain/': typeof CaptainIndexRoute
   '/staff/': typeof StaffIndexRoute
   '/student/': typeof StudentIndexRoute
@@ -153,9 +167,11 @@ export interface FileRoutesByTo {
   '/staff/settings': typeof StaffSettingsRoute
   '/staff/students': typeof StaffStudentsRoute
   '/staff/tickets': typeof StaffTicketsRoute
+  '/student/courses': typeof StudentCoursesRoute
   '/student/notices': typeof StudentNoticesRoute
   '/student/profile': typeof StudentProfileRoute
   '/student/report': typeof StudentReportRoute
+  '/student/study': typeof StudentStudyRoute
   '/captain': typeof CaptainIndexRoute
   '/staff': typeof StaffIndexRoute
   '/student': typeof StudentIndexRoute
@@ -175,9 +191,11 @@ export interface FileRoutesById {
   '/staff/settings': typeof StaffSettingsRoute
   '/staff/students': typeof StaffStudentsRoute
   '/staff/tickets': typeof StaffTicketsRoute
+  '/student/courses': typeof StudentCoursesRoute
   '/student/notices': typeof StudentNoticesRoute
   '/student/profile': typeof StudentProfileRoute
   '/student/report': typeof StudentReportRoute
+  '/student/study': typeof StudentStudyRoute
   '/captain/': typeof CaptainIndexRoute
   '/staff/': typeof StaffIndexRoute
   '/student/': typeof StudentIndexRoute
@@ -198,9 +216,11 @@ export interface FileRouteTypes {
     | '/staff/settings'
     | '/staff/students'
     | '/staff/tickets'
+    | '/student/courses'
     | '/student/notices'
     | '/student/profile'
     | '/student/report'
+    | '/student/study'
     | '/captain/'
     | '/staff/'
     | '/student/'
@@ -216,9 +236,11 @@ export interface FileRouteTypes {
     | '/staff/settings'
     | '/staff/students'
     | '/staff/tickets'
+    | '/student/courses'
     | '/student/notices'
     | '/student/profile'
     | '/student/report'
+    | '/student/study'
     | '/captain'
     | '/staff'
     | '/student'
@@ -237,9 +259,11 @@ export interface FileRouteTypes {
     | '/staff/settings'
     | '/staff/students'
     | '/staff/tickets'
+    | '/student/courses'
     | '/student/notices'
     | '/student/profile'
     | '/student/report'
+    | '/student/study'
     | '/captain/'
     | '/staff/'
     | '/student/'
@@ -342,6 +366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentIndexRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/student/courses': {
+      id: '/student/courses'
+      path: '/courses'
+      fullPath: '/student/courses'
+      preLoaderRoute: typeof StudentCoursesRouteImport
+      parentRoute: typeof StudentRoute
+    }
     '/student/notices': {
       id: '/student/notices'
       path: '/notices'
@@ -361,6 +392,13 @@ declare module '@tanstack/react-router' {
       path: '/report'
       fullPath: '/student/report'
       preLoaderRoute: typeof StudentReportRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/study': {
+      id: '/student/study'
+      path: '/study'
+      fullPath: '/student/study'
+      preLoaderRoute: typeof StudentStudyRouteImport
       parentRoute: typeof StudentRoute
     }
     '/student/community/': {
@@ -426,9 +464,11 @@ const StaffRouteChildren: StaffRouteChildren = {
 const StaffRouteWithChildren = StaffRoute._addFileChildren(StaffRouteChildren)
 
 interface StudentRouteChildren {
+  StudentCoursesRoute: typeof StudentCoursesRoute
   StudentNoticesRoute: typeof StudentNoticesRoute
   StudentProfileRoute: typeof StudentProfileRoute
   StudentReportRoute: typeof StudentReportRoute
+  StudentStudyRoute: typeof StudentStudyRoute
   StudentIndexRoute: typeof StudentIndexRoute
   StudentCommunityIdRoute: typeof StudentCommunityIdRoute
   StudentIssuesIdRoute: typeof StudentIssuesIdRoute
@@ -437,9 +477,11 @@ interface StudentRouteChildren {
 }
 
 const StudentRouteChildren: StudentRouteChildren = {
+  StudentCoursesRoute: StudentCoursesRoute,
   StudentNoticesRoute: StudentNoticesRoute,
   StudentProfileRoute: StudentProfileRoute,
   StudentReportRoute: StudentReportRoute,
+  StudentStudyRoute: StudentStudyRoute,
   StudentIndexRoute: StudentIndexRoute,
   StudentCommunityIdRoute: StudentCommunityIdRoute,
   StudentIssuesIdRoute: StudentIssuesIdRoute,
