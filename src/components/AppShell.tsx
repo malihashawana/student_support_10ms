@@ -91,9 +91,9 @@ export function AppShell({
                 onClick={() => setOpen(false)}
                 className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-200/60 transition-all before:absolute before:left-0 before:top-1/2 before:h-0 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:content-[''] before:transition-all before:duration-300 hover:bg-white/10 hover:text-white"
                 activeProps={{
-                  className:
-                    "bg-red-600 text-white shadow-lg shadow-red-950/50 before:h-2/3 hover:bg-red-500 hover:text-white",
-                }}
+  className:
+    "bg-[#8B1E2D] text-white shadow-lg shadow-[#4A0E17]/50 before:h-2/3 hover:bg-[#A52436] hover:text-white",
+}}
               >
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5 transition-colors group-hover:bg-white/15">
                   {item.icon}
