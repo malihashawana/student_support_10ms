@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { BookMarked, Heart, Loader2, Send } from "lucide-react";
+import { BookMarked, FileText, Heart, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
@@ -52,7 +52,7 @@ function CoursesPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
         title="কোর্স স্ট্রাকচার"
-        description="একটি পেপারে ক্লিক করে নোট দেখুন, বা (ক্যাপ্টেন হলে) নতুন নোট যোগ করুন।"
+        description="একটি পেপারে ক্লিক করে নোট (ছবি/PDF) দেখুন, বা (ক্যাপ্টেন হলে) নতুন নোট আপলোড করুন।"
       />
 
       {isLoading ? (
@@ -127,7 +127,8 @@ function CourseNotesPanel({ courseId, courseName }: { courseId: number; courseNa
   const fetchNotes = useServerFn(courseNotesForCourse);
   const submitNote = useServerFn(createCourseNote);
   const toggleLove = useServerFn(toggleNoteLove);
-  const [draft, setDraft] = useState("");
+  const [caption, setCaption] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   const queryKey = ["course-notes", courseId];
   const { data, isLoading } = useQuery({
@@ -136,9 +137,22 @@ function CourseNotesPanel({ courseId, courseName }: { courseId: number; courseNa
   });
 
   const addNote = useMutation({
-    mutationFn: (content: string) => submitNote({ data: { courseId, content } }),
+    mutationFn: async () => {
+      if (!file) throw new Error("একটি ছবি বা PDF ফাইল বেছে নিন।");
+      if (file.size > 4 * 1024 * 1024) throw new Error("ফাইলের সাইজ ৪ MB-এর বেশি হতে পারবে না।");
+      const fileBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      return submitNote({
+        data: { courseId, caption, fileName: file.name, fileType: file.type, fileBase64 },
+      });
+    },
     onSuccess: () => {
-      setDraft("");
+      setCaption("");
+      setFile(null);
       toast.success("নোট জমা দেওয়া হয়েছে, অনুমোদনের অপেক্ষায় আছে।");
       queryClient.invalidateQueries({ queryKey });
     },
@@ -162,7 +176,26 @@ function CourseNotesPanel({ courseId, courseName }: { courseId: number; courseNa
         <div className="space-y-2">
           {data.notes.map((note) => (
             <div key={note.id} className="rounded-lg border border-border bg-background p-3">
-              <p className="text-sm text-foreground">{note.content}</p>
+              {note.fileType?.startsWith("image/") ? (
+                <a href={note.fileUrl ?? "#"} target="_blank" rel="noreferrer">
+                  <img
+                    src={note.fileUrl ?? ""}
+                    alt={note.fileName ?? "note"}
+                    className="mb-2 max-h-48 w-full rounded-md border border-border object-contain"
+                  />
+                </a>
+              ) : (
+                <a
+                  href={note.fileUrl ?? "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mb-2 flex items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground"
+                >
+                  <FileText className="size-4" />
+                  {note.fileName ?? "PDF দেখুন"}
+                </a>
+              )}
+              {note.content ? <p className="text-sm text-foreground">{note.content}</p> : null}
               <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                 <span>
                   {note.authorName}
@@ -191,36 +224,39 @@ function CourseNotesPanel({ courseId, courseName }: { courseId: number; courseNa
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (draft.trim().length < 5) {
-              toast.error("নোটটি অন্তত ৫ অক্ষরে লিখুন।");
-              return;
-            }
-            addNote.mutate(draft.trim());
+            addNote.mutate();
           }}
-          className="flex items-start gap-2 pt-2"
+          className="space-y-2 pt-2"
         >
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="এই পেপারের জন্য নোট লিখুন..."
-            rows={2}
-            className="flex-1 rounded-lg border border-border bg-background p-2 text-sm outline-none focus:ring-1 focus:ring-primary"
+          <input
+            type="file"
+            accept="image/*,.pdf"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="block w-full text-xs text-muted-foreground file:mr-2 file:rounded-md file:border-0 file:bg-secondary file:px-2 file:py-1 file:text-xs"
           />
-          <button
-            type="submit"
-            disabled={addNote.isPending}
-            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
-          >
-            {addNote.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
-          </button>
+          <div className="flex items-start gap-2">
+            <input
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              placeholder="ছোট বিবরণ (ঐচ্ছিক)"
+              className="flex-1 rounded-lg border border-border bg-background p-2 text-sm outline-none focus:ring-1 focus:ring-primary"
+            />
+            <button
+              type="submit"
+              disabled={addNote.isPending || !file}
+              className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
+            >
+              {addNote.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4" />
+              )}
+            </button>
+          </div>
         </form>
       ) : (
         <p className="text-xs text-muted-foreground/70">
-          শুধু ক্যাপ্টেনরা এখানে নতুন নোট যোগ করতে পারবেন।
+          শুধু ক্যাপ্টেনরা এখানে নতুন নোট আপলোড করতে পারবেন।
         </p>
       )}
     </div>

@@ -403,12 +403,16 @@ export type Database = {
           },
         ];
       };
-      course_notes: {
+            course_notes: {
         Row: {
           id: string;
           course_id: number;
           author_id: string;
           content: string;
+          file_name: string | null;
+          file_type: string | null;
+          file_url: string | null;
+          storage_path: string | null;
           status: string;
           approved_by: string | null;
           approved_at: string | null;
@@ -419,7 +423,11 @@ export type Database = {
           id?: string;
           course_id: number;
           author_id: string;
-          content: string;
+          content?: string;
+          file_name?: string | null;
+          file_type?: string | null;
+          file_url?: string | null;
+          storage_path?: string | null;
           status?: string;
           approved_by?: string | null;
           approved_at?: string | null;
@@ -431,6 +439,10 @@ export type Database = {
           course_id?: number;
           author_id?: string;
           content?: string;
+          file_name?: string | null;
+          file_type?: string | null;
+          file_url?: string | null;
+          storage_path?: string | null;
           status?: string;
           approved_by?: string | null;
           approved_at?: string | null;

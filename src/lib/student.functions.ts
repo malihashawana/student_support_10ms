@@ -435,7 +435,9 @@ export const courseNotesForCourse = createServerFn({ method: "GET" })
 
     const { data: notes } = await db
       .from("course_notes")
-      .select("id, content, status, author_id, created_at, students(name)")
+      .select(
+        "id, content, status, author_id, created_at, file_name, file_type, file_url, students(name)",
+      )
       .eq("course_id", data.courseId)
       .order("created_at", { ascending: false });
 
@@ -464,6 +466,9 @@ export const courseNotesForCourse = createServerFn({ method: "GET" })
         isMine: n.author_id === studentId,
         authorName: n.students?.name ?? "ক্যাপ্টেন",
         created_at: n.created_at,
+        fileName: n.file_name,
+        fileType: n.file_type,
+        fileUrl: n.file_url,
         loveCount: countByNote[n.id] ?? 0,
         lovedByMe: lovedByMe.has(n.id),
       })),
@@ -471,7 +476,15 @@ export const courseNotesForCourse = createServerFn({ method: "GET" })
   });
 
 export const createCourseNote = createServerFn({ method: "POST" })
-  .inputValidator((data: { courseId: number; content: string }) => data)
+  .inputValidator(
+    (data: {
+      courseId: number;
+      caption?: string;
+      fileName: string;
+      fileType: string;
+      fileBase64: string;
+    }) => data,
+  )
   .handler(async ({ data }) => {
     const { studentId } = await requireStudent();
     const { data: requester } = await db
@@ -480,19 +493,46 @@ export const createCourseNote = createServerFn({ method: "POST" })
       .eq("id", studentId)
       .maybeSingle();
     if (requester?.account_role !== "captain") {
-      throw friendly("শুধু ক্যাপ্টেনরাই নোট লিখতে পারবেন।");
+      throw friendly("শুধু ক্যাপ্টেনরাই নোট আপলোড করতে পারবে।");
     }
-    const content = (data.content ?? "").trim();
-    if (content.length < 5 || content.length > 2000) {
-      throw friendly("নোটটি ৫ থেকে ২০০০ অক্ষরের মধ্যে লিখুন।");
+
+    const fileName = (data.fileName ?? "").trim();
+    const fileType = (data.fileType ?? "").trim();
+    const isImage = fileType.startsWith("image/");
+    const isPdf = fileType === "application/pdf";
+    if (!fileName || !(isImage || isPdf)) {
+      throw friendly("শুধু ছবি (jpg/png) অথবা PDF ফাইল আপলোড করা যাবে।");
     }
+
+    const buffer = Buffer.from(data.fileBase64, "base64");
+    const MAX_BYTES = 4 * 1024 * 1024; // 4MB
+    if (buffer.length > MAX_BYTES) {
+      throw friendly("ফাইলের সাইজ ৪ MB-এর বেশি হতে পারবে না।");
+    }
+
+    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `${data.courseId}/${crypto.randomUUID()}-${safeName}`;
+
+    const { error: uploadError } = await db.storage
+      .from("course-notes")
+      .upload(path, buffer, { contentType: fileType, upsert: false });
+    if (uploadError) throw friendly("ফাইলটি আপলোড করা যায়নি। আবার চেষ্টা করো।");
+
+    const { data: pub } = db.storage.from("course-notes").getPublicUrl(path);
+
+    const caption = (data.caption ?? "").trim().slice(0, 500);
+
     const { error } = await db.from("course_notes").insert({
       course_id: data.courseId,
       author_id: studentId,
-      content,
+      content: caption,
+      file_name: fileName,
+      file_type: fileType,
+      file_url: pub.publicUrl,
+      storage_path: path,
       status: "pending",
     });
-    if (error) throw friendly("নোটটি সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।");
+    if (error) throw friendly("নোটটি সংরক্ষণ করা যায়নি। আবার চেষ্টা করো।");
     return { ok: true };
   });
 
