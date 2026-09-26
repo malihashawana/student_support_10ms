@@ -1,11 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { BookMarked, Loader2 } from "lucide-react";
+import { BookMarked, Heart, Loader2, Send } from "lucide-react";
+import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
-import { tenmsCourseStructure } from "@/lib/student.functions";
+import {
+  courseNotesForCourse,
+  createCourseNote,
+  tenmsCourseStructure,
+  toggleNoteLove,
+} from "@/lib/student.functions";
 
 export const Route = createFileRoute("/student/courses")({
   head: () => ({
@@ -31,6 +38,8 @@ function CoursesPage() {
     queryFn: () => fetchStructure(),
   });
 
+  const [openCourseId, setOpenCourseId] = useState<number | null>(null);
+
   const groups = new Map<string, NonNullable<typeof data>>();
   for (const program of data ?? []) {
     const key = program.group_label ?? "অন্যান্য";
@@ -43,7 +52,7 @@ function CoursesPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
         title="কোর্স স্ট্রাকচার"
-        description="HSC 28 ব্যাচের সব বিষয় ও পেপারের তালিকা — ক্লাস শুরু হলে এখানেই রুটিন ও লেকচার যোগ হবে।"
+        description="একটি পেপারে ক্লিক করে নোট দেখুন, বা (ক্যাপ্টেন হলে) নতুন নোট যোগ করুন।"
       />
 
       {isLoading ? (
@@ -74,14 +83,32 @@ function CoursesPage() {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {program.courses.map((course) => (
-                        <span
+                        <button
                           key={course.id}
-                          className="rounded-full bg-secondary px-2.5 py-1 text-xs text-foreground/80"
+                          type="button"
+                          onClick={() =>
+                            setOpenCourseId((prev) => (prev === course.id ? null : course.id))
+                          }
+                          className={`rounded-full px-2.5 py-1 text-xs transition-colors ${
+                            openCourseId === course.id
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-secondary text-foreground/80 hover:bg-secondary/80"
+                          }`}
                         >
                           {course.name_bn}
-                        </span>
+                        </button>
                       ))}
                     </div>
+
+                    {program.courses.map((course) =>
+                      openCourseId === course.id ? (
+                        <CourseNotesPanel
+                          key={course.id}
+                          courseId={course.id}
+                          courseName={course.name_bn}
+                        />
+                      ) : null,
+                    )}
                   </div>
                 ))}
               </div>
@@ -90,6 +117,111 @@ function CoursesPage() {
         </div>
       ) : (
         <EmptyState title="কোর্সের তথ্য এখনো যোগ করা হয়নি।" />
+      )}
+    </div>
+  );
+}
+
+function CourseNotesPanel({ courseId, courseName }: { courseId: number; courseName: string }) {
+  const queryClient = useQueryClient();
+  const fetchNotes = useServerFn(courseNotesForCourse);
+  const submitNote = useServerFn(createCourseNote);
+  const toggleLove = useServerFn(toggleNoteLove);
+  const [draft, setDraft] = useState("");
+
+  const queryKey = ["course-notes", courseId];
+  const { data, isLoading } = useQuery({
+    queryKey,
+    queryFn: () => fetchNotes({ data: { courseId } }),
+  });
+
+  const addNote = useMutation({
+    mutationFn: (content: string) => submitNote({ data: { courseId, content } }),
+    onSuccess: () => {
+      setDraft("");
+      toast.success("নোট জমা দেওয়া হয়েছে, অনুমোদনের অপেক্ষায় আছে।");
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : "নোটটি দেওয়া যায়নি।"),
+  });
+
+  const loveNote = useMutation({
+    mutationFn: (noteId: string) => toggleLove({ data: { noteId } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  return (
+    <div className="mt-4 space-y-3 border-t border-border pt-4">
+      <p className="text-xs font-semibold text-muted-foreground">{courseName} — নোট</p>
+
+      {isLoading ? (
+        <div className="flex justify-center py-6">
+          <Loader2 className="size-4 animate-spin text-muted-foreground" />
+        </div>
+      ) : data?.notes.length ? (
+        <div className="space-y-2">
+          {data.notes.map((note) => (
+            <div key={note.id} className="rounded-lg border border-border bg-background p-3">
+              <p className="text-sm text-foreground">{note.content}</p>
+              <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {note.authorName}
+                  {note.status === "pending" ? " · অনুমোদনের অপেক্ষায়" : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => loveNote.mutate(note.id)}
+                  disabled={loveNote.isPending}
+                  className={`flex items-center gap-1 rounded-full px-2 py-0.5 ${
+                    note.lovedByMe ? "text-red-500" : "text-muted-foreground hover:text-red-400"
+                  }`}
+                >
+                  <Heart className={`size-3.5 ${note.lovedByMe ? "fill-current" : ""}`} />
+                  {note.loveCount}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">এখনো কোনো নোট নেই।</p>
+      )}
+
+      {data?.isCaptain ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (draft.trim().length < 5) {
+              toast.error("নোটটি অন্তত ৫ অক্ষরে লিখুন।");
+              return;
+            }
+            addNote.mutate(draft.trim());
+          }}
+          className="flex items-start gap-2 pt-2"
+        >
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="এই পেপারের জন্য নোট লিখুন..."
+            rows={2}
+            className="flex-1 rounded-lg border border-border bg-background p-2 text-sm outline-none focus:ring-1 focus:ring-primary"
+          />
+          <button
+            type="submit"
+            disabled={addNote.isPending}
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
+          >
+            {addNote.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
+          </button>
+        </form>
+      ) : (
+        <p className="text-xs text-muted-foreground/70">
+          শুধু ক্যাপ্টেনরা এখানে নতুন নোট যোগ করতে পারবেন।
+        </p>
       )}
     </div>
   );
