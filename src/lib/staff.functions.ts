@@ -238,7 +238,7 @@ async function tryResolutionEmail(
   const { data: ticket } = await db
     .from("tickets")
     .select(
-      "id, ticket_number, title, status, official_response, resolved_email_sent_at, students(email, name)",
+      "id, ticket_number, title, status, official_response, resolved_email_sent_at, students!tickets_student_id_fkey(email, name)",
     )
     .eq("id", ticketId)
     .maybeSingle();

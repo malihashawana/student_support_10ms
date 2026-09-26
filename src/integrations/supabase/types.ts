@@ -208,7 +208,7 @@ export type Database = {
           login_number: string;
           name: string;
           password_hash?: string | null;
-          resolved_notifications_seen_at: string | null;
+          resolved_notifications_seen_at?: string | null;
           status?: string;
           student_code?: string | null;
           tms_transaction_id?: string | null;
@@ -230,7 +230,7 @@ export type Database = {
           login_number?: string;
           name?: string;
           password_hash?: string | null;
-          resolved_notifications_seen_at: string | null;
+          resolved_notifications_seen_at?: string | null;
           status?: string;
           student_code?: string | null;
           tms_transaction_id?: string | null;
