@@ -749,7 +749,7 @@ export const listAuditLogs = createServerFn({ method: "POST" })
   const { data } = await db
     .from("course_notes")
     .select(
-      "id, content, status, created_at, course_id, tenms_courses(name_en, name_bn), students(name, login_number)",
+      "id, content, status, created_at, course_id, file_name, file_type, file_url, tenms_courses(name_en, name_bn), students(name, login_number)",
     )
     .eq("status", "pending")
     .order("created_at", { ascending: true });

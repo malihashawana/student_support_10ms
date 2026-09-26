@@ -1,90 +1,111 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Heart, Loader2, X } from "lucide-react";
+import { Check, FileText, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
-import { Button } from "@/components/ui/button";
 import { moderateCourseNote, pendingCourseNotes } from "@/lib/staff.functions";
-import { formatDateBn } from "@/lib/support-constants";
 
 export const Route = createFileRoute("/staff/course-notes")({
   head: () => ({
-    meta: [{ title: "কোর্স নোট অনুমোদন — Student Support Hub HSC 28" }],
+    meta: [{ title: "কোর্স নোট অনুমোদন — সাপোর্ট টিম" }],
   }),
-  component: CourseNoteModeration,
+  component: StaffCourseNotesPage,
 });
 
-function CourseNoteModeration() {
+function StaffCourseNotesPage() {
+  const queryClient = useQueryClient();
   const fetchPending = useServerFn(pendingCourseNotes);
   const moderate = useServerFn(moderateCourseNote);
-  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["pending-course-notes"],
     queryFn: () => fetchPending(),
   });
 
-  const mutation = useMutation({
+  const act = useMutation({
     mutationFn: (input: { id: string; approve: boolean }) => moderate({ data: input }),
-    onSuccess: (_result, variables) => {
-      toast.success(variables.approve ? "নোট অনুমোদন করা হয়েছে।" : "নোট প্রত্যাখ্যান করা হয়েছে।");
-      void queryClient.invalidateQueries({ queryKey: ["pending-course-notes"] });
+    onSuccess: (_res, vars) => {
+      toast.success(vars.approve ? "নোটটি অনুমোদন করা হয়েছে।" : "নোটটি বাতিল করা হয়েছে।");
+      queryClient.invalidateQueries({ queryKey: ["pending-course-notes"] });
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : "কাজটি সম্পন্ন করা যায়নি।"),
+    onError: () => toast.error("কাজটি করা যায়নি। আবার চেষ্টা করুন।"),
   });
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
         title="কোর্স নোট অনুমোদন"
-        description="ক্যাপ্টেনদের জমা দেওয়া নোট এখানে অনুমোদন বা প্রত্যাখ্যান করুন — অনুমোদিত নোটই শিক্ষার্থীরা দেখতে পাবে।"
+        description="ক্যাপ্টেনদের পাঠানো নোট/ফাইল এখানে দেখে অনুমোদন বা বাতিল করুন।"
       />
+
       {isLoading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : data?.length ? (
-        <ul className="space-y-3">
+        <div className="space-y-3">
           {data.map((note) => (
-            <li key={note.id} className="card-panel p-4">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <p className="text-sm font-semibold">
-                    {note.tenms_courses?.name_bn ?? note.tenms_courses?.name_en ?? "কোর্স"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {note.students?.name ?? "ক্যাপ্টেন"} · {formatDateBn(note.created_at)}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={mutation.isPending}
-                    onClick={() => mutation.mutate({ id: note.id, approve: false })}
-                  >
-                    <X className="size-4" />
-                    প্রত্যাখ্যান
-                  </Button>
-                  <Button
-                    size="sm"
-                    disabled={mutation.isPending}
-                    onClick={() => mutation.mutate({ id: note.id, approve: true })}
-                  >
-                    <Check className="size-4" />
-                    অনুমোদন
-                  </Button>
-                </div>
+            <div key={note.id} className="card-panel space-y-3 p-4">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {note.tenms_courses?.name_bn ?? note.tenms_courses?.name_en} ·{" "}
+                  {note.students?.name} ({note.students?.login_number})
+                </span>
+                <span>{new Date(note.created_at).toLocaleString("bn-BD")}</span>
               </div>
-              <p className="mt-2 text-sm whitespace-pre-wrap text-foreground/85">{note.content}</p>
-            </li>
+
+              {note.file_url ? (
+                note.file_type?.startsWith("image/") ? (
+                  <a href={note.file_url} target="_blank" rel="noreferrer">
+                    <img
+                      src={note.file_url}
+                      alt={note.file_name ?? "note"}
+                      className="max-h-64 w-full rounded-md border border-border object-contain"
+                    />
+                  </a>
+                ) : (
+                  <a
+                    href={note.file_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-2 text-sm"
+                  >
+                    <FileText className="size-4" />
+                    {note.file_name ?? "ফাইল দেখুন"}
+                  </a>
+                )
+              ) : null}
+
+              {note.content ? <p className="text-sm text-foreground">{note.content}</p> : null}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => act.mutate({ id: note.id, approve: false })}
+                  disabled={act.isPending}
+                  className="flex items-center gap-1 rounded-lg border border-destructive/40 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10"
+                >
+                  <X className="size-3.5" />
+                  বাতিল
+                </button>
+                <button
+                  type="button"
+                  onClick={() => act.mutate({ id: note.id, approve: true })}
+                  disabled={act.isPending}
+                  className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs text-primary-foreground disabled:opacity-50"
+                >
+                  <Check className="size-3.5" />
+                  অনুমোদন
+                </button>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
-        <EmptyState icon={<Heart className="size-5" />} title="অনুমোদনের অপেক্ষায় কোনো নোট নেই।" />
+        <EmptyState title="অনুমোদনের অপেক্ষায় কোনো নোট নেই।" />
       )}
     </div>
   );

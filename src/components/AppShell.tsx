@@ -78,7 +78,7 @@ export function AppShell({
       <div className="mx-auto flex max-w-[1500px] gap-6 px-4 py-6">
         <aside
           className={cn(
-            "fixed inset-x-0 top-16 z-20 border-b border-border bg-surface p-3 lg:static lg:block lg:w-60 lg:shrink-0 lg:border-none lg:bg-transparent lg:p-0",
+            "fixed inset-x-0 top-16 z-20 border-b border-white/10 bg-[#2a0a12] p-3 lg:static lg:block lg:w-60 lg:shrink-0 lg:rounded-2xl lg:border lg:border-white/10 lg:bg-[#2a0a12] lg:p-3 lg:shadow-xl",
             open ? "block" : "hidden",
           )}
         >
@@ -89,13 +89,13 @@ export function AppShell({
                 to={item.to as never}
                 activeOptions={{ exact: item.exact ?? false }}
                 onClick={() => setOpen(false)}
-                className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+                className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-200/60 transition-all before:absolute before:left-0 before:top-1/2 before:h-0 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:content-[''] before:transition-all before:duration-300 hover:bg-white/10 hover:text-white"
                 activeProps={{
                   className:
-                    "bg-gradient-to-r from-primary/15 to-primary/5 text-primary shadow-sm hover:bg-primary/10 hover:text-primary",
+                    "bg-white/10 text-white shadow-inner before:h-2/3 hover:bg-white/15 hover:text-white",
                 }}
               >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary/60 transition-colors group-hover:bg-background">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5 transition-colors group-hover:bg-white/15">
                   {item.icon}
                 </span>
                 {item.label}
