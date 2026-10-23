@@ -9,6 +9,7 @@ import { StatCard } from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
 import { bn, formatDateShortBn, labelCategory } from "@/lib/support-constants";
 import { studentDashboard } from "@/lib/student.functions";
+import { UpcomingClasses } from "@/components/UpcomingClasses";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
@@ -87,8 +88,12 @@ function StudentHome() {
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-            <div className="card-panel">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="lg:order-1">
+              <UpcomingClasses />
+            </div>
+
+            <div className="card-panel lg:order-3 lg:col-span-2">
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <h2 className="text-sm font-semibold">সাম্প্রতিক টিকেট</h2>
                 <Link to="/student/issues" className="text-xs font-medium text-primary">
@@ -130,8 +135,7 @@ function StudentHome() {
               )}
             </div>
 
-            
-                        <div className="card-panel overflow-hidden">
+            <div className="card-panel overflow-hidden lg:order-2">
               <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-primary/10 to-transparent px-4 py-3">
                 <h2 className="flex items-center gap-2 text-sm font-semibold">
                   <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -143,7 +147,7 @@ function StudentHome() {
                   সব নোটিশ
                 </Link>
               </div>
-                            {data?.notices.length ? (
+              {data?.notices.length ? (
                 <ul className="divide-y divide-border">
                   {data.notices.map((notice, index) => {
                     const recent = isRecent(notice.created_at);

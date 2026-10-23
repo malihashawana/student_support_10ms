@@ -1,48 +1,45 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { BookMarked, FileText, Heart, Loader2, Send } from "lucide-react";
-import { toast } from "sonner";
+import { BookMarked, Loader2, X } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
-import {
-  courseNotesForCourse,
-  createCourseNote,
-  tenmsCourseStructure,
-  toggleNoteLove,
-} from "@/lib/student.functions";
+import { courseSchedule } from "@/lib/student.functions";
 
 export const Route = createFileRoute("/student/courses")({
   head: () => ({
     meta: [
       { title: "কোর্স স্ট্রাকচার — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
-      { name: "description", content: "HSC 28-এর সব বিষয় ও পেপারের তালিকা।" },
+      { name: "description", content: "HSC 28-এর বিষয়ভিত্তিক আপলোড হওয়া ক্লাসের তালিকা।" },
     ],
   }),
   component: CoursesPage,
 });
 
-const GROUP_STYLES: Record<string, string> = {
-  আবশ্যিক: "border-sky-200 bg-sky-50 text-sky-700",
-  বিজ্ঞান: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  "ব্যবসায় শিক্ষা": "border-amber-200 bg-amber-50 text-amber-700",
-  মানবিক: "border-violet-200 bg-violet-50 text-violet-700",
+type UploadedClass = {
+  id: string;
+  date: string;
+  chapter: string;
+  title: string;
+  link: string;
 };
 
+type OpenCourse = { name: string; classes: UploadedClass[] };
+
 function CoursesPage() {
-  const fetchStructure = useServerFn(tenmsCourseStructure);
+  const fetchSchedule = useServerFn(courseSchedule);
   const { data, isLoading } = useQuery({
-    queryKey: ["tenms-course-structure"],
-    queryFn: () => fetchStructure(),
+    queryKey: ["course-schedule"],
+    queryFn: () => fetchSchedule(),
   });
 
-  const [openCourseId, setOpenCourseId] = useState<number | null>(null);
+  const [open, setOpen] = useState<OpenCourse | null>(null);
 
-  const groups = new Map<string, NonNullable<typeof data>>();
-  for (const program of data ?? []) {
-    const key = program.group_label ?? "অন্যান্য";
+  const groups = new Map<string, NonNullable<typeof data>["programs"]>();
+  for (const program of data?.programs ?? []) {
+    const key = program.groupLabel ?? "অন্যান্য";
     const list = groups.get(key) ?? [];
     list.push(program);
     groups.set(key, list);
@@ -50,10 +47,7 @@ function CoursesPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <PageHeader
-        title="কোর্স স্ট্রাকচার"
-        description="একটি পেপারে ক্লিক করে নোট (ছবি/PDF) দেখুন, বা (ক্যাপ্টেন হলে) নতুন নোট আপলোড করুন।"
-      />
+      <PageHeader title="কোর্স স্ট্রাকচার" description="পেপারে ট্যাপ করলে আপলোড হওয়া ক্লাসগুলো দেখতে পাবেন।" />
 
       {isLoading ? (
         <div className="flex justify-center py-16">
@@ -63,52 +57,33 @@ function CoursesPage() {
         <div className="space-y-8">
           {Array.from(groups.entries()).map(([group, programs]) => (
             <div key={group}>
-              <h2 className="mb-3 font-display text-sm font-semibold text-muted-foreground">
-                {group}
-              </h2>
+              <h2 className="mb-3 font-display text-sm font-semibold text-muted-foreground">{group}</h2>
               <div className="grid gap-3 sm:grid-cols-2">
                 {programs.map((program) => (
-                  <div key={program.id} className="card-panel p-4">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span
-                        className={`flex size-8 items-center justify-center rounded-lg border ${
-                          GROUP_STYLES[group] ?? "border-border bg-secondary text-foreground"
-                        }`}
-                      >
+                  <div key={program.id} className="card-panel space-y-3 p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
                         <BookMarked className="size-4" />
                       </span>
-                      <p className="font-display text-sm font-semibold">
-                        {program.subject_name_bn}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {program.courses.map((course) => (
-                        <button
-                          key={course.id}
-                          type="button"
-                          onClick={() =>
-                            setOpenCourseId((prev) => (prev === course.id ? null : course.id))
-                          }
-                          className={`rounded-full px-2.5 py-1 text-xs transition-colors ${
-                            openCourseId === course.id
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-secondary text-foreground/80 hover:bg-secondary/80"
-                          }`}
-                        >
-                          {course.name_bn}
-                        </button>
-                      ))}
+                      <p className="truncate font-display text-sm font-semibold">{program.subjectNameBn}</p>
                     </div>
 
-                    {program.courses.map((course) =>
-                      openCourseId === course.id ? (
-                        <CourseNotesPanel
-                          key={course.id}
-                          courseId={course.id}
-                          courseName={course.name_bn}
-                        />
-                      ) : null,
-                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {program.courses.map((course) => {
+                        const uploaded = course.classes.filter((c) => c.status === "uploaded");
+                        return (
+                          <button
+                            key={course.id}
+                            type="button"
+                            onClick={() => setOpen({ name: course.name_bn, classes: uploaded })}
+                            className="rounded-full bg-secondary px-3 py-1.5 text-xs text-foreground/80 transition-colors hover:bg-primary hover:text-primary-foreground"
+                          >
+                            {course.name_bn}
+                            {uploaded.length ? <span className="ml-1 opacity-60">· {uploaded.length}</span> : null}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -118,147 +93,65 @@ function CoursesPage() {
       ) : (
         <EmptyState title="কোর্সের তথ্য এখনো যোগ করা হয়নি।" />
       )}
+
+      {open ? <CourseModal course={open} onClose={() => setOpen(null)} /> : null}
     </div>
   );
 }
 
-function CourseNotesPanel({ courseId, courseName }: { courseId: number; courseName: string }) {
-  const queryClient = useQueryClient();
-  const fetchNotes = useServerFn(courseNotesForCourse);
-  const submitNote = useServerFn(createCourseNote);
-  const toggleLove = useServerFn(toggleNoteLove);
-  const [caption, setCaption] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+function CourseModal({ course, onClose }: { course: OpenCourse; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
-  const queryKey = ["course-notes", courseId];
-  const { data, isLoading } = useQuery({
-    queryKey,
-    queryFn: () => fetchNotes({ data: { courseId } }),
-  });
-
-  const addNote = useMutation({
-    mutationFn: async () => {
-      if (!file) throw new Error("একটি ছবি বা PDF ফাইল বেছে নিন।");
-      if (file.size > 4 * 1024 * 1024) throw new Error("ফাইলের সাইজ ৪ MB-এর বেশি হতে পারবে না।");
-      const fileBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      return submitNote({
-        data: { courseId, caption, fileName: file.name, fileType: file.type, fileBase64 },
-      });
-    },
-    onSuccess: () => {
-      setCaption("");
-      setFile(null);
-      toast.success("নোট জমা দেওয়া হয়েছে, অনুমোদনের অপেক্ষায় আছে।");
-      queryClient.invalidateQueries({ queryKey });
-    },
-    onError: (err) => toast.error(err instanceof Error ? err.message : "নোটটি দেওয়া যায়নি।"),
-  });
-
-  const loveNote = useMutation({
-    mutationFn: (noteId: string) => toggleLove({ data: { noteId } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
-  });
+  const chapters = new Map<string, UploadedClass[]>();
+  for (const c of course.classes) {
+    const key = c.chapter || "অন্যান্য";
+    const list = chapters.get(key) ?? [];
+    list.push(c);
+    chapters.set(key, list);
+  }
 
   return (
-    <div className="mt-4 space-y-3 border-t border-border pt-4">
-      <p className="text-xs font-semibold text-muted-foreground">{courseName} — নোট</p>
-
-      {isLoading ? (
-        <div className="flex justify-center py-6">
-          <Loader2 className="size-4 animate-spin text-muted-foreground" />
-        </div>
-      ) : data?.notes.length ? (
-        <div className="space-y-2">
-          {data.notes.map((note) => (
-            <div key={note.id} className="rounded-lg border border-border bg-background p-3">
-              {note.fileType?.startsWith("image/") ? (
-                <a href={note.fileUrl ?? "#"} target="_blank" rel="noreferrer">
-                  <img
-                    src={note.fileUrl ?? ""}
-                    alt={note.fileName ?? "note"}
-                    className="mb-2 max-h-48 w-full rounded-md border border-border object-contain"
-                  />
-                </a>
-              ) : (
-                <a
-                  href={note.fileUrl ?? "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mb-2 flex items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground"
-                >
-                  <FileText className="size-4" />
-                  {note.fileName ?? "PDF দেখুন"}
-                </a>
-              )}
-              {note.content ? <p className="text-sm text-foreground">{note.content}</p> : null}
-              <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                <span>
-                  {note.authorName}
-                  {note.status === "pending" ? " · অনুমোদনের অপেক্ষায়" : ""}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => loveNote.mutate(note.id)}
-                  disabled={loveNote.isPending}
-                  className={`flex items-center gap-1 rounded-full px-2 py-0.5 ${
-                    note.lovedByMe ? "text-red-500" : "text-muted-foreground hover:text-red-400"
-                  }`}
-                >
-                  <Heart className={`size-3.5 ${note.lovedByMe ? "fill-current" : ""}`} />
-                  {note.loveCount}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-xs text-muted-foreground">এখনো কোনো নোট নেই।</p>
-      )}
-
-      {data?.isCaptain ? (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            addNote.mutate();
-          }}
-          className="space-y-2 pt-2"
-        >
-          <input
-            type="file"
-            accept="image/*,.pdf"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-xs text-muted-foreground file:mr-2 file:rounded-md file:border-0 file:bg-secondary file:px-2 file:py-1 file:text-xs"
-          />
-          <div className="flex items-start gap-2">
-            <input
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="ছোট বিবরণ (ঐচ্ছিক)"
-              className="flex-1 rounded-lg border border-border bg-background p-2 text-sm outline-none focus:ring-1 focus:ring-primary"
-            />
-            <button
-              type="submit"
-              disabled={addNote.isPending || !file}
-              className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
-            >
-              {addNote.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Send className="size-4" />
-              )}
-            </button>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4" onClick={onClose}>
+      <div
+        className="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-border bg-background shadow-2xl sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-display text-lg font-semibold">{course.name}</p>
+            <p className="text-xs text-muted-foreground">{course.classes.length}টা ক্লাস আপলোড হয়েছে</p>
           </div>
-        </form>
-      ) : (
-        <p className="text-xs text-muted-foreground/70">
-          শুধু ক্যাপ্টেনরা এখানে নতুন নোট আপলোড করতে পারবেন।
-        </p>
-      )}
+          <button type="button" onClick={onClose} className="rounded-full p-2 text-muted-foreground hover:bg-secondary">
+            <X className="size-5" />
+          </button>
+        </div>
+
+        <div className="space-y-5 overflow-y-auto px-5 py-4">
+          {course.classes.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">এই কোর্সের ক্লাস শিগগিরই আপলোড হবে।</p>
+          ) : (
+            Array.from(chapters.entries()).map(([chapter, list]) => (
+              <section key={chapter} className="space-y-2">
+                <p className="text-sm font-semibold">{chapter}</p>
+                <ul className="space-y-1.5">
+                  {list.map((c) => (
+                    <li key={c.id} className="flex items-center gap-3 rounded-xl border border-border bg-secondary/30 px-3 py-2.5">
+                      <p className="min-w-0 flex-1 text-sm font-medium">{c.title || "ক্লাস"}</p>
+                      {c.link ? <a href={c.link} target="_blank" rel="noreferrer" className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs text-primary-foreground">দেখো</a> : null}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

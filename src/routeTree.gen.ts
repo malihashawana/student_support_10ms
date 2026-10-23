@@ -16,6 +16,7 @@ import { Route as StudentRouteImport } from './routes/student'
 import { Route as CaptainIndexRouteImport } from './routes/captain.index'
 import { Route as StaffIndexRouteImport } from './routes/staff.index'
 import { Route as StaffAuditRouteImport } from './routes/staff.audit'
+import { Route as StaffCourseActivityRouteImport } from './routes/staff.course-activity'
 import { Route as StaffCourseNotesRouteImport } from './routes/staff.course-notes'
 import { Route as StaffNoticesRouteImport } from './routes/staff.notices'
 import { Route as StaffSettingsRouteImport } from './routes/staff.settings'
@@ -65,6 +66,11 @@ const StaffIndexRoute = StaffIndexRouteImport.update({
 const StaffAuditRoute = StaffAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
+  getParentRoute: () => StaffRoute,
+} as any)
+const StaffCourseActivityRoute = StaffCourseActivityRouteImport.update({
+  id: '/course-activity',
+  path: '/course-activity',
   getParentRoute: () => StaffRoute,
 } as any)
 const StaffCourseNotesRoute = StaffCourseNotesRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/staff': typeof StaffRouteWithChildren
   '/student': typeof StudentRouteWithChildren
   '/staff/audit': typeof StaffAuditRoute
+  '/staff/course-activity': typeof StaffCourseActivityRoute
   '/staff/course-notes': typeof StaffCourseNotesRoute
   '/staff/notices': typeof StaffNoticesRoute
   '/staff/settings': typeof StaffSettingsRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/staff/audit': typeof StaffAuditRoute
+  '/staff/course-activity': typeof StaffCourseActivityRoute
   '/staff/course-notes': typeof StaffCourseNotesRoute
   '/staff/notices': typeof StaffNoticesRoute
   '/staff/settings': typeof StaffSettingsRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/staff': typeof StaffRouteWithChildren
   '/student': typeof StudentRouteWithChildren
   '/staff/audit': typeof StaffAuditRoute
+  '/staff/course-activity': typeof StaffCourseActivityRoute
   '/staff/course-notes': typeof StaffCourseNotesRoute
   '/staff/notices': typeof StaffNoticesRoute
   '/staff/settings': typeof StaffSettingsRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/staff'
     | '/student'
     | '/staff/audit'
+    | '/staff/course-activity'
     | '/staff/course-notes'
     | '/staff/notices'
     | '/staff/settings'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/staff/audit'
+    | '/staff/course-activity'
     | '/staff/course-notes'
     | '/staff/notices'
     | '/staff/settings'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/staff'
     | '/student'
     | '/staff/audit'
+    | '/staff/course-activity'
     | '/staff/course-notes'
     | '/staff/notices'
     | '/staff/settings'
@@ -341,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/staff/audit'
       preLoaderRoute: typeof StaffAuditRouteImport
+      parentRoute: typeof StaffRoute
+    }
+    '/staff/course-activity': {
+      id: '/staff/course-activity'
+      path: '/course-activity'
+      fullPath: '/staff/course-activity'
+      preLoaderRoute: typeof StaffCourseActivityRouteImport
       parentRoute: typeof StaffRoute
     }
     '/staff/course-notes': {
@@ -464,6 +483,7 @@ const CaptainRouteWithChildren =
 
 interface StaffRouteChildren {
   StaffAuditRoute: typeof StaffAuditRoute
+  StaffCourseActivityRoute: typeof StaffCourseActivityRoute
   StaffCourseNotesRoute: typeof StaffCourseNotesRoute
   StaffNoticesRoute: typeof StaffNoticesRoute
   StaffSettingsRoute: typeof StaffSettingsRoute
@@ -474,6 +494,7 @@ interface StaffRouteChildren {
 
 const StaffRouteChildren: StaffRouteChildren = {
   StaffAuditRoute: StaffAuditRoute,
+  StaffCourseActivityRoute: StaffCourseActivityRoute,
   StaffCourseNotesRoute: StaffCourseNotesRoute,
   StaffNoticesRoute: StaffNoticesRoute,
   StaffSettingsRoute: StaffSettingsRoute,

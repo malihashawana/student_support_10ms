@@ -348,6 +348,7 @@ export type Database = {
           subject_name_en: string;
           subject_name_bn: string;
           group_label: string | null;
+          slug: string | null;
           created_at: string;
         };
         Insert: {
@@ -356,6 +357,7 @@ export type Database = {
           subject_name_en: string;
           subject_name_bn: string;
           group_label?: string | null;
+          slug?: string | null;
           created_at?: string;
         };
         Update: {
@@ -364,6 +366,7 @@ export type Database = {
           subject_name_en?: string;
           subject_name_bn?: string;
           group_label?: string | null;
+          slug?: string | null;
           created_at?: string;
         };
         Relationships: [];
@@ -399,6 +402,78 @@ export type Database = {
             columns: ["program_id"];
             isOneToOne: false;
             referencedRelation: "tenms_programs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+
+            tenms_catalog_cache: {
+        Row: {
+          product_id: number;
+          slug: string | null;
+          title: string | null;
+          payload: Json;
+          fetched_at: string;
+        };
+        Insert: {
+          product_id: number;
+          slug?: string | null;
+          title?: string | null;
+          payload: Json;
+          fetched_at?: string;
+        };
+        Update: {
+          product_id?: number;
+          slug?: string | null;
+          title?: string | null;
+          payload?: Json;
+          fetched_at?: string;
+        };
+        Relationships: [];
+      };
+      tenms_classes: {
+        Row: {
+          id: string;
+          course_id: number;
+          class_no: number;
+          title: string;
+          status: string;
+          scheduled_on: string | null;
+          resource_url: string | null;
+          note: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          course_id: number;
+          class_no?: number;
+          title: string;
+          status?: string;
+          scheduled_on?: string | null;
+          resource_url?: string | null;
+          note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          course_id?: number;
+          class_no?: number;
+          title?: string;
+          status?: string;
+          scheduled_on?: string | null;
+          resource_url?: string | null;
+          note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tenms_classes_course_id_fkey";
+            columns: ["course_id"];
+            isOneToOne: false;
+            referencedRelation: "tenms_courses";
             referencedColumns: ["id"];
           },
         ];

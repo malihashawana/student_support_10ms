@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-
+import { addDays, getSchedule, normSubject, statusOf, todayDhaka } from "./schedule.server";
 import { logAudit } from "./audit.server";
 import { friendly, requireStudent } from "./session.server";
 import { db } from "./support.server";
@@ -553,3 +553,277 @@ export const toggleNoteLove = createServerFn({ method: "POST" })
     await db.from("course_note_reactions").insert({ note_id: data.noteId, student_id: studentId });
     return { loved: true };
   });
+
+  export const courseActivity = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStudent();
+
+  const [{ data: programs }, { data: courses }, { data: classes }, { data: cache }] = await Promise.all([
+    db.from("tenms_programs").select("*").order("group_label").order("subject_name_en"),
+    db.from("tenms_courses").select("*").order("id"),
+    db.from("tenms_classes").select("*").order("class_no"),
+    db.from("tenms_catalog_cache").select("*"),
+  ]);
+
+  type ClassRow = {
+    id: string;
+    course_id: number;
+    class_no: number;
+    title: string;
+    status: string;
+    scheduled_on: string | null;
+    resource_url: string | null;
+    note: string | null;
+    updated_at: string;
+  };
+
+  const cacheByProduct = new Map((cache ?? []).map((row) => [row.product_id, row]));
+
+  const tally = (rows: ClassRow[]) => {
+    const count = (status: string) => rows.filter((item) => item.status === status).length;
+    return {
+      uploaded: count("uploaded"),
+      pending: count("pending"),
+      missing: count("missing"),
+      scheduled: count("scheduled"),
+      total: rows.length,
+    };
+  };
+
+  return (programs ?? []).map((program) => {
+    const programCourses = (courses ?? []).filter((c) => c.program_id === program.id);
+    const courseRows = programCourses.map((course) => {
+      const courseClasses = ((classes ?? []) as ClassRow[]).filter((c) => c.course_id === course.id);
+      return {
+        id: course.id,
+        name_en: course.name_en,
+        name_bn: course.name_bn,
+        classes: courseClasses,
+        ...tally(courseClasses),
+      };
+    });
+
+    const allClasses = courseRows.flatMap((c) => c.classes);
+    const totals = tally(allClasses);
+    const cached = cacheByProduct.get(program.catalog_product_id);
+    const payload = (cached?.payload ?? null) as Record<string, unknown> | null;
+    const lastUpload =
+      allClasses
+        .filter((c) => c.status === "uploaded")
+        .map((c) => c.updated_at)
+        .sort()
+        .at(-1) ?? null;
+
+    return {
+      id: program.id,
+      groupLabel: program.group_label,
+      subjectNameEn: program.subject_name_en,
+      subjectNameBn: program.subject_name_bn,
+      courses: courseRows,
+      ...totals,
+      progress: totals.total === 0 ? 0 : Math.round((totals.uploaded / totals.total) * 100),
+      lastUpload,
+      live: payload
+        ? {
+            title: String(payload["title"] ?? program.subject_name_en),
+            thumbnail: (payload["thumbnail"] as string | null) ?? null,
+            startAt: (payload["startAt"] as string | null) ?? null,
+            availability: (payload["availability"] as string | null) ?? null,
+            instructors:
+              (payload["instructors"] as { name: string; image: string | null }[] | undefined) ?? [],
+            checklist: (payload["checklist"] as string[] | undefined) ?? [],
+            fetchedAt: String(cached?.fetched_at ?? payload["fetchedAt"] ?? ""),
+          }
+        : null,
+    };
+  });
+});
+
+async function loadSchedule() {
+  try {
+    return await getSchedule();
+  } catch {
+    throw friendly("ক্লাস রুটিন এখন লোড করা যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।");
+  }
+}
+
+export const upcomingClasses = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStudent();
+  const rows = await loadSchedule();
+  const today = todayDhaka();
+  const end = addDays(today, 6);
+  const items = rows
+    .filter((r) => r.date >= today && r.date <= end)
+    .map((r) => ({
+      id: r.id,
+      date: r.date,
+      time: r.time,
+      slot: r.slot,
+      courseLabel: r.courseLabel,
+      subject: r.subject,
+      chapter: r.chapter,
+      title: r.title,
+      teacher: r.teacher,
+      link: r.link,
+      recorded: r.recorded,
+    }));
+  return { today, items };
+});
+
+export const courseSchedule = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStudent();
+  const rows = await loadSchedule();
+  const today = todayDhaka();
+
+  const bySubject = new Map<string, typeof rows>();
+  for (const r of rows) {
+    if (!r.subject) continue;
+    const key = normSubject(r.subject);
+    const list = bySubject.get(key) ?? [];
+    list.push(r);
+    bySubject.set(key, list);
+  }
+
+  const [{ data: programs }, { data: courses }] = await Promise.all([
+    db
+      .from("tenms_programs")
+      .select("id, subject_name_en, subject_name_bn, group_label")
+      .order("group_label")
+      .order("subject_name_bn"),
+    db.from("tenms_courses").select("id, program_id, name_en, name_bn").order("id"),
+  ]);
+
+  const result = (programs ?? []).map((p) => {
+    const courseList = (courses ?? [])
+      .filter((c) => c.program_id === p.id)
+      .map((c) => {
+        const found =
+          bySubject.get(normSubject(c.name_en)) ??
+          bySubject.get(normSubject(`${p.subject_name_en} ${c.name_en}`)) ??
+          [];
+        const classes = found.map((r) => ({
+          id: r.id,
+          date: r.date,
+          time: r.time,
+          chapter: r.chapter,
+          title: r.title,
+          exam: r.exam,
+          slide: r.slide,
+          link: r.link,
+          teacher: r.teacher,
+          status: statusOf(r, today),
+        }));
+        return {
+          id: c.id,
+          name_bn: c.name_bn,
+          classes,
+          uploaded: classes.filter((x) => x.status === "uploaded").length,
+          pending: classes.filter((x) => x.status === "pending").length,
+          scheduled: classes.filter((x) => x.status === "scheduled").length,
+        };
+      });
+    return {
+      id: p.id,
+      groupLabel: p.group_label,
+      subjectNameBn: p.subject_name_bn,
+      courses: courseList,
+      uploaded: courseList.reduce((n, c) => n + c.uploaded, 0),
+      pending: courseList.reduce((n, c) => n + c.pending, 0),
+      scheduled: courseList.reduce((n, c) => n + c.scheduled, 0),
+    };
+  });
+
+  return { today, programs: result };
+});
+
+
+export const classSubjectOptions = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStudent();
+  const rows = await loadSchedule();
+  const set = new Set<string>();
+  for (const r of rows) {
+    const s = r.subject.trim();
+    if (s) set.add(s);
+  }
+  return { subjects: Array.from(set).sort((a, b) => a.localeCompare(b)) };
+});
+
+export const upcomingForSubjects = createServerFn({ method: "POST" })
+  .inputValidator((input: { subjects: string[] }) => ({
+    subjects: Array.isArray(input?.subjects)
+      ? input.subjects
+          .map((s) => String(s).trim().toLowerCase())
+          .filter(Boolean)
+          .slice(0, 40)
+      : [],
+  }))
+  .handler(async ({ data }) => {
+    await requireStudent();
+    const rows = await loadSchedule();
+    const today = todayDhaka();
+    const end = addDays(today, 45);
+    const wanted = new Set(data.subjects);
+    const items = rows
+      .filter((r) => r.date >= today && r.date <= end && wanted.has(r.subject.trim().toLowerCase()))
+      .map((r) => ({
+        id: r.id,
+        date: r.date,
+        time: r.time,
+        subject: r.subject,
+        chapter: r.chapter,
+        title: r.title,
+        teacher: r.teacher,
+        link: r.link,
+      }));
+    return { today, items };
+  });
+
+  const PAPER_RE = /\s*[-–]?\s*(1st|2nd)\s*paper\s*$/i;
+const GROUP_ORDER = [
+  "bangla",
+  "english",
+  "ict",
+  "physics",
+  "chemistry",
+  "higher math",
+  "math",
+  "biology",
+  "management",
+  "marketing",
+];
+
+function baseSubject(s: string) {
+  return s.replace(PAPER_RE, "").trim();
+}
+
+export const upcomingAll = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStudent();
+  const rows = await loadSchedule();
+  const today = todayDhaka();
+  const end = addDays(today, 45);
+
+  const names = new Set<string>();
+  for (const r of rows) {
+    const b = baseSubject(r.subject);
+    if (b) names.add(b);
+  }
+  const rank = (n: string) => {
+    const i = GROUP_ORDER.indexOf(n.toLowerCase());
+    return i === -1 ? 999 : i;
+  };
+  const groups = Array.from(names).sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+
+  const items = rows
+    .filter((r) => r.date >= today && r.date <= end && r.subject.trim())
+    .map((r) => ({
+      id: r.id,
+      date: r.date,
+      time: r.time,
+      group: baseSubject(r.subject),
+      subject: r.subject,
+      title: r.title,
+      teacher: r.teacher,
+      link: r.link,
+    }));
+
+  return { today, groups, items };
+});

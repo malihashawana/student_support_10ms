@@ -771,3 +771,121 @@ export const moderateCourseNote = createServerFn({ method: "POST" })
     if (error) throw friendly("নোটটি আপডেট করা যায়নি। আবার চেষ্টা করুন।");
     return { ok: true };
   });
+
+  export const syncTenmsCatalog = createServerFn({ method: "POST" }).handler(async () => {
+  await requireStaff();
+  const { fetchTenmsProduct } = await import("./tenms.server");
+
+  const { data: programs } = await db
+    .from("tenms_programs")
+    .select("catalog_product_id, slug, subject_name_en");
+
+  let synced = 0;
+  const failed: string[] = [];
+
+  for (const program of programs ?? []) {
+    if (!program.slug) continue;
+    try {
+      const snapshot = await fetchTenmsProduct(program.slug);
+      if (!snapshot) {
+        failed.push(program.subject_name_en);
+        continue;
+      }
+      await db.from("tenms_catalog_cache").upsert({
+        product_id: program.catalog_product_id,
+        slug: program.slug,
+        title: snapshot.title,
+        payload: JSON.parse(JSON.stringify(snapshot)),
+        fetched_at: new Date().toISOString(),
+      });
+      synced += 1;
+    } catch {
+      failed.push(program.subject_name_en);
+    }
+  }
+
+  return { synced, failed };
+});
+
+export const setProgramSlug = createServerFn({ method: "POST" })
+  .inputValidator((data: { programId: number; slug: string }) => data)
+  .handler(async ({ data }) => {
+    await requireStaff();
+    const slug = data.slug.trim();
+    const { error } = await db
+      .from("tenms_programs")
+      .update({ slug: slug || null })
+      .eq("id", data.programId);
+    if (error) throw friendly("স্লাগ সংরক্ষণ করা যায়নি।");
+    return { ok: true };
+  });
+
+export const addClass = createServerFn({ method: "POST" })
+  .inputValidator(
+    (data: {
+      courseId: number;
+      title: string;
+      classNo: number;
+      status: string;
+      scheduledOn?: string;
+      resourceUrl?: string;
+    }) => data,
+  )
+  .handler(async ({ data }) => {
+    await requireStaff();
+    const title = data.title.trim();
+    if (!title) throw friendly("ক্লাসের নাম লিখুন।");
+    const { error } = await db.from("tenms_classes").insert({
+      course_id: data.courseId,
+      title,
+      class_no: data.classNo,
+      status: data.status,
+      scheduled_on: data.scheduledOn?.trim() || null,
+      resource_url: data.resourceUrl?.trim() || null,
+    });
+    if (error) throw friendly("ক্লাসটি যোগ করা যায়নি।");
+    return { ok: true };
+  });
+
+export const setClassStatus = createServerFn({ method: "POST" })
+  .inputValidator((data: { classId: string; status: string }) => data)
+  .handler(async ({ data }) => {
+    await requireStaff();
+    const { error } = await db
+      .from("tenms_classes")
+      .update({ status: data.status, updated_at: new Date().toISOString() })
+      .eq("id", data.classId);
+    if (error) throw friendly("স্ট্যাটাস আপডেট করা যায়নি।");
+    return { ok: true };
+  });
+
+export const deleteClass = createServerFn({ method: "POST" })
+  .inputValidator((data: { classId: string }) => data)
+  .handler(async ({ data }) => {
+    await requireStaff();
+    await db.from("tenms_classes").delete().eq("id", data.classId);
+    return { ok: true };
+  });
+
+
+  export const staffCourseBoard = createServerFn({ method: "GET" }).handler(async () => {
+  await requireStaff();
+  const [{ data: programs }, { data: courses }, { data: classes }] = await Promise.all([
+    db.from("tenms_programs").select("*").order("group_label").order("subject_name_en"),
+    db.from("tenms_courses").select("*").order("id"),
+    db.from("tenms_classes").select("*").order("class_no"),
+  ]);
+  return (programs ?? []).map((p) => ({
+    id: p.id,
+    subjectNameBn: p.subject_name_bn,
+    subjectNameEn: p.subject_name_en,
+    slug: p.slug,
+    courses: (courses ?? [])
+      .filter((c) => c.program_id === p.id)
+      .map((c) => ({
+        id: c.id,
+        name_bn: c.name_bn,
+        classes: (classes ?? []).filter((cl) => cl.course_id === c.id),
+      })),
+  }));
+});
