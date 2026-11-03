@@ -1,0 +1,609 @@
+﻿
+> build
+> vite build
+
+node.exe : [33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin 
+and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([33mThe plugin...g instead.[39m:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[36mvite v8.2.1 [32mbuilding client environment for production...[36m[39m
+[2K
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts:84:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts:209:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts:276:27 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:45:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:72:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:161:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:200:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:224:38 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:277:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:291:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:309:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:321:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:339:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:357:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:379:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:425:37 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:478:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:539:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:750:36 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts:8:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts:71:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts:105:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:63:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:136:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:163:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:270:38 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:284:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:308:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:367:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:388:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:447:28 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:540:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:566:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:629:27 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:658:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:687:30 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:702:39 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:731:30 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:759:35 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:810:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:823:25 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:850:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:862:28 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/captain.functions.ts:35:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:client] C:/Users/DELL/support-connect-hub/src/lib/captain.functions.ts:65:35 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+
+/__l5e/assets-v1/745dc2b0-50f4-4798-8242-da495a75535a/maroon-bg.jpg referenced in /__l5e/assets-v1/745dc2b0-50f4-4798-8242-da495a75535a/maroon-bg.jpg didn't resolve at build time, it will 
+remain unchanged to be resolved at runtime
+transforming...Γ£ô 2100 modules transformed.
+rendering chunks...
+computing gzip size...
+.output/public/assets/styles-hqH7y_gj.css                  102.88 kB Γöé gzip:  16.72 kB
+.output/public/assets/check-C_uOvVEK.js                      0.11 kB Γöé gzip:   0.13 kB
+.output/public/assets/loader-circle-CE8Rie1D.js              0.13 kB Γöé gzip:   0.14 kB
+.output/public/assets/plus-BQHVcESJ.js                       0.14 kB Γöé gzip:   0.14 kB
+.output/public/assets/arrow-left-B3hP7K0F.js                 0.15 kB Γöé gzip:   0.15 kB
+.output/public/assets/search-Y2Fvd-Vb.js                     0.16 kB Γöé gzip:   0.16 kB
+.output/public/assets/circle-check-D4fdVtyy.js               0.16 kB Γöé gzip:   0.16 kB
+.output/public/assets/rotate-ccw-Cz9O2mc4.js                 0.19 kB Γöé gzip:   0.17 kB
+.output/public/assets/upload-Ck_was6L.js                     0.22 kB Γöé gzip:   0.18 kB
+.output/public/assets/download-BHO8-mOG.js                   0.22 kB Γöé gzip:   0.18 kB
+.output/public/assets/book-marked-CR5onMYP.js                0.23 kB Γöé gzip:   0.20 kB
+.output/public/assets/list-checks-KPeIhd4n.js                0.26 kB Γöé gzip:   0.18 kB
+.output/public/assets/inbox-Dbm3lMwx.js                      0.27 kB Γöé gzip:   0.22 kB
+.output/public/assets/bell-BJAT9_8s.js                       0.28 kB Γöé gzip:   0.22 kB
+.output/public/assets/users-CRpkH9V7.js                      0.29 kB Γöé gzip:   0.21 kB
+.output/public/assets/user-plus-mRAjNYoI.js                  0.30 kB Γöé gzip:   0.22 kB
+.output/public/assets/shield-check-DD9WgArB.js               0.31 kB Γöé gzip:   0.24 kB
+.output/public/assets/save-Bl8z5fcb.js                       0.31 kB Γöé gzip:   0.22 kB
+.output/public/assets/trash-2-CgIYNDgM.js                    0.31 kB Γöé gzip:   0.20 kB
+.output/public/assets/graduation-cap-Cd40oHz1.js             0.32 kB Γöé gzip:   0.23 kB
+.output/public/assets/file-plus-corner-DTSKIhJq.js           0.33 kB Γöé gzip:   0.24 kB
+.output/public/assets/scroll-text-DjspUPXP.js                0.33 kB Γöé gzip:   0.22 kB
+.output/public/assets/layout-dashboard-DYamL2eY.js           0.34 kB Γöé gzip:   0.19 kB
+.output/public/assets/file-text-DETlqYyD.js                  0.37 kB Γöé gzip:   0.24 kB
+.output/public/assets/useServerFn-ComWprFK.js                0.41 kB Γöé gzip:   0.29 kB
+.output/public/assets/sparkles-DGjW0UMd.js                   0.48 kB Γöé gzip:   0.27 kB
+.output/public/assets/EmptyState-Z1mabwmg.js                 0.54 kB Γöé gzip:   0.31 kB
+.output/public/assets/captain-Csccko7o.js                    0.55 kB Γöé gzip:   0.39 kB
+.output/public/assets/textarea--j7CTuUl.js                   0.56 kB Γöé gzip:   0.38 kB
+.output/public/assets/rolldown-runtime-CbXtAM7H.js           0.58 kB Γöé gzip:   0.36 kB
+.output/public/assets/input-D478zFaR.js                      0.66 kB Γöé gzip:   0.41 kB
+.output/public/assets/dist-CydEu8aG.js                       0.71 kB Γöé gzip:   0.48 kB
+.output/public/assets/label-C0Ufuvjy.js                      0.73 kB Γöé gzip:   0.47 kB
+.output/public/assets/auth.functions-D2BGUnVs.js             0.82 kB Γöé gzip:   0.53 kB
+.output/public/assets/attachments.functions-DyKglvfz.js      0.82 kB Γöé gzip:   0.51 kB
+.output/public/assets/ResolvedNotifications-D8jsfVCf.js      0.85 kB Γöé gzip:   0.57 kB
+.output/public/assets/StatusBadge-DwAJzcQH.js                1.02 kB Γöé gzip:   0.51 kB
+.output/public/assets/StatCard-_6Ool4MR.js                   1.46 kB Γöé gzip:   0.63 kB
+.output/public/assets/student.profile-xDuF4LRB.js            1.92 kB Γöé gzip:   0.97 kB
+.output/public/assets/student-BGSdc3ZC.js                    2.04 kB Γöé gzip:   0.91 kB
+.output/public/assets/useMutation-DAIV3yrU.js                2.33 kB Γöé gzip:   0.98 kB
+.output/public/assets/staff-IFe2IA43.js                      2.45 kB Γöé gzip:   1.07 kB
+.output/public/assets/support-constants-E77KxDVy.js          2.84 kB Γöé gzip:   1.19 kB
+.output/public/assets/student.notices-CaA0GRWm.js            3.03 kB Γöé gzip:   1.39 kB
+.output/public/assets/student.functions-C9FexoB4.js          3.08 kB Γöé gzip:   1.36 kB
+.output/public/assets/student.community._id-miIm3YZy.js      3.10 kB Γöé gzip:   1.28 kB
+.output/public/assets/staff.functions-BWK3ZwH2.js            3.15 kB Γöé gzip:   1.41 kB
+.output/public/assets/staff.course-notes-9ekxvHrv.js         3.39 kB Γöé gzip:   1.42 kB
+.output/public/assets/AttachmentList-CGYcBg2z.js             4.14 kB Γöé gzip:   1.79 kB
+.output/public/assets/student.issues.index-WMNHK4e2.js       4.27 kB Γöé gzip:   1.63 kB
+.output/public/assets/AppShell-CbWn6mKL.js                   4.44 kB Γöé gzip:   1.84 kB
+.output/public/assets/staff.index-cUAseLQL.js                4.47 kB Γöé gzip:   1.60 kB
+.output/public/assets/staff.audit-BD94MaDe.js                4.49 kB Γöé gzip:   1.67 kB
+.output/public/assets/student.courses-CkLyuTQV.js            4.62 kB Γöé gzip:   1.80 kB
+.output/public/assets/captain.index-CmTaSpkT.js              4.93 kB Γöé gzip:   1.92 kB
+.output/public/assets/student.issues._id-BRc1LQRy.js         5.44 kB Γöé gzip:   1.98 kB
+.output/public/assets/preload-helper-Cfyym91z.js             5.69 kB Γöé gzip:   2.14 kB
+.output/public/assets/staff.settings-BGpSJ0t8.js             5.87 kB Γöé gzip:   2.07 kB
+.output/public/assets/staff.course-activity-D25YLIeY.js      5.94 kB Γöé gzip:   2.21 kB
+.output/public/assets/staff.notices-CR6HKTMB.js              6.19 kB Γöé gzip:   2.26 kB
+.output/public/assets/student.community.index-B4sf2AhM.js    6.58 kB Γöé gzip:   2.56 kB
+.output/public/assets/useQuery-_FV7wHKE.js                   8.84 kB Γöé gzip:   3.24 kB
+.output/public/assets/student.report-COiPg_Wy.js             9.00 kB Γöé gzip:   3.03 kB
+.output/public/assets/student.index-C6bwrFG3.js              9.91 kB Γöé gzip:   3.37 kB
+.output/public/assets/routes-dqm_-Maj.js                    10.45 kB Γöé gzip:   2.81 kB
+.output/public/assets/QueryClientProvider-COZnsMdi.js       15.29 kB Γöé gzip:   5.28 kB
+.output/public/assets/staff.students-CkGQnBIn.js            15.56 kB Γöé gzip:   4.35 kB
+.output/public/assets/student.study-DEWEgSf-.js             16.03 kB Γöé gzip:   4.95 kB
+.output/public/assets/staff.tickets-VVjXoIvQ.js             16.44 kB Γöé gzip:   4.36 kB
+.output/public/assets/link-CwPQSxD-.js                      23.73 kB Γöé gzip:   8.88 kB
+.output/public/assets/button-BsWnWiRb.js                    33.15 kB Γöé gzip:  11.07 kB
+.output/public/assets/createServerFn-cDyrJT9T.js            48.58 kB Γöé gzip:  16.63 kB
+.output/public/assets/Match-Y942s3pu.js                     48.62 kB Γöé gzip:  15.78 kB
+.output/public/assets/select-Dsh-JNbB.js                    84.58 kB Γöé gzip:  28.65 kB
+.output/public/assets/index-DFHSEm6c.js                    477.11 kB Γöé gzip: 135.22 kB
+
+[32mΓ£ô built in 3.55s[39m
+[33m[33m[PLUGIN_TIMINGS] [0mYour build spent 89% of 3.5s inside plugin hooks (3.1s).
+Not measurable ΓÇö 2 hooks whose calls overlap, so elapsed time covers work other calls were doing. Profile with `node --cpu-prof`:
+  - tanstack-start-core:import-protection resolveId (6305 calls)
+  - tanstack-start-core::server-fn:client transform (21 calls)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+[39m
+[36mvite v8.2.1 [32mbuilding ssr environment for production...[36m[39m
+[2K
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/captain.functions.ts?tss-serverfn-split:35:34 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/captain.functions.ts?tss-serverfn-split:65:35 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:63:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:136:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:163:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:270:38 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:284:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:308:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:367:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:388:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:447:28 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:540:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:566:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:629:27 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:658:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:687:30 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:702:39 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:731:30 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:759:35 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:810:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:823:25 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:850:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts?tss-serverfn-split:862:28 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:45:31 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:72:29 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:161:34 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:200:33 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:224:38 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:277:34 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:291:32 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:309:32 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:321:32 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:339:32 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:357:32 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:379:32 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:425:37 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:478:33 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:539:31 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts?tss-serverfn-split:750:36 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts?tss-serverfn-split:8:33 createServerFn().inputValidator() is deprecated. 
+Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts?tss-serverfn-split:71:34 createServerFn().inputValidator() is 
+deprecated. Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts?tss-serverfn-split:105:33 createServerFn().inputValidator() is 
+deprecated. Use createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts?tss-serverfn-split:84:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts?tss-serverfn-split:209:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts?tss-serverfn-split:276:27 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts:84:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts:209:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/auth.functions.ts:276:27 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:45:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:72:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:161:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:200:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:224:38 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:277:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:291:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:309:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:321:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:339:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:357:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:379:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:425:37 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:478:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:539:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/student.functions.ts:750:36 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:63:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:136:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:163:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:270:38 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:284:32 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:308:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:367:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:388:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:447:28 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:540:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:566:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:629:27 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:658:29 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:687:30 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:702:39 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:731:30 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:759:35 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:810:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:823:25 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:850:31 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/staff.functions.ts:862:28 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/captain.functions.ts:35:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/captain.functions.ts:65:35 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts:8:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts:71:34 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+[33m[plugin tanstack-start-core::server-fn:ssr] C:/Users/DELL/support-connect-hub/src/lib/attachments.functions.ts:105:33 createServerFn().inputValidator() is deprecated. Use 
+createServerFn().validator() instead.[39m
+transforming...Γ£ô 142 modules transformed.
+rendering chunks...
+computing gzip size...
+node_modules/.nitro/vite/services/ssr/assets/styles-hqH7y_gj.css                     102.88 kB Γöé gzip: 16.72 kB
+node_modules/.nitro/vite/services/ssr/assets/empty-plugin-adapters-D9UWiqvJ.js         0.22 kB Γöé gzip:  0.16 kB
+node_modules/.nitro/vite/services/ssr/assets/rolldown-runtime-D7D4PA-g.js              0.36 kB Γöé gzip:  0.25 kB
+node_modules/.nitro/vite/services/ssr/assets/createSsrRpc-DykdPI8A.js                  0.52 kB Γöé gzip:  0.33 kB
+node_modules/.nitro/vite/services/ssr/assets/useServerFn-CrZF2pjq.js                   0.63 kB Γöé gzip:  0.35 kB
+node_modules/.nitro/vite/services/ssr/assets/label-B4PTMSG2.js                         0.64 kB Γöé gzip:  0.39 kB
+node_modules/.nitro/vite/services/ssr/assets/textarea-DBn9CRiI.js                      0.67 kB Γöé gzip:  0.42 kB
+node_modules/.nitro/vite/services/ssr/assets/attachments.functions-CAOtxYQE.js         0.76 kB Γöé gzip:  0.39 kB
+node_modules/.nitro/vite/services/ssr/assets/input-DicJzR9-.js                         0.76 kB Γöé gzip:  0.46 kB
+node_modules/.nitro/vite/services/ssr/assets/EmptyState-mAES9NIg.js                    0.78 kB Γöé gzip:  0.38 kB
+node_modules/.nitro/vite/services/ssr/assets/captain-8dZsNlcj.js                       0.83 kB Γöé gzip:  0.48 kB
+node_modules/.nitro/vite/services/ssr/assets/ResolvedNotifications-lOivjVCk.js         1.35 kB Γöé gzip:  0.68 kB
+node_modules/.nitro/vite/services/ssr/assets/StatusBadge-o-27dGc8.js                   1.37 kB Γöé gzip:  0.63 kB
+node_modules/.nitro/vite/services/ssr/assets/auth.functions-tYG1TXOC.js                1.59 kB Γöé gzip:  0.87 kB
+node_modules/.nitro/vite/services/ssr/assets/tenms.server-SBehQAXU.js                  1.76 kB Γöé gzip:  0.95 kB
+node_modules/.nitro/vite/services/ssr/assets/button-DRsC1qZi.js                        1.78 kB Γöé gzip:  0.82 kB
+node_modules/.nitro/vite/services/ssr/assets/staff-CKtOnL7Y.js                         1.85 kB Γöé gzip:  0.72 kB
+node_modules/.nitro/vite/services/ssr/assets/StatCard-_qQq4UK0.js                      1.88 kB Γöé gzip:  0.76 kB
+node_modules/.nitro/vite/services/ssr/assets/student-DbPCpeJn.js                       2.42 kB Γöé gzip:  0.87 kB
+node_modules/.nitro/vite/services/ssr/assets/student.profile-CqH92msB.js               2.57 kB Γöé gzip:  1.16 kB
+node_modules/.nitro/vite/services/ssr/assets/createCsrfMiddleware-B2To0gPJ.js          3.19 kB Γöé gzip:  1.01 kB
+node_modules/.nitro/vite/services/ssr/assets/support-constants-D4kglalS.js             4.16 kB Γöé gzip:  1.54 kB
+node_modules/.nitro/vite/services/ssr/assets/student.notices-CkBquEp4.js               4.23 kB Γöé gzip:  1.66 kB
+node_modules/.nitro/vite/services/ssr/assets/student.community._id-Dcmqw-d6.js         4.27 kB Γöé gzip:  1.52 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.course-notes-BAjbvaA7.js            4.63 kB Γöé gzip:  1.65 kB
+node_modules/.nitro/vite/services/ssr/index.js                                         4.63 kB Γöé gzip:  1.93 kB
+node_modules/.nitro/vite/services/ssr/assets/select-DUy71i1r.js                        4.67 kB Γöé gzip:  1.34 kB
+node_modules/.nitro/vite/services/ssr/assets/captain.functions-BFcXAcrQ.js             4.80 kB Γöé gzip:  1.69 kB
+node_modules/.nitro/vite/services/ssr/assets/start-CMdXxgKh.js                         4.83 kB Γöé gzip:  1.75 kB
+node_modules/.nitro/vite/services/ssr/assets/AttachmentList-D05jhzi_.js                4.91 kB Γöé gzip:  1.59 kB
+node_modules/.nitro/vite/services/ssr/assets/AppShell-CqniFHhu.js                      5.40 kB Γöé gzip:  1.92 kB
+node_modules/.nitro/vite/services/ssr/assets/student.functions-Dop-KI56.js             5.42 kB Γöé gzip:  1.86 kB
+node_modules/.nitro/vite/services/ssr/assets/student.issues.index-Co6T1Ci2.js          5.90 kB Γöé gzip:  1.87 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.index-Bax-7yGC.js                   6.00 kB Γöé gzip:  1.71 kB
+node_modules/.nitro/vite/services/ssr/assets/attachments.functions-CxhYVKxu.js         6.06 kB Γöé gzip:  1.84 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.functions-M6PgTjbj.js               6.22 kB Γöé gzip:  2.17 kB
+node_modules/.nitro/vite/services/ssr/assets/captain.index-CD69xZZD.js                 6.24 kB Γöé gzip:  2.07 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.audit-CNWEKkOE.js                   6.30 kB Γöé gzip:  2.00 kB
+node_modules/.nitro/vite/services/ssr/assets/student.courses-C8qTKQSK.js               6.58 kB Γöé gzip:  2.17 kB
+node_modules/.nitro/vite/services/ssr/assets/student.issues._id-BPadlDNc.js            7.67 kB Γöé gzip:  2.32 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.settings-nXUu4v-O.js                8.33 kB Γöé gzip:  2.24 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.course-activity-DbB0BRme.js         8.34 kB Γöé gzip:  2.57 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.notices-j-EPcAzQ.js                 9.50 kB Γöé gzip:  2.73 kB
+node_modules/.nitro/vite/services/ssr/assets/student.community.index-BB_SUJnD.js       9.62 kB Γöé gzip:  3.06 kB
+node_modules/.nitro/vite/services/ssr/assets/auth.functions-Cl0pX_B3.js               10.86 kB Γöé gzip:  3.02 kB
+node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-D0zbBMfZ.js   13.46 kB Γöé gzip:  1.88 kB
+node_modules/.nitro/vite/services/ssr/assets/student.index-DMF7Eq43.js                13.62 kB Γöé gzip:  3.83 kB
+node_modules/.nitro/vite/services/ssr/assets/student.report-BxJKO3UB.js               13.71 kB Γöé gzip:  3.74 kB
+node_modules/.nitro/vite/services/ssr/assets/routes-BxzJP8Hs.js                       14.93 kB Γöé gzip:  3.14 kB
+node_modules/.nitro/vite/services/ssr/assets/audit.server-DBo9Z_Re.js                 15.21 kB Γöé gzip:  5.29 kB
+node_modules/.nitro/vite/services/ssr/assets/student.study-DO7xcgOH.js                22.78 kB Γöé gzip:  5.32 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.students-Buuj94cg.js               22.87 kB Γöé gzip:  4.97 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.tickets-Cs7OcIIE.js                25.05 kB Γöé gzip:  5.32 kB
+node_modules/.nitro/vite/services/ssr/assets/router-BAUPRH5n.js                       29.15 kB Γöé gzip:  5.54 kB
+node_modules/.nitro/vite/services/ssr/assets/student.functions-4TDUVut-.js            37.56 kB Γöé gzip:  9.40 kB
+node_modules/.nitro/vite/services/ssr/assets/staff.functions-6oWt8-Kx.js              38.08 kB Γöé gzip:  9.54 kB
+node_modules/.nitro/vite/services/ssr/assets/server-CItSns9v.js                       86.29 kB Γöé gzip: 23.13 kB
+
+[32mΓ£ô built in 1.95s[39m
+
+[90m[[90mnitro[90m][39m [35mΓùÉ[39m Building [[35mNitro[39m] [2m(preset: [36mcloudflare-module[39m, compatibility: [36m2026-11-03[39m)[22m
+[90m[[90mnitro[90m][39m [32mΓ£ö[39m Generated public [36m.output/public[39m
+[36mvite v8.2.1 [32mbuilding nitro environment for production...[36m[39m
+
+[43m[30m WARN [39m[49m [36minlineDynamicImports[39m option is ignored because the [36mcodeSplitting[39m option is specified.
+
+[2K
+transforming...Γ£ô 2093 modules transformed.
+rendering chunks...
+[31mΓ£ù[39m Build failed in 1.11s
+[31merror during build:
+[31mBuild failed with 9 errors:
+
+[31m[MISSING_EXPORT] [0m"_getRenderedMatches" is not exported by "node_modules/@tanstack/router-core/dist/esm/index.js".
+   [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m node_modules/.nitro/vite/services/ssr/assets/server-CItSns9v.js:9:10 [38;5;246m][0m
+   [38;5;246mΓöé[0m
+ [38;5;246m9 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m 
+[0m_getRenderedMatches[38;5;249m,[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mS[0m[38;5;249me[0m[38;5
+;249mr[0m[38;5;249mi[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249mA[0m[3
+8;5;249md[0m[38;5;249ma[0m[38;5;249mp[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249me[0m[38;5;249mx[0m[38;5;249me[0m[38;5;249mc[0m
+[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mw[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mI[0m[38;5;249mn
+[0m[38;5;249mp[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mS[0m[38;5;249mc[0m[38;5;249mr[0m[38;5;249
+mi[0m[38;5;249mp[0m[38;5;249mt[0m[38;5;249mP[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ml[0m[38;5;249mo[0m[38;5;249ma[0m[38;5;249md[0m[38;5;249mA[0m[38;5;249mt[0m[38;5;
+249mt[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mS[0m[38;5;249mt[0m[38;5;249my[0m[38;5;249ml[0m[38
+;5;249me[0m[38;5;249ms[0m[38;5;249mh[0m[38;5;249me[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mH[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mf[0m[38;5;249m,[0m[38;5;249m 
+[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249m,[0m[38;5;249m [0m[38;5;24
+9mi[0m[38;5;249ms[0m[38;5;249mD[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249ms[0m[38;5;249mP[0m[38;5
+;249mr[0m[38;5;249mo[0m[38;5;249mt[0m[38;5;249mo[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249ml[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mi[0m[38;5;249ms[0m[38;5;249mN[0m[3
+8;5;249mo[0m[38;5;249mt[0m[38;5;249mF[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249m,[0m[38;5;249m 
+[0m[38;5;249mi[0m[38;5;249ms[0m[38;5;249mP[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249mi[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m,[0m[38;5;249m 
+[0m[38;5;249mi[0m[38;5;249ms[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249m 
+[0m[38;5;249ma[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249mi[0m[38;5;249ms[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;24
+9mc[0m[38;5;249mt[0m[38;5;249m$[0m[38;5;249m1[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mp[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mR[0m[38;5
+;249me[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ms[0m[3
+8;5;249mo[0m[38;5;249ml[0m[38;5;249mv[0m[38;5;249me[0m[38;5;249mM[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mi[0m[38;5;249mf[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mt[0m
+[38;5;249mA[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mL[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mk[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mr
+[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mo[0m[38;5;249ml[0m[38;5;249mv[0m[38;5;249me[0m[38;5;249mM[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mi[0m[38;5;249mf[0m[38;5;249
+me[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249mC[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249mL[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mk[0m[38;5;249m,[0m[38;5;249m [0m[38;5;
+249mr[0m[38;5;249mo[0m[38;5;249mo[0m[38;5;249mt[0m[38;5;249mR[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mI[0m[38;5;249md[0m[38;5;249m 
+[0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m@[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;24
+9mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mk[0m[38;5;249m/[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5
+;249mr[0m[38;5;249m-[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m  Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m  Γöé[0m                   Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Missing export
+[38;5;246mΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[MISSING_EXPORT] [0m"isPromise" is not exported by "node_modules/@tanstack/router-core/dist/esm/index.js".
+   [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m node_modules/.nitro/vite/services/ssr/assets/server-CItSns9v.js:9:166 [38;5;246m][0m
+   [38;5;246mΓöé[0m
+ [38;5;246m9 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249m_[0m[38;5;
+249mg[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mM[0m[38
+;5;249ma[0m[38;5;249mt[0m[38;5;249mc[0m[38;5;249mh[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ma[0m
+[38;5;249mt[0m[38;5;249me[0m[38;5;249mS[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249ma[0m[38;5;249mt[
+0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249mA[0m[38;5;249md[0m[38;5;249ma[0m[38;5;249mp[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m,[0m[38;5;249m
+ [0m[38;5;249me[0m[38;5;249mx[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mw[0m[38;5;249mr[0m[38;5;2
+49mi[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mI[0m[38;5;249mn[0m[38;5;249mp[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mg[0m[38;5;249me[0m[38;
+5;249mt[0m[38;5;249mS[0m[38;5;249mc[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249mp[0m[38;5;249mt[0m[38;5;249mP[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ml[0m[38;5;249mo[0m[
+38;5;249ma[0m[38;5;249md[0m[38;5;249mA[0m[38;5;249mt[0m[38;5;249mt[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mt[0
+m[38;5;249mS[0m[38;5;249mt[0m[38;5;249my[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mh[0m[38;5;249me[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mH[0m[38;5;249mr
+[0m[38;5;249me[0m[38;5;249mf[0m[38;5;249m,[0m[38;5;249m 
+[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249m,[0m[38;5;249m [0m[38;5;24
+9mi[0m[38;5;249ms[0m[38;5;249mD[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249ms[0m[38;5;249mP[0m[38;5
+;249mr[0m[38;5;249mo[0m[38;5;249mt[0m[38;5;249mo[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249ml[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mi[0m[38;5;249ms[0m[38;5;249mN[0m[3
+8;5;249mo[0m[38;5;249mt[0m[38;5;249mF[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249m,[0m[38;5;249m [0misPromise[38;5;249m,[0m[38;5;249m 
+[0m[38;5;249mi[0m[38;5;249ms[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249m 
+[0m[38;5;249ma[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249mi[0m[38;5;249ms[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;24
+9mc[0m[38;5;249mt[0m[38;5;249m$[0m[38;5;249m1[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mp[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mR[0m[38;5
+;249me[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ms[0m[3
+8;5;249mo[0m[38;5;249ml[0m[38;5;249mv[0m[38;5;249me[0m[38;5;249mM[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mi[0m[38;5;249mf[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mt[0m
+[38;5;249mA[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mL[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mk[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mr
+[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mo[0m[38;5;249ml[0m[38;5;249mv[0m[38;5;249me[0m[38;5;249mM[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mi[0m[38;5;249mf[0m[38;5;249
+me[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249mC[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249mL[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mk[0m[38;5;249m,[0m[38;5;249m [0m[38;5;
+249mr[0m[38;5;249mo[0m[38;5;249mo[0m[38;5;249mt[0m[38;5;249mR[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mI[0m[38;5;249md[0m[38;5;249m 
+[0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m@[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;24
+9mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mk[0m[38;5;249m/[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5
+;249mr[0m[38;5;249m-[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m  Γöé[0m                                                                                                                                                                      
+ΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m  Γöé[0m                                                                                                                                                                        
+  Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Missing export
+[38;5;246mΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[MISSING_EXPORT] [0m"makeSerovalPlugin" is not exported by "node_modules/@tanstack/router-core/dist/esm/ssr/client.js".
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m node_modules/.nitro/vite/services/ssr/assets/server-CItSns9v.js:10:10 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m10 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m 
+[0mmakeSerovalPlugin[38;5;249m,[0m[38;5;249m [0m[38;5;249mm[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mH[0m[38;5;249me[0m[38;5;249ma[0m[38;5;2
+49md[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mm[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mH[0m[38;
+5;249me[0m[38;5;249ma[0m[38;5;249md[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249ma[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249mm[0m[38;5;249me[0m[
+38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mH[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249md[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249m$[0m[38;5;249m1[0
+m[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m@[0m[38;5;249mt[0m[38;5;249ma
+[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mk[0m[38;5;249m/[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;24
+9me[0m[38;5;249mr[0m[38;5;249m-[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249m/[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249m/[0m[38;5
+;249mc[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                  Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Missing export
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[MISSING_EXPORT] [0m"bindSsrResponseToRequest" is not exported by "node_modules/@tanstack/router-core/dist/esm/ssr/server.js".
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m node_modules/.nitro/vite/services/ssr/assets/server-CItSns9v.js:12:38 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m12 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249ma[0m[38;5
+;249mt[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mh[0m[38;5;249mR[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mS[0m[3
+8;5;249me[0m[38;5;249mr[0m[38;5;249mv[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mU[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249ml[0m
+[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0mbindSsrResponseToRequest[38;5;249m,[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249mt[0m[38;
+5;249me[0m[38;5;249mR[0m[38;5;249ma[0m[38;5;249mw[0m[38;5;249mS[0m[38;5;249mt[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249mm[0m[38;5;249mR[0m[38;5;249mP[0m[
+38;5;249mC[0m[38;5;249mP[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249mg[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249md[0m[38;5;249me[0m[38;5;249mf[0
+m[38;5;249ma[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249mt[0m[38;5;249mS[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mD
+[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249mr[0m[38;5;24
+9mP[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249mg[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249md[0m[38;5;249mi[0m[38;5;249ms[0m[38;5
+;249mp[0m[38;5;249mo[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[3
+8;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mN[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mm[0m
+[38;5;249ma[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mU[0m[38;5;249mR[0m[38;5;249mL[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mi
+[0m[38;5;249ms[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249
+me[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mn[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;
+249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m,[0m[38
+;5;249m [0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mp[0m[38;5;249ml[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249me[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m
+[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249mr[
+0m[38;5;249mi[0m[38;5;249mp[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249m
+s[0m[38;5;249me[0m[38;5;249mB[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249my[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mw[0m[38;5;249ma[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;2
+49mF[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mq[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m 
+[0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m@[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;24
+9mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mk[0m[38;5;249m/[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5
+;249mr[0m[38;5;249m-[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249m/[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249m/[0m[38;5;249ms[0m[3
+8;5;249me[0m[38;5;249mr[0m[38;5;249mv[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m                                      ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                                                  Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Missing export
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[MISSING_EXPORT] [0m"createRawStreamRPCPlugin" is not exported by "node_modules/@tanstack/router-core/dist/esm/ssr/server.js".
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m node_modules/.nitro/vite/services/ssr/assets/server-CItSns9v.js:12:64 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m12 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249ma[0m[38;5
+;249mt[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mh[0m[38;5;249mR[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mS[0m[3
+8;5;249me[0m[38;5;249mr[0m[38;5;249mv[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mU[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249ml[0m
+[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mb[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me
+[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mT[0m[38;5;249mo[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mq[0m[38;5;249
+mu[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m,[0m[38;5;249m [0mcreateRawStreamRPCPlugin[38;5;249m,[0m[38;5;249m [0m[38;5;249md[0m[38;5;249me[0m[38;5;249mf[0
+m[38;5;249ma[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249mt[0m[38;5;249mS[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mD
+[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249mr[0m[38;5;24
+9mP[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249mg[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249md[0m[38;5;249mi[0m[38;5;249ms[0m[38;5
+;249mp[0m[38;5;249mo[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[3
+8;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mN[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mm[0m
+[38;5;249ma[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mU[0m[38;5;249mR[0m[38;5;249mL[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mi
+[0m[38;5;249ms[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249
+me[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mn[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;
+249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m,[0m[38
+;5;249m [0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mp[0m[38;5;249ml[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249me[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m
+[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249mr[
+0m[38;5;249mi[0m[38;5;249mp[0m[38;5;249mS[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249m
+s[0m[38;5;249me[0m[38;5;249mB[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249my[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mw[0m[38;5;249ma[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;2
+49mF[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mq[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m 
+[0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m@[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;24
+9mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mk[0m[38;5;249m/[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249me[0m[38;5
+;249mr[0m[38;5;249m-[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249m/[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249mr[0m[38;5;249m/[0m[38;5;249ms[0m[3
+8;5;249me[0m[38;5;249mr[0m[38;5;249mv[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m                                                                ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                                                                            Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Missing export
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+...[31m
+    at aggregateBindingErrorsIntoJsError (file:///C:/Users/DELL/support-connect-hub/node_modules/rolldown/dist/shared/error-CVc7IgvG.mjs:48:18)
+    at unwrapBindingResult (file:///C:/Users/DELL/support-connect-hub/node_modules/rolldown/dist/shared/error-CVc7IgvG.mjs:18:128)
+    at #build (file:///C:/Users/DELL/support-connect-hub/node_modules/rolldown/dist/shared/rolldown-DiYVDns9.mjs:132:34)
+    at async buildEnvironment (file:///C:/Users/DELL/support-connect-hub/node_modules/vite/dist/node/chunks/node.js:33730:66)
+    at async Object.build (file:///C:/Users/DELL/support-connect-hub/node_modules/vite/dist/node/chunks/node.js:34150:19)
+    at async buildEnvironments (file:///C:/Users/DELL/support-connect-hub/node_modules/nitro/dist/vite.mjs:120:17)
+    at async Object.buildApp (file:///C:/Users/DELL/support-connect-hub/node_modules/vite/dist/node/chunks/node.js:34144:5)
+    at async CAC.<anonymous> (file:///C:/Users/DELL/support-connect-hub/node_modules/vite/dist/node/cli.js:776:3) {
+  errors: [Getter/Setter]
+}[39m
