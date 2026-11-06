@@ -4,7 +4,6 @@ import {
   Bell,
   BookMarked,
   FilePlus2,
-  GraduationCap,
   LayoutDashboard,
   ListChecks,
   ShieldCheck,
@@ -14,6 +13,7 @@ import {
 
 import { AppShell, type NavItem } from "@/components/AppShell";
 import { getCurrentUser } from "@/lib/auth.functions";
+import { getStudentAcademicProfile } from "@/lib/student-academic.functions";
 
 export const Route = createFileRoute("/student")({
   ssr: false,
@@ -21,14 +21,19 @@ export const Route = createFileRoute("/student")({
     const user = await getCurrentUser();
     if (user.role === "staff") throw redirect({ to: "/staff" });
     if (user.role !== "student") throw redirect({ to: "/" });
-    return { student: user };
+
+    // getCurrentUser currently does not include academic_batch.
+    // Read the authenticated student's actual saved batch instead.
+    const academicProfile = await getStudentAcademicProfile();
+    return { student: user, academicBatch: academicProfile.academic_batch };
   },
   component: StudentLayout,
 });
 
 function StudentLayout() {
-  const { student } = Route.useRouteContext();
+  const { student, academicBatch } = Route.useRouteContext();
   const isCaptain = student.account_role === "captain";
+  const isHsc28 = academicBatch === "hsc_28";
 
   const nav: NavItem[] = [
     isCaptain
@@ -46,20 +51,21 @@ function StudentLayout() {
     },
     { to: "/student/issues", label: "আমার সমস্যা", icon: <ListChecks className="size-4" /> },
     { to: "/student/community", label: "সবার সমস্যা", icon: <Users className="size-4" /> },
-  /* লুকানো আছে, পরে ফেরত আনা হবে
-  { to: "/student/study", label: "স্টাডি হেল্প", icon: <GraduationCap className="size-4" /> },
-  { to: "/student/courses", label: "HSC 28 কোর্স", icon: <BookMarked className="size-4" /> },
-  */
+    // Study Help remains hidden until it is ready.
+    ...(isHsc28
+      ? [{ to: "/student/courses", label: "HSC 28 কোর্স", icon: <BookMarked className="size-4" /> }]
+      : []),
     { to: "/student/notices", label: "নোটিশ", icon: <Bell className="size-4" /> },
     { to: "/student/profile", label: "প্রোফাইল", icon: <UserRound className="size-4" /> },
   ];
 
-    return (
+  return (
     <AppShell
       nav={nav}
       variant="student"
       title={student.name}
       subtitle={isCaptain ? `ক্যাপ্টেন · ${student.contact_number}` : student.contact_number}
+      academicBatch={isHsc28 ? "hsc_28" : academicBatch === "hsc_27" ? "hsc_27" : null}
     >
       <ResolvedNotifications />
       <Outlet />

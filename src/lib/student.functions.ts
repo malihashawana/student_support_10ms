@@ -669,70 +669,178 @@ export const upcomingClasses = createServerFn({ method: "GET" }).handler(async (
   return { today, items };
 });
 
-export const courseSchedule = createServerFn({ method: "GET" }).handler(async () => {
-  await requireStudent();
-  const rows = await loadSchedule();
-  const today = todayDhaka();
+/**
+ * Course Structure is an HSC 28-only feature.
+ * The linked Google Sheet is exclusively HSC 28 data.
+ * Department filtering happens on the server, not only in the UI.
+ */
+function academicGroupFromLabel(
+  label: string,
+): "science" | "business_studies" | "humanities" | "common" | null {
+  const normalized = label.trim().toLowerCase();
+  if (normalized === "আবশ্যিক" || /common|compulsory|all groups/.test(normalized)) {
+    return "common";
+  }
+  if (normalized === "বিজ্ঞান" || normalized === "science") return "science";
+  if (
+    normalized === "ব্যবসায় শিক্ষা" ||
+    normalized === "ব্যবসায় শিক্ষা" ||
+    /business|commerce/.test(normalized)
+  ) return "business_studies";
+  if (normalized === "মানবিক" || /humanities|arts/.test(normalized)) return "humanities";
+  return null;
+}
 
+/** Google Sheet names can be Bengali while tenms_courses names are English. */
+const SHEET_SUBJECT_ALIASES: Record<string, string[]> = {
+  bangla: ["bangla", "বাংলা"],
+  english: ["english", "ইংরেজি"],
+  ict: ["ict", "আইসিটি"],
+  physics: ["physics", "ফিজিক্স", "পদার্থবিজ্ঞান"],
+  chemistry: ["chemistry", "কেমিস্ট্রি", "রসায়ন", "রসায়ন"],
+  biology: ["biology", "বায়োলজি", "বায়োলজি", "জীববিজ্ঞান"],
+  highermath: ["higher math", "higher mathematics", "math", "ম্যাথ", "উচ্চতর গণিত"],
+  accounting: ["accounting", "একাউন্টিং", "অ্যাকাউন্টিং", "হিসাববিজ্ঞান"],
+  finance: ["finance", "ফাইন্যান্স"],
+  marketing: ["marketing", "মার্কেটিং"],
+  management: ["management", "ম্যানেজমেন্ট"],
+  economics: ["economics", "ইকোনমিক্স", "অর্থনীতি"],
+  geography: ["geography", "জিওগ্রাফি", "ভূগোল"],
+  civics: ["civics", "পৌরনীতি"],
+};
+
+function sheetSubjectKey(value: string): string | null {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return null;
+  for (const [key, aliases] of Object.entries(SHEET_SUBJECT_ALIASES)) {
+    if (aliases.some((alias) => normalized === alias ||
+      normalized.startsWith(`${alias} `) || normalized.startsWith(`${alias} -`) ||
+      normalized.startsWith(`${alias}–`))) return key;
+  }
+  return null;
+}
+
+function paperNumber(value: string): 1 | 2 | null {
+  if (/(?:1st|first|1\s*st|১ম|প্রথম)\s*(?:paper|পত্র)/i.test(value)) return 1;
+  if (/(?:2nd|second|2\s*nd|২য়|২য়|দ্বিতীয়|দ্বিতীয়)\s*(?:paper|পত্র)/i.test(value)) return 2;
+  return null;
+}
+
+function sheetRowSubjectKey(row: { courseLabel: string; subject: string }): string | null {
+  // The full HSC 28 course name is the most reliable source of subject.
+  const suffix = row.courseLabel.split(/\s+-\s+/).at(-1) ?? row.courseLabel;
+  return sheetSubjectKey(suffix) ?? sheetSubjectKey(row.subject);
+}
+
+export const courseSchedule = createServerFn({ method: "GET" }).handler(async () => {
+  const { studentId } = await requireStudent();
+  const { data: student, error: studentError } = await db
+    .from("students")
+    .select("academic_batch, academic_group, status")
+    .eq("id", studentId)
+    .maybeSingle();
+
+  if (studentError || !student || student.status !== "active") {
+    throw friendly("শিক্ষার্থীর তথ্য পাওয়া যায়নি।");
+  }
+
+  const today = todayDhaka();
+  if (student.academic_batch !== "hsc_28") {
+    return { today, programs: [], needsAcademicProfile: false, unavailableForBatch: true };
+  }
+  if (!student.academic_group || !["science", "business_studies", "humanities"].includes(student.academic_group)) {
+    return { today, programs: [], needsAcademicProfile: true, unavailableForBatch: false };
+  }
+
+  const [{ data: programs, error: programError }, { data: courses, error: courseError }] =
+    await Promise.all([
+      db.from("tenms_programs")
+        .select("id, subject_name_en, subject_name_bn, group_label, academic_batch")
+        .order("group_label")
+        .order("subject_name_bn"),
+      db.from("tenms_courses")
+        .select("id, program_id, name_en, name_bn")
+        .order("id"),
+    ]);
+
+  if (programError || courseError) {
+    throw friendly("কোর্সের তথ্য লোড করা যায়নি।");
+  }
+
+  const eligiblePrograms = (programs ?? []).filter((program) => {
+    const department = academicGroupFromLabel(program.group_label ?? "");
+    return (
+      (program.academic_batch === "both" || program.academic_batch === "hsc_28") &&
+      (department === "common" || department === student.academic_group)
+    );
+  });
+
+  // This Google Sheet is exclusively HSC 28. Reject any unexpected batch rows.
+  const rows = (await loadSchedule()).filter((row) =>
+    /(?:^|\s)HSC\s*28(?:\s|$)/i.test(row.courseLabel),
+  );
   const bySubject = new Map<string, typeof rows>();
-  for (const r of rows) {
-    if (!r.subject) continue;
-    const key = normSubject(r.subject);
+  for (const row of rows) {
+    const key = sheetRowSubjectKey(row);
+    if (!key) continue;
     const list = bySubject.get(key) ?? [];
-    list.push(r);
+    list.push(row);
     bySubject.set(key, list);
   }
 
-  const [{ data: programs }, { data: courses }] = await Promise.all([
-    db
-      .from("tenms_programs")
-      .select("id, subject_name_en, subject_name_bn, group_label")
-      .order("group_label")
-      .order("subject_name_bn"),
-    db.from("tenms_courses").select("id, program_id, name_en, name_bn").order("id"),
-  ]);
+  const result = eligiblePrograms.map((program) => {
+    const subjectKey = sheetSubjectKey(program.subject_name_en) ??
+      sheetSubjectKey(program.subject_name_bn);
+    const subjectRows = subjectKey ? (bySubject.get(subjectKey) ?? []) : [];
+    const programCourses = (courses ?? []).filter((course) => course.program_id === program.id);
 
-  const result = (programs ?? []).map((p) => {
-    const courseList = (courses ?? [])
-      .filter((c) => c.program_id === p.id)
-      .map((c) => {
-        const found =
-          bySubject.get(normSubject(c.name_en)) ??
-          bySubject.get(normSubject(`${p.subject_name_en} ${c.name_en}`)) ??
-          [];
-        const classes = found.map((r) => ({
-          id: r.id,
-          date: r.date,
-          time: r.time,
-          chapter: r.chapter,
-          title: r.title,
-          exam: r.exam,
-          slide: r.slide,
-          link: r.link,
-          teacher: r.teacher,
-          status: statusOf(r, today),
-        }));
-        return {
-          id: c.id,
-          name_bn: c.name_bn,
-          classes,
-          uploaded: classes.filter((x) => x.status === "uploaded").length,
-          pending: classes.filter((x) => x.status === "pending").length,
-          scheduled: classes.filter((x) => x.status === "scheduled").length,
-        };
+    const courseList = programCourses.map((course) => {
+      const coursePaper = paperNumber(`${course.name_en} ${course.name_bn}`);
+      // If a subject has two papers, only map a row when its paper is known.
+      // This prevents showing the same uploaded class under both papers.
+      const hasMultiplePapers = programCourses.some((c) =>
+        c.id !== course.id && paperNumber(`${c.name_en} ${c.name_bn}`) !== null,
+      );
+      const found = subjectRows.filter((row) => {
+        const rowPaper = paperNumber(`${row.subject} ${row.courseLabel}`);
+        if (coursePaper !== null) return rowPaper === coursePaper;
+        return !hasMultiplePapers && rowPaper === null;
       });
+
+      const classes = found.map((row) => ({
+        id: row.id,
+        date: row.date,
+        time: row.time,
+        chapter: row.chapter,
+        title: row.title,
+        exam: row.exam,
+        slide: row.slide,
+        link: row.link,
+        status: statusOf(row, today),
+      }));
+
+      return {
+        id: course.id,
+        name_bn: course.name_bn,
+        classes,
+        uploaded: classes.filter((item) => item.status === "uploaded").length,
+        pending: classes.filter((item) => item.status === "pending").length,
+        scheduled: classes.filter((item) => item.status === "scheduled").length,
+      };
+    });
+
     return {
-      id: p.id,
-      groupLabel: p.group_label,
-      subjectNameBn: p.subject_name_bn,
+      id: program.id,
+      groupLabel: program.group_label,
+      subjectNameBn: program.subject_name_bn,
       courses: courseList,
-      uploaded: courseList.reduce((n, c) => n + c.uploaded, 0),
-      pending: courseList.reduce((n, c) => n + c.pending, 0),
-      scheduled: courseList.reduce((n, c) => n + c.scheduled, 0),
+      uploaded: courseList.reduce((total, course) => total + course.uploaded, 0),
+      pending: courseList.reduce((total, course) => total + course.pending, 0),
+      scheduled: courseList.reduce((total, course) => total + course.scheduled, 0),
     };
   });
 
-  return { today, programs: result };
+  return { today, programs: result, needsAcademicProfile: false, unavailableForBatch: false };
 });
 
 

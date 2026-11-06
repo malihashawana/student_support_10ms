@@ -1,6 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import {
+  isAcademicBatch,
+  isAcademicGroup,
+  type AcademicBatch,
+  type AcademicGroup,
+} from "./academic-config";
+
+import {
   assertLoginNotRateLimited,
   clearLoginAttempts,
   friendly,
@@ -89,6 +96,8 @@ export const registerStudent = createServerFn({ method: "POST" })
       name: string;
       email?: string;
       password: string;
+      academic_batch: AcademicBatch;
+      academic_group: AcademicGroup;
     }) => input,
   )
   .handler(async ({ data }) => {
@@ -97,6 +106,15 @@ export const registerStudent = createServerFn({ method: "POST" })
     const name = (data.name ?? "").trim();
     const email = data.email?.trim() || null;
     const password = data.password ?? "";
+    const academic_batch = data.academic_batch;
+    const academic_group = data.academic_group;
+
+    if (!isAcademicBatch(academic_batch)) {
+      throw friendly("সঠিক HSC ব্যাচ নির্বাচন করুন।");
+    }
+    if (!isAcademicGroup(academic_group)) {
+      throw friendly("সঠিক বিভাগ নির্বাচন করুন।");
+    }
 
     if (login_number.length < 6) throw friendly("সঠিক লগইন নম্বর দিন।");
     if (!isValidTmsTransactionId(tms)) {
@@ -128,6 +146,8 @@ export const registerStudent = createServerFn({ method: "POST" })
           status: "active",
           contact_number: login_number,
           password_hash,
+          academic_batch,
+          academic_group,
         })
         .select("id, name, account_role")
         .single();
@@ -181,6 +201,8 @@ export const registerStudent = createServerFn({ method: "POST" })
         name: existing.name?.trim() ? existing.name : name,
         email: existing.email ?? email,
         tms_transaction_ids: existingTms.includes(tms) ? existingTms : [...existingTms, tms],
+        academic_batch,
+        academic_group,
       })
       .eq("id", existing.id)
       .select("id, name, account_role")

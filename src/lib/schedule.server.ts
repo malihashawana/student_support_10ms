@@ -95,13 +95,14 @@ async function fetchRows(): Promise<ClassItem[]> {
     const subject = get(r, 4);
     const title = get(r, 6);
     if (!course && !subject && !title) return;
-    const cut = course.lastIndexOf(" - ");
     items.push({
       id: `${date}-${index}`,
       date,
       time: get(r, 1),
       slot: get(r, 2),
-      courseLabel: cut >= 0 ? course.slice(cut + 3).trim() : course,
+      // Preserve the complete sheet label, e.g. "HSC 28 অনলাইন ব্যাচ - ফিজিক্স".
+      // The student server function uses this prefix to prevent cross-batch access.
+      courseLabel: course,
       subject,
       chapter: get(r, 5),
       title,

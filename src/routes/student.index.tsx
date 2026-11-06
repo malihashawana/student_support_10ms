@@ -1,26 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, CheckCircle2, FilePlus2, Inbox, Loader2, Search, Sparkles, Ticket } from "lucide-react";
+import { Bell, CheckCircle2, FilePlus2, Inbox, Loader2, Sparkles, Ticket } from "lucide-react";
+
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { PriorityBadge, StatusBadge } from "@/components/StatusBadge";
 import { StatCard } from "@/components/StatCard";
-import { Button } from "@/components/ui/button";
-import { bn, formatDateShortBn, labelCategory } from "@/lib/support-constants";
-import { studentDashboard } from "@/lib/student.functions";
 import { UpcomingClasses } from "@/components/UpcomingClasses";
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/language-context";
+import { studentDashboard } from "@/lib/student.functions";
+import { bn, formatDateShortBn, labelCategory } from "@/lib/support-constants";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
     meta: [
-      { title: "ড্যাশবোর্ড — Student Support Hub HSC 28" },
+      { title: "Dashboard — Student Support Hub HSC 27 & 28" },
       {
         name: "description",
-        content: "তোমার জানানো সমস্যা, নোটিশ দেখো এবং নতুন সমস্যা জানাও HSC 28-এর জন্য।",
+        content: "Track your support tickets, notices and updates for HSC 27 and HSC 28.",
       },
-      { property: "og:title", content: "ড্যাশবোর্ড — Student Support Hub HSC 28" },
-      { property: "og:description", content: "তোমার HSC 28 সাপোর্ট টিকেট ও নোটিশ।" },
+      { property: "og:title", content: "Dashboard — Student Support Hub HSC 27 & 28" },
+      { property: "og:description", content: "Student support tickets and notices for HSC 27 and 28." },
     ],
   }),
   component: StudentHome,
@@ -32,7 +34,41 @@ function isRecent(dateStr: string) {
   return Date.now() - new Date(dateStr).getTime() < 3 * DAY_MS;
 }
 
+const CATEGORY_EN: Record<string, string> = {
+  recorded_class: "Recorded Class",
+  "recorded class": "Recorded Class",
+  live_class: "Live Class",
+  "live class": "Live Class",
+  study_material: "Study Material",
+  "study material": "Study Material",
+  exam: "Exam",
+  other: "Other",
+  payment: "Payment",
+  technical: "Technical Issue",
+  account: "Account",
+};
+
+function categoryLabel(category: string, language: "bn" | "en") {
+  const label = labelCategory(category);
+  if (language === "bn") return label;
+  const key = category.trim().toLowerCase().replace(/[-\s]+/g, "_");
+  return CATEGORY_EN[key] ?? CATEGORY_EN[category.trim().toLowerCase()] ?? label;
+}
+
+function displayNumber(value: number, language: "bn" | "en") {
+  return language === "bn" ? bn(value) : String(value);
+}
+
+function displayDate(date: string, language: "bn" | "en") {
+  if (language === "bn") return formatDateShortBn(date);
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime())
+    ? date
+    : new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(parsed);
+}
+
 function StudentHome() {
+  const { language, t } = useLanguage();
   const fetchDashboard = useServerFn(studentDashboard);
   const { data, isLoading } = useQuery({
     queryKey: ["student-dashboard"],
@@ -42,48 +78,43 @@ function StudentHome() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="ড্যাশবোর্ড"
-        description="সমস্যা জানাও, টিকেট ফলো করো এবং আপডেট থাকো।"
+        title={t("ড্যাশবোর্ড", "Dashboard")}
+        description={t(
+          "সমস্যা জানাও, টিকেট ফলো করো এবং আপডেট থাকো।",
+          "Report an issue, track your tickets and stay updated.",
+        )}
         action={
-          <div className="flex gap-2">
-            <Button asChild variant="outline">
-              <Link to="/student/community">
-                <Search className="size-4" />
-                সমস্যা খুঁজুন
-              </Link>
-            </Button>
-            <Button asChild>
-              <Link to="/student/report">
-                <FilePlus2 className="size-4" />
-                সমস্যা জানান
-              </Link>
-            </Button>
-          </div>
+          <Button asChild>
+            <Link to="/student/report">
+              <FilePlus2 className="size-4" />
+              {t("সমস্যা জানান", "Report an Issue")}
+            </Link>
+          </Button>
         }
       />
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
+        <div className="flex justify-center py-16" role="status" aria-label={t("লোড হচ্ছে", "Loading")}>
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard
-              label="আমার চলমান সমস্যা"
-              value={bn(data?.stats.open ?? 0)}
+              label={t("আমার চলমান সমস্যা", "My Open Tickets")}
+              value={displayNumber(data?.stats.open ?? 0, language)}
               tone="open"
               icon={<Inbox className="size-5" />}
             />
             <StatCard
-              label="আমার সমাধান হওয়া সমস্যা"
-              value={bn(data?.stats.resolved ?? 0)}
+              label={t("আমার সমাধান হওয়া সমস্যা", "My Resolved Tickets")}
+              value={displayNumber(data?.stats.resolved ?? 0, language)}
               tone="resolved"
               icon={<CheckCircle2 className="size-5" />}
             />
             <StatCard
-              label="মোট জমা দেওয়া"
-              value={bn(data?.stats.total ?? 0)}
+              label={t("মোট জমা দেওয়া", "Total Submitted")}
+              value={displayNumber(data?.stats.total ?? 0, language)}
               icon={<Ticket className="size-5" />}
             />
           </div>
@@ -95,9 +126,9 @@ function StudentHome() {
 
             <div className="card-panel lg:order-3 lg:col-span-2">
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <h2 className="text-sm font-semibold">সাম্প্রতিক টিকেট</h2>
+                <h2 className="text-sm font-semibold">{t("সাম্প্রতিক টিকেট", "Recent Tickets")}</h2>
                 <Link to="/student/issues" className="text-xs font-medium text-primary">
-                  সব দেখুন
+                  {t("সব দেখুন", "View All")}
                 </Link>
               </div>
               {data?.tickets.length ? (
@@ -112,8 +143,8 @@ function StudentHome() {
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{ticket.title}</p>
                           <p className="text-xs text-muted-foreground">
-                            {bn(ticket.ticket_number)} · {labelCategory(ticket.category)} ·{" "}
-                            {formatDateShortBn(ticket.created_at)}
+                            {ticket.ticket_number} · {categoryLabel(ticket.category, language)} ·{" "}
+                            {displayDate(ticket.created_at, language)}
                           </p>
                         </div>
                         <StatusBadge status={ticket.status} short />
@@ -124,11 +155,14 @@ function StudentHome() {
               ) : (
                 <EmptyState
                   icon={<Inbox className="size-5" />}
-                  title="এখনো কোনো সমস্যা জানানো হয়নি।"
-                  description="সমস্যা জানালে তার অবস্থাসহ এখানে দেখা যাবে।"
+                  title={t("এখনো কোনো সমস্যা জানানো হয়নি।", "No issues reported yet.")}
+                  description={t(
+                    "সমস্যা জানালে তার অবস্থাসহ এখানে দেখা যাবে।",
+                    "Once you report an issue, you can track its status here.",
+                  )}
                   action={
                     <Button asChild size="sm">
-                      <Link to="/student/report">সমস্যা জানান</Link>
+                      <Link to="/student/report">{t("সমস্যা জানান", "Report an Issue")}</Link>
                     </Button>
                   }
                 />
@@ -136,15 +170,15 @@ function StudentHome() {
             </div>
 
             <div className="card-panel overflow-hidden lg:order-2">
-              <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-primary/10 to-transparent px-4 py-3">
+              <div className="flex items-center justify-between border-b border-border bg-primary/5 px-4 py-3">
                 <h2 className="flex items-center gap-2 text-sm font-semibold">
                   <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
                     <Bell className="size-3.5" />
                   </span>
-                  নোটিশ বোর্ড
+                  {t("নোটিশ বোর্ড", "Notice Board")}
                 </h2>
                 <Link to="/student/notices" className="text-xs font-medium text-primary">
-                  সব নোটিশ
+                  {t("সব নোটিশ", "All Notices")}
                 </Link>
               </div>
               {data?.notices.length ? (
@@ -173,7 +207,7 @@ function StudentHome() {
                             {recent ? (
                               <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600">
                                 <Sparkles className="size-2.5" />
-                                নতুন
+                                {t("নতুন", "New")}
                               </span>
                             ) : null}
                           </div>
@@ -191,14 +225,14 @@ function StudentHome() {
                             isImportant || isUrgent ? "opacity-75" : "text-muted-foreground/70"
                           }`}
                         >
-                          {formatDateShortBn(notice.created_at)}
+                          {displayDate(notice.created_at, language)}
                         </p>
                       </li>
                     );
                   })}
                 </ul>
               ) : (
-                <EmptyState title="নতুন কোনো নোটিশ নেই।" />
+                <EmptyState title={t("নতুন কোনো নোটিশ নেই।", "No new notices.")} />
               )}
             </div>
           </div>

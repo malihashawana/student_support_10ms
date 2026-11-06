@@ -172,6 +172,8 @@ export type Database = {
       };
       students: {
         Row: {
+          academic_batch: string | null;
+          academic_group: string | null;
           account_role: string;
           contact_number: string;
           course_name: string | null;
@@ -194,6 +196,8 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          academic_batch?: string | null;
+          academic_group?: string | null;
           account_role?: string;
           contact_number: string;
           course_name?: string | null;
@@ -216,6 +220,8 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          academic_batch?: string | null;
+          academic_group?: string | null;
           account_role?: string;
           contact_number?: string;
           course_name?: string | null;
@@ -343,6 +349,7 @@ export type Database = {
 
             tenms_programs: {
         Row: {
+          academic_batch: string | null;
           id: number;
           catalog_product_id: number;
           subject_name_en: string;
@@ -352,6 +359,7 @@ export type Database = {
           created_at: string;
         };
         Insert: {
+          academic_batch?: string | null;
           id: number;
           catalog_product_id: number;
           subject_name_en: string;
@@ -361,6 +369,7 @@ export type Database = {
           created_at?: string;
         };
         Update: {
+          academic_batch?: string | null;
           id?: number;
           catalog_product_id?: number;
           subject_name_en?: string;

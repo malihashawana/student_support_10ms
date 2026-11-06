@@ -9,25 +9,65 @@ import { EmptyState } from "@/components/EmptyState";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/lib/language-context";
 import { bn, formatDateShortBn, labelCategory } from "@/lib/support-constants";
 import { myTickets } from "@/lib/student.functions";
 
 export const Route = createFileRoute("/student/issues/")({
   head: () => ({
     meta: [
-      { title: "আমার সমস্যা — Student Support Hub HSC 28" },
+      { title: "My Tickets — Student Support Hub HSC 27 & 28" },
       {
         name: "description",
-        content: "তুমি যেসব সমস্যা জানিয়েছ, সেগুলোর বর্তমান অবস্থা ও সর্বশেষ আপডেট।",
+        content: "Track the status and latest updates of your HSC 27 or HSC 28 support tickets.",
       },
-      { property: "og:title", content: "আমার সমস্যা — Student Support Hub HSC 28" },
-      { property: "og:description", content: "তোমার HSC 28 সাপোর্ট টিকেটের অবস্থা দেখো।" },
+      { property: "og:title", content: "My Tickets — Student Support Hub HSC 27 & 28" },
+      { property: "og:description", content: "Track your HSC 27 and HSC 28 support requests." },
     ],
   }),
   component: MyIssues,
 });
 
+const CATEGORY_EN: Record<string, string> = {
+  recorded_class: "Recorded Class",
+  live_class: "Live Class",
+  study_material: "Study Material",
+  exam: "Exam",
+  other: "Other",
+  payment: "Payment",
+  technical: "Technical Issue",
+  account: "Account",
+};
+
+function displayCategory(category: string, language: "bn" | "en") {
+  if (language === "bn") return labelCategory(category);
+  const key = category.trim().toLowerCase().replace(/[-\s]+/g, "_");
+  return CATEGORY_EN[key] ?? labelCategory(category);
+}
+
+function displayDate(value: string, language: "bn" | "en") {
+  if (language === "bn") return formatDateShortBn(value);
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(date);
+}
+
+function displayTicketNumber(value: string, language: "bn" | "en") {
+  // Ticket IDs are identifiers, not quantities. Preserve their stored prefix and
+  // sequence; only convert digit glyphs for the selected display language.
+  if (language === "bn") return bn(value);
+  return value.replace(/[০-৯]/g, (digit) =>
+    String("০১২৩৪৫৬৭৮৯".indexOf(digit)),
+  );
+}
+
 function MyIssues() {
+  const { language, t } = useLanguage();
   const fetchTickets = useServerFn(myTickets);
   const [search, setSearch] = useState("");
   const { data, isLoading } = useQuery({
@@ -35,23 +75,34 @@ function MyIssues() {
     queryFn: () => fetchTickets(),
   });
 
-  const rows = (data ?? []).filter((t) =>
-    [t.ticket_number, t.title, t.category, t.status]
-      .join(" ")
-      .toLowerCase()
-      .includes(search.toLowerCase()),
-  );
+  const rows = (data ?? []).filter((ticket) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    const searchable = [
+      ticket.ticket_number,
+      displayTicketNumber(ticket.ticket_number, "bn"),
+      displayTicketNumber(ticket.ticket_number, "en"),
+      ticket.title,
+      ticket.category,
+      displayCategory(ticket.category, language),
+      ticket.status,
+    ];
+    return searchable.join(" ").toLowerCase().includes(query);
+  });
 
   return (
     <div>
       <PageHeader
-        title="আমার সমস্যা"
-        description="শুধু তুমিই এই টিকেট ও এর বিস্তারিত দেখতে পাবে।"
+        title={t("আমার সমস্যা", "My Tickets")}
+        description={t(
+          "শুধু তুমিই এই টিকেট ও এর বিস্তারিত দেখতে পাবে।",
+          "Only you can view these tickets and their details.",
+        )}
         action={
           <Button asChild>
             <Link to="/student/report">
               <FilePlus2 className="size-4" />
-              সমস্যা জানান
+              {t("সমস্যা জানান", "Report an Issue")}
             </Link>
           </Button>
         }
@@ -62,14 +113,15 @@ function MyIssues() {
           <Search className="size-4 text-muted-foreground" />
           <Input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="আমার টিকেট খুঁজুন"
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder={t("আমার টিকেট খুঁজুন", "Search my tickets")}
+            aria-label={t("আমার টিকেট খুঁজুন", "Search my tickets")}
             className="h-9 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-16">
+          <div className="flex justify-center py-16" role="status" aria-label={t("লোড হচ্ছে", "Loading")}>
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         ) : rows.length ? (
@@ -77,12 +129,12 @@ function MyIssues() {
             <table className="w-full min-w-[760px] text-sm">
               <thead className="sticky top-0 bg-secondary/70 text-xs tracking-wide text-muted-foreground uppercase">
                 <tr>
-                  <th className="px-4 py-2 text-left font-medium">টিকেট আইডি</th>
-                  <th className="px-4 py-2 text-left font-medium">সমস্যা</th>
-                  <th className="px-4 py-2 text-left font-medium">ধরন</th>
-                  <th className="px-4 py-2 text-left font-medium">তারিখ</th>
-                  <th className="px-4 py-2 text-left font-medium">অবস্থা</th>
-                  <th className="px-4 py-2 text-left font-medium">সর্বশেষ আপডেট</th>
+                  <th className="px-4 py-2 text-left font-medium">{t("টিকেট আইডি", "Ticket ID")}</th>
+                  <th className="px-4 py-2 text-left font-medium">{t("সমস্যা", "Issue")}</th>
+                  <th className="px-4 py-2 text-left font-medium">{t("ধরন", "Category")}</th>
+                  <th className="px-4 py-2 text-left font-medium">{t("তারিখ", "Date")}</th>
+                  <th className="px-4 py-2 text-left font-medium">{t("অবস্থা", "Status")}</th>
+                  <th className="px-4 py-2 text-left font-medium">{t("সর্বশেষ আপডেট", "Last Updated")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -94,7 +146,7 @@ function MyIssues() {
                         params={{ id: ticket.id }}
                         className="text-primary hover:underline"
                       >
-                        {bn(ticket.ticket_number)}
+                        {displayTicketNumber(ticket.ticket_number, language)}
                       </Link>
                     </td>
                     <td className="max-w-[320px] px-4 py-3">
@@ -107,16 +159,16 @@ function MyIssues() {
                       </Link>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                      {labelCategory(ticket.category)}
+                      {displayCategory(ticket.category, language)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                      {formatDateShortBn(ticket.created_at)}
+                      {displayDate(ticket.created_at, language)}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={ticket.status} short />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                      {formatDateShortBn(ticket.updated_at)}
+                      {displayDate(ticket.updated_at, language)}
                     </td>
                   </tr>
                 ))}
@@ -126,14 +178,12 @@ function MyIssues() {
         ) : (
           <EmptyState
             icon={<Inbox className="size-5" />}
-            title={
-              search
-                ? "তোমার খোঁজার সাথে মিলে এমন কোনো সমস্যা পাওয়া যায়নি।"
-                : "এখনো কোনো সমস্যা জানানো হয়নি।"
-            }
-            description={
-              search ? "অন্য কোনো শব্দ দিয়ে চেষ্টা করো।" : "সমস্যা জানাও এবং এখানে এর অবস্থা দেখো।"
-            }
+            title={search.trim()
+              ? t("তোমার খোঁজার সাথে মিলে এমন কোনো সমস্যা পাওয়া যায়নি।", "No tickets match your search.")
+              : t("এখনো কোনো সমস্যা জানানো হয়নি।", "You haven't reported any issues yet.")}
+            description={search.trim()
+              ? t("অন্য কোনো শব্দ দিয়ে চেষ্টা করো।", "Try searching with different words.")
+              : t("সমস্যা জানাও এবং এখানে এর অবস্থা দেখো।", "Report an issue and track its status here.")}
           />
         )}
       </div>

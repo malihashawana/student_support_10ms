@@ -6,25 +6,71 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/lib/auth.functions";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/language-context";
 
 export type NavItem = { to: string; label: string; icon: ReactNode; exact?: boolean };
+export type ShellAcademicBatch = "hsc_27" | "hsc_28" | null;
+
+// Translate only known UI labels; preserve custom labels and routes unchanged.
+const navigationTranslations: Record<string, string> = {
+  "ড্যাশবোর্ড": "Dashboard",
+  "হোম": "Home",
+  "আমার সমস্যা": "My Tickets",
+  "আমার টিকিট": "My Tickets",
+  "সমস্যা জানাও": "Submit a Ticket",
+  "নতুন সমস্যা": "New Ticket",
+  "নতুন টিকিট": "New Ticket",
+  "সমস্যা রিপোর্ট": "Report an Issue",
+  "কোর্স স্ট্রাকচার": "Course Structure",
+  "কোর্সের কাঠামো": "Course Structure",
+  "ক্লাস রুটিন": "Class Schedule",
+  "রুটিন": "Schedule",
+  "প্রোফাইল": "Profile",
+  "নোটিফিকেশন": "Notifications",
+  "সেটিংস": "Settings",
+  "সবার সমস্যা": "Community Tickets",
+  "সব সমস্যা": "All Tickets",
+  "টিকিটসমূহ": "Tickets",
+  "শিক্ষার্থীরা": "Students",
+  "শিক্ষার্থী": "Students",
+  "রিপোর্ট": "Reports",
+  "টিম": "Team",
+};
 
 export function AppShell({
   nav,
   variant,
   title,
   subtitle,
+  academicBatch,
   children,
 }: {
   nav: NavItem[];
   variant: "student" | "staff";
   title: string;
   subtitle: string;
+  /** Pass the authenticated student's academic_batch from the parent layout. */
+  academicBatch?: ShellAcademicBatch;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const router = useRouter();
+  const { language, setLanguage, t } = useLanguage();
+
+  // Filtering the menu is presentation-only. The courseSchedule server
+  // function must independently enforce HSC 28 access.
+  const visibleNav =
+    variant === "student" && academicBatch !== "hsc_28"
+      ? nav.filter((item) => item.to !== "/student/courses")
+      : nav;
+
+  const batchLabel =
+    academicBatch === "hsc_27"
+      ? t("এইচএসসি ২৭", "HSC 27")
+      : academicBatch === "hsc_28"
+        ? t("এইচএসসি ২৮", "HSC 28")
+        : t("স্টুডেন্ট সাপোর্ট হাব", "Student Support Hub");
 
   async function signOut() {
     try {
@@ -32,7 +78,7 @@ export function AppShell({
       await router.invalidate();
       await navigate({ to: "/", replace: true });
     } catch {
-      toast.error("সাইন আউট করা যায়নি। আবার চেষ্টা করুন।");
+      toast.error(t("সাইন আউট করা যায়নি। আবার চেষ্টা করুন।", "Could not sign out. Please try again."));
     }
   }
 
@@ -43,7 +89,9 @@ export function AppShell({
           <button
             className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
             onClick={() => setOpen((v) => !v)}
-            aria-label="মেনু খুলুন বা বন্ধ করুন"
+            aria-label={t("মেনু খুলুন বা বন্ধ করুন", "Toggle menu")}
+            aria-expanded={open}
+            type="button"
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -56,9 +104,9 @@ export function AppShell({
             </span>
             <span className="leading-tight">
               <span className="font-display block text-sm font-semibold">
-                স্টুডেন্ট সাপোর্ট হাব
+                {t("স্টুডেন্ট সাপোর্ট হাব", "Student Support Hub")}
               </span>
-              <span className="block text-xs text-muted-foreground">এইচএসসি ২৮</span>
+              <span className="block text-xs text-muted-foreground">{batchLabel}</span>
             </span>
           </Link>
           <div className="ml-auto flex items-center gap-3">
@@ -66,9 +114,37 @@ export function AppShell({
               <p className="text-sm font-medium">{title}</p>
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             </div>
+            <div
+              role="group"
+              aria-label={t("ভাষা নির্বাচন", "Choose language")}
+              className="inline-flex items-center rounded-md border border-border bg-background p-0.5"
+            >
+              <button
+                type="button"
+                onClick={() => setLanguage("bn")}
+                aria-pressed={language === "bn"}
+                className={cn(
+                  "rounded px-2 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  language === "bn" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary",
+                )}
+              >
+                বাংলা
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                aria-pressed={language === "en"}
+                className={cn(
+                  "rounded px-2 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  language === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary",
+                )}
+              >
+                EN
+              </button>
+            </div>
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="size-4" />
-              <span className="hidden sm:inline">লগআউট</span>
+              <span className="hidden sm:inline">{t("লগআউট", "Log out")}</span>
             </Button>
           </div>
         </div>
@@ -83,7 +159,7 @@ export function AppShell({
           )}
         >
           <nav className="flex flex-col gap-1 lg:sticky lg:top-24">
-            {nav.map((item) => (
+            {visibleNav.map((item) => (
               <Link
                 key={item.to}
                 to={item.to as never}
@@ -91,9 +167,9 @@ export function AppShell({
                 onClick={() => setOpen(false)}
                 className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-200/60 transition-all before:absolute before:left-0 before:top-1/2 before:h-0 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:content-[''] before:transition-all before:duration-300 hover:bg-white/10 hover:text-white"
                 activeProps={{
-  className:
-    "bg-[#8B1E2D] text-white shadow-lg shadow-[#4A0E17]/50 before:h-2/3 hover:bg-[#A52436] hover:text-white",
-}}
+                  className:
+                    "bg-[#8B1E2D] text-white shadow-lg shadow-[#4A0E17]/50 before:h-2/3 hover:bg-[#A52436] hover:text-white",
+                }}
               >
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5 transition-colors group-hover:bg-white/15">
                   {item.icon}

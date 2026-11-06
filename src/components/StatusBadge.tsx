@@ -1,5 +1,36 @@
+import { useLanguage } from "@/lib/language-context";
 import { STATUS_STYLES, labelPriority, labelStatus } from "@/lib/support-constants";
 import { cn } from "@/lib/utils";
+
+// Only presentation labels change; database status and priority values stay intact.
+const EN_STATUS_LABELS: Record<string, string> = {
+  open: "Open",
+  in_progress: "In Progress",
+  "in-progress": "In Progress",
+  inprogress: "In Progress",
+  review: "In Review",
+  in_review: "In Review",
+  under_review: "In Review",
+  waiting: "Waiting",
+  waiting_for_student: "Waiting for Student",
+  waiting_for_staff: "Waiting for Support",
+  pending: "Pending",
+  resolved: "Resolved",
+  closed: "Closed",
+  reopened: "Reopened",
+};
+
+const EN_PRIORITY_LABELS: Record<string, string> = {
+  urgent: "Urgent",
+  high: "High",
+  important: "Important",
+  normal: "Normal",
+  low: "Low",
+};
+
+function normalizedKey(value: string) {
+  return (value ?? "").trim().toLowerCase().replace(/\s+/g, "_");
+}
 
 export function StatusBadge({
   status,
@@ -10,6 +41,13 @@ export function StatusBadge({
   className?: string;
   short?: boolean;
 }) {
+  const { language } = useLanguage();
+  const key = normalizedKey(status);
+  const label =
+    language === "en"
+      ? (EN_STATUS_LABELS[key] ?? labelStatus(status, short))
+      : labelStatus(status, short);
+
   return (
     <span
       className={cn(
@@ -19,13 +57,14 @@ export function StatusBadge({
       )}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {labelStatus(status, short)}
+      {label}
     </span>
   );
 }
 
 export function PriorityBadge({ priority }: { priority: string }) {
-  const key = (priority ?? "").toLowerCase();
+  const { language } = useLanguage();
+  const key = normalizedKey(priority);
   const styles: Record<string, string> = {
     urgent: "border-destructive/30 bg-destructive/15 text-destructive",
     high: "border-amber-500 bg-amber-400 text-amber-950 font-semibold",
@@ -40,7 +79,9 @@ export function PriorityBadge({ priority }: { priority: string }) {
         styles[key] ?? styles["normal"],
       )}
     >
-      {labelPriority(priority)}
+      {language === "en"
+        ? (EN_PRIORITY_LABELS[key] ?? labelPriority(priority))
+        : labelPriority(priority)}
     </span>
   );
 }
