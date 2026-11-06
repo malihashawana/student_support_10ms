@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, Loader2, Paperclip, Save, Search, Send, X } from "lucide-react";
+import { Download, Folder, FolderOpen, Flag, Loader2, Paperclip, Save, Search, Send, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -79,12 +79,22 @@ function TicketWorkspace() {
     range: "all",
   });
   const [selected, setSelected] = useState<string | null>(null);
+  const [queue, setQueue] = useState<"all" | "important" | "normal">("all");
   const [exporting, setExporting] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["staff-tickets", filters],
     queryFn: () => fetchTickets({ data: filters }),
   });
+
+  const visibleTickets = (data ?? []).filter((ticket) =>
+    queue === "all" || (queue === "important" ? ticket.priority === "urgent" || ticket.priority === "high" : ticket.priority === "normal"),
+  );
+
+  const queueCount = (kind: "all" | "important" | "normal") =>
+    kind === "all" ? (data?.length ?? 0) : (data ?? []).filter((ticket) =>
+      kind === "important" ? ticket.priority === "urgent" || ticket.priority === "high" : ticket.priority === "normal",
+    ).length;
 
   async function handleExport() {
     setExporting(true);
@@ -117,6 +127,41 @@ function TicketWorkspace() {
           </Button>
         }
       />
+
+      <section className="mb-4 space-y-3" aria-label={t("বিভাগভিত্তিক ফোল্ডার", "Category folders")}>
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <FolderOpen className="size-4 text-primary" />
+          {t("বিভাগভিত্তিক ফোল্ডার", "Category folders")}
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+          {["all", ...CATEGORIES].map((category) => {
+            const active = (filters.category ?? "all") === category;
+            const count = category === "all" ? (data?.length ?? 0) : (data ?? []).filter((ticket) => ticket.category === category).length;
+            return (
+              <button key={category} type="button"
+                onClick={() => { setFilters((prev) => ({ ...prev, category })); setSelected(null); }}
+                aria-pressed={active}
+                className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-3 text-left transition-colors ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface hover:bg-secondary/60"}`}>
+                <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                  {active ? <FolderOpen className="size-4 shrink-0" /> : <Folder className="size-4 shrink-0" />}
+                  <span className="truncate">{category === "all" ? t("সব সমস্যা", "All issues") : labelCategory(category, language)}</span>
+                </span>
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-foreground">{category === "all" ? count : active ? count : "—"}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex flex-wrap gap-2" aria-label={t("প্রায়োরিটি কিউ", "Priority queues")}>
+          {(["all", "important", "normal"] as const).map((kind) => (
+            <button key={kind} type="button" onClick={() => setQueue(kind)} aria-pressed={queue === kind}
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${queue === kind ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface hover:bg-secondary"}`}>
+              <Flag className="size-3.5" />
+              {kind === "all" ? t("সব কিউ", "All queues") : kind === "important" ? t("গুরুত্বপূর্ণ (High + Urgent)", "Important (High + Urgent)") : t("সাধারণ (Normal)", "Normal")}
+              <span className="opacity-75">{queueCount(kind)}</span>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <div className="card-panel mb-4 grid gap-3 p-4 lg:grid-cols-5">
         <div className="flex items-center gap-2 rounded-md border border-input px-3 lg:col-span-2">
@@ -230,7 +275,7 @@ function TicketWorkspace() {
           <div className="flex justify-center py-16">
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
-        ) : data?.length ? (
+        ) : visibleTickets.length ? (
           <div className="sheet-scroll max-h-[70vh]">
             <table className="w-full min-w-[1250px] text-sm">
               <thead className="sticky top-0 z-10 bg-secondary text-xs tracking-wide text-muted-foreground uppercase">
@@ -247,7 +292,7 @@ function TicketWorkspace() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {data.map((ticket) => (
+                {visibleTickets.map((ticket) => (
                   <tr
                     key={ticket.id}
                     onClick={() => setSelected(ticket.id)}
@@ -319,6 +364,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   });
 
   const [status, setStatus] = useState<string | null>(null);
+  const [priority, setPriority] = useState<string | null>(null);
   const [response, setResponse] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [internal, setInternal] = useState(false);
@@ -329,6 +375,7 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
         data: {
           id,
           status: status ?? data?.ticket.status ?? "Open",
+          priority: priority ?? data?.ticket.priority ?? "normal",
           response: response ?? data?.ticket.official_response ?? "",
           sendResponse,
         },
@@ -344,6 +391,9 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
       void queryClient.invalidateQueries({ queryKey: ["staff-ticket", id] });
       void queryClient.invalidateQueries({ queryKey: ["staff-tickets"] });
       void queryClient.invalidateQueries({ queryKey: ["staff-overview"] });
+      setPriority(null);
+      setStatus(null);
+      setResponse(null);
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : t("টিকেটটি আপডেট করা যায়নি।", "Could not update ticket.")),
   });
@@ -432,6 +482,17 @@ function TicketDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                         {labelStatus(s, false, language)}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t("প্রায়োরিটি (শুধু স্টাফ)", "Priority (staff only)")}</Label>
+                <Select value={priority ?? data.ticket.priority} onValueChange={setPriority}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">{t("সাধারণ", "Normal")}</SelectItem>
+                    <SelectItem value="high">{t("গুরুত্বপূর্ণ", "High")}</SelectItem>
+                    <SelectItem value="urgent">{t("অতি জরুরি", "Urgent")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

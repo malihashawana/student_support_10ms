@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Bell, CheckCircle2, FilePlus2, Inbox, Loader2, Sparkles, Ticket } from "lucide-react";
 
@@ -49,7 +49,7 @@ const CATEGORY_EN: Record<string, string> = {
 };
 
 function categoryLabel(category: string, language: "bn" | "en") {
-  const label = labelCategory(category);
+  const label = labelCategory(category, language);
   if (language === "bn") return label;
   const key = category.trim().toLowerCase().replace(/[-\s]+/g, "_");
   return CATEGORY_EN[key] ?? CATEGORY_EN[category.trim().toLowerCase()] ?? label;
@@ -67,7 +67,11 @@ function displayDate(date: string, language: "bn" | "en") {
     : new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(parsed);
 }
 
+const studentLayoutRoute = getRouteApi("/student");
+
 function StudentHome() {
+  const { academicBatch } = studentLayoutRoute.useRouteContext();
+  const showUpcomingClasses = academicBatch === "hsc_28";
   const { language, t } = useLanguage();
   const fetchDashboard = useServerFn(studentDashboard);
   const { data, isLoading } = useQuery({
@@ -119,12 +123,14 @@ function StudentHome() {
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="lg:order-1">
-              <UpcomingClasses />
-            </div>
+          <div className={`grid gap-6 ${showUpcomingClasses ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
+            {showUpcomingClasses ? (
+              <div className="lg:order-1">
+                <UpcomingClasses />
+              </div>
+            ) : null}
 
-            <div className="card-panel lg:order-3 lg:col-span-2">
+            <div className="card-panel lg:order-3 lg:col-span-full">
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <h2 className="text-sm font-semibold">{t("সাম্প্রতিক টিকেট", "Recent Tickets")}</h2>
                 <Link to="/student/issues" className="text-xs font-medium text-primary">
@@ -169,7 +175,7 @@ function StudentHome() {
               )}
             </div>
 
-            <div className="card-panel overflow-hidden lg:order-2">
+            <div className={`card-panel overflow-hidden lg:order-2 ${showUpcomingClasses ? "" : "lg:col-span-full"}`}>
               <div className="flex items-center justify-between border-b border-border bg-primary/5 px-4 py-3">
                 <h2 className="flex items-center gap-2 text-sm font-semibold">
                   <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">

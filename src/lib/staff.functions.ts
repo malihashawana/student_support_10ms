@@ -179,6 +179,7 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
     (input: {
       id: string;
       status?: string;
+      priority?: "normal" | "high" | "urgent";
       response?: string;
       handled_by?: string;
       sendResponse?: boolean;
@@ -188,6 +189,7 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
     const { staffId, username } = await requireStaff();
     const patch: {
       status?: string;
+      priority?: "normal" | "high" | "urgent";
       resolved_at?: string;
       official_response?: string | null;
       handled_by?: string;
@@ -197,6 +199,12 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
       if (!STATUSES.includes(data.status as never)) throw friendly("সঠিক অবস্থা নির্বাচন করুন।");
       patch.status = data.status;
       if (data.status === "Resolved") patch.resolved_at = new Date().toISOString();
+    }
+    if (data.priority !== undefined) {
+      if (!["normal", "high", "urgent"].includes(data.priority)) {
+        throw friendly("সঠিক প্রায়োরিটি নির্বাচন করুন।");
+      }
+      patch.priority = data.priority;
     }
     if (typeof data.response === "string") patch.official_response = data.response.trim() || null;
     if (typeof data.handled_by === "string") patch.handled_by = data.handled_by.trim() || username;
@@ -213,6 +221,18 @@ export const staffUpdateTicket = createServerFn({ method: "POST" })
         targetType: "ticket",
         targetId: data.id,
         metadata: { status: patch.status },
+      });
+    }
+
+    if (patch.priority) {
+      await logAudit({
+        actorType: "staff",
+        actorId: staffId,
+        actorName: username,
+        eventType: "ticket.priority_changed",
+        targetType: "ticket",
+        targetId: data.id,
+        metadata: { priority: patch.priority },
       });
     }
 

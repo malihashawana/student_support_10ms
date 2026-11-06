@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays, Loader2 } from "lucide-react";
@@ -6,7 +5,6 @@ import { CalendarDays, Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { upcomingAll } from "@/lib/student.functions";
 
-const STORAGE_KEY = "upcoming-groups-v1";
 const SHOW_DAYS = 3;
 
 function nextDays(today: string, count: number) {
@@ -26,48 +24,20 @@ function dayLabel(date: string, language: "bn" | "en") {
   );
 }
 
-function displayCount(count: number, language: "bn" | "en") {
-  return language === "bn" ? count.toLocaleString("bn-BD") : String(count);
-}
-
 export function UpcomingClasses() {
   const { language, t } = useLanguage();
-  const [selected, setSelected] = useState<string[]>([]);
   const fetchAll = useServerFn(upcomingAll);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed: unknown = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) {
-        setSelected(parsed.filter((value): value is string => typeof value === "string"));
-      }
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const update = (next: string[]) => {
-    setSelected(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      /* ignore */
-    }
-  };
-
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["upcoming-all"],
     queryFn: () => fetchAll(),
     refetchInterval: 5 * 60 * 1000,
   });
 
-  const groups = data?.groups ?? [];
-  const today = data?.today ?? "";
-  const active = selected.filter((s) => groups.includes(s));
-  const all = data?.items ?? [];
-  const items = active.length ? all.filter((i) => active.includes(i.group)) : all;
-  const days = today ? nextDays(today, SHOW_DAYS) : [];
+  // The server already limits these classes to the student's HSC 28 department.
+  // Do not expose a second client-side course selector.
+  const items = data?.items ?? [];
+  const days = data?.today ? nextDays(data.today, SHOW_DAYS) : [];
 
   return (
     <section className="card-panel space-y-4 p-5">
@@ -78,57 +48,14 @@ export function UpcomingClasses() {
         </h2>
       </div>
 
-      {groups.length ? (
-        <div className="space-y-2">
-          <p className="text-[11px] text-muted-foreground">
-            {active.length
-              ? t(
-                  `${displayCount(active.length, language)}টি কোর্স বেছে নেওয়া আছে`,
-                  `${displayCount(active.length, language)} ${active.length === 1 ? "course" : "courses"} selected`,
-                )
-              : t(
-                  "সব কোর্সের ক্লাস দেখাচ্ছে — নিজের কোর্স বেছে নিন",
-                  "Showing classes from all courses — select your courses",
-                )}
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              type="button"
-              onClick={() => update([])}
-              className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
-                active.length === 0
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-foreground/80 hover:bg-secondary/70"
-              }`}
-            >
-              {t("সব", "All")}
-            </button>
-            {groups.map((g) => {
-              const on = active.includes(g);
-              return (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => update(on ? active.filter((x) => x !== g) : [...active, g])}
-                  className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
-                    on
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-foreground/80 hover:bg-secondary/70"
-                  }`}
-                  aria-pressed={on}
-                >
-                  {g}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-
       {isLoading ? (
         <div className="flex justify-center py-4" role="status" aria-label={t("ক্লাস লোড হচ্ছে", "Loading classes")}>
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
         </div>
+      ) : isError ? (
+        <p className="rounded-xl border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
+          {t("ক্লাস রুটিন লোড করা যাচ্ছে না। পরে আবার চেষ্টা করুন।", "Unable to load the class schedule. Please try again later.")}
+        </p>
       ) : (
         <div className="max-h-[32rem] space-y-4 overflow-y-auto pr-1">
           {days.map((date) => {

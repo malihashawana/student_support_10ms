@@ -626,9 +626,45 @@ async function loadSchedule() {
   }
 }
 
+// Apply the same batch and department authorization to every student schedule endpoint.
+// The server derives eligibility from the authenticated student's database record.
+async function requireHsc28ScheduleGroup(): Promise<"science" | "business_studies" | "humanities"> {
+  const { studentId } = await requireStudent();
+  const { data: student, error } = await db
+    .from("students")
+    .select("academic_batch, academic_group, status")
+    .eq("id", studentId)
+    .maybeSingle();
+  if (error || !student || student.status !== "active") {
+    throw friendly("শিক্ষার্থীর তথ্য পাওয়া যায়নি।");
+  }
+  if (student.academic_batch !== "hsc_28") {
+    throw friendly("আসন্ন ক্লাসের রুটিন শুধু HSC 28 শিক্ষার্থীদের জন্য।");
+  }
+  const group = student.academic_group;
+  if (group !== "science" && group !== "business_studies" && group !== "humanities") {
+    throw friendly("রুটিন দেখতে প্রোফাইলে বিভাগ নির্বাচন করুন।");
+  }
+  return group;
+}
+
+const DEPARTMENT_SUBJECT_KEYS = {
+  science: ["bangla", "english", "ict", "physics", "chemistry", "biology", "highermath"],
+  business_studies: ["bangla", "english", "ict", "finance", "accounting", "marketing", "management"],
+  humanities: ["bangla", "english", "ict", "economics", "geography", "civics"],
+} as const;
+
+async function loadEligibleHsc28Schedule() {
+  const group = await requireHsc28ScheduleGroup();
+  const allowed = new Set<string>(DEPARTMENT_SUBJECT_KEYS[group]);
+  return (await loadSchedule()).filter((row) =>
+    /(?:^|\s)HSC\s*28(?:\s|$)/i.test(row.courseLabel) &&
+    allowed.has(sheetRowSubjectKey(row) ?? ""),
+  );
+}
+
 export const upcomingClasses = createServerFn({ method: "GET" }).handler(async () => {
-  await requireStudent();
-  const rows = await loadSchedule();
+  const rows = await loadEligibleHsc28Schedule();
   const today = todayDhaka();
   const end = addDays(today, 6);
   const items = rows
@@ -825,8 +861,7 @@ export const courseSchedule = createServerFn({ method: "GET" }).handler(async ()
 
 
 export const classSubjectOptions = createServerFn({ method: "GET" }).handler(async () => {
-  await requireStudent();
-  const rows = await loadSchedule();
+  const rows = await loadEligibleHsc28Schedule();
   const set = new Set<string>();
   for (const r of rows) {
     const s = r.subject.trim();
@@ -845,8 +880,7 @@ export const upcomingForSubjects = createServerFn({ method: "POST" })
       : [],
   }))
   .handler(async ({ data }) => {
-    await requireStudent();
-    const rows = await loadSchedule();
+    const rows = await loadEligibleHsc28Schedule();
     const today = todayDhaka();
     const end = addDays(today, 45);
     const wanted = new Set(data.subjects);
@@ -865,18 +899,23 @@ export const upcomingForSubjects = createServerFn({ method: "POST" })
     return { today, items };
   });
 
-  const PAPER_RE = /\s*[-–]?\s*(1st|2nd)\s*paper\s*$/i;
+// Sorting order only: subjects not listed here still appear after these.
+const PAPER_RE = /\s*[-–]?\s*(?:1st|2nd|first|second|১ম|২য়|২য়|প্রথম|দ্বিতীয়|দ্বিতীয়)\s*(?:paper|পত্র)\s*$/i;
 const GROUP_ORDER = [
   "bangla",
   "english",
   "ict",
   "physics",
   "chemistry",
-  "higher math",
-  "math",
+  "highermath",
   "biology",
-  "management",
+  "accounting",
+  "finance",
   "marketing",
+  "management",
+  "economics",
+  "geography",
+  "civics",
 ];
 
 function baseSubject(s: string) {
@@ -884,19 +923,19 @@ function baseSubject(s: string) {
 }
 
 export const upcomingAll = createServerFn({ method: "GET" }).handler(async () => {
-  await requireStudent();
-  const rows = await loadSchedule();
+  const rows = await loadEligibleHsc28Schedule();
   const today = todayDhaka();
   const end = addDays(today, 45);
 
   const names = new Set<string>();
   for (const r of rows) {
-    const b = baseSubject(r.subject);
-    if (b) names.add(b);
+    const subject = baseSubject(r.subject);
+    if (subject) names.add(subject);
   }
-  const rank = (n: string) => {
-    const i = GROUP_ORDER.indexOf(n.toLowerCase());
-    return i === -1 ? 999 : i;
+  const rank = (name: string) => {
+    const key = sheetSubjectKey(name) ?? name.toLowerCase();
+    const index = GROUP_ORDER.indexOf(key);
+    return index === -1 ? GROUP_ORDER.length : index;
   };
   const groups = Array.from(names).sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
 
