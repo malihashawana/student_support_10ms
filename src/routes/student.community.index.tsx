@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+/**
+ * import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Search, ShieldCheck } from "lucide-react";
@@ -218,3 +219,20 @@ function CommunityPage() {
     </div>
   );
 }
+
+*/
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
+/**
+ * The student community has been retired.
+ * Redirect legacy URLs without fetching community tickets or rendering
+ * captain approval controls. Server-side community endpoints must also be
+ * disabled separately.
+ */
+export const Route = createFileRoute("/student/community/")({
+  beforeLoad: () => {
+    throw redirect({ to: "/student/issues" });
+  },
+  component: () => null,
+});
+

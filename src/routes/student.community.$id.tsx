@@ -1,3 +1,5 @@
+/*
+
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -95,4 +97,21 @@ function CommunityDetail() {
       </div>
     </div>
   );
+}
+*/
+
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/student/community/$id")({
+  beforeLoad: () => {
+    throw redirect({
+      to: "/student/issues",
+      replace: true,
+    });
+  },
+  component: CommunityDetailDisabled,
+});
+
+function CommunityDetailDisabled() {
+  return null;
 }

@@ -1,18 +1,23 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
-import { Activity, Bell, FileCheck, LayoutDashboard, ScrollText, Settings, Table2, Users } from "lucide-react";
+import {
+  Bell,
+  LayoutDashboard,
+  ScrollText,
+  Settings,
+  Table2,
+  Users,
+} from "lucide-react";
 
 import { AppShell, type NavItem } from "@/components/AppShell";
 import { getCurrentUser } from "@/lib/auth.functions";
+import { useLanguage } from "@/lib/language-context";
 
 const nav: NavItem[] = [
   { to: "/staff", label: "সারসংক্ষেপ", icon: <LayoutDashboard className="size-4" />, exact: true },
-  { to: "/staff/tickets", label: "সমস্যা ওয়ার্কস্পেস", icon: <Table2 className="size-4" /> },
+  { to: "/staff/tickets", label: "Issue Desk", icon: <Table2 className="size-4" /> },
   { to: "/staff/students", label: "শিক্ষার্থী ডেটাবেজ", icon: <Users className="size-4" /> },
   { to: "/staff/notices", label: "নোটিশ", icon: <Bell className="size-4" /> },
-  /* লুকানো আছে, পরে ফেরত আনা হবে
-  { to: "/staff/course-notes", label: "কোর্স নোট", icon: <FileCheck className="size-4" /> },
-  { to: "/staff/course-activity", label: "কোর্স অ্যাক্টিভিটি", icon: <Activity className="size-4" /> },
-  */
+  // Course Notes and Course Activity remain hidden until re-enabled.
   { to: "/staff/audit", label: "অ্যাক্টিভিটি লগ", icon: <ScrollText className="size-4" /> },
   { to: "/staff/settings", label: "সেটিংস", icon: <Settings className="size-4" /> },
 ];
@@ -30,8 +35,15 @@ export const Route = createFileRoute("/staff")({
 
 function StaffLayout() {
   const { staff } = Route.useRouteContext();
+  const { t } = useLanguage();
+
   return (
-    <AppShell nav={nav} variant="staff" title={staff.username} subtitle="সাপোর্ট টিম">
+    <AppShell
+      nav={nav}
+      variant="staff"
+      title={staff.username}
+      subtitle={t("সাপোর্ট টিম", "Support Team")}
+    >
       <Outlet />
     </AppShell>
   );

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type Language = "bn" | "en";
 
@@ -13,34 +13,43 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  // Keep server and first client render identical for hydration.
+  // Match the server-rendered HTML on the first client render.
   const [language, setLanguage] = useState<Language>("bn");
+  const [restored, setRestored] = useState(false);
 
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored === "bn" || stored === "en") setLanguage(stored);
+      if (stored === "bn" || stored === "en") {
+        setLanguage(stored);
+      }
     } catch {
-      // Storage may be unavailable in privacy-restricted browsers.
+      // The language switch remains usable without local storage.
+    } finally {
+      setRestored(true);
     }
   }, []);
 
   useEffect(() => {
+    if (!restored) return;
     document.documentElement.lang = language;
     try {
       window.localStorage.setItem(STORAGE_KEY, language);
     } catch {
-      // The language still works for the current session.
+      // The selected language remains active for this session.
     }
-  }, [language]);
+  }, [language, restored]);
 
-  return (
-    <LanguageContext.Provider
-      value={{ language, setLanguage, t: (bn, en) => (language === "bn" ? bn : en) }}
-    >
-      {children}
-    </LanguageContext.Provider>
+  const value = useMemo<LanguageContextValue>(
+    () => ({
+      language,
+      setLanguage,
+      t: (bn, en) => (language === "bn" ? bn : en),
+    }),
+    [language],
   );
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {

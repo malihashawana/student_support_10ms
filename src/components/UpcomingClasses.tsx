@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays, Loader2 } from "lucide-react";
 
+import { useLanguage } from "@/lib/language-context";
 import { upcomingAll } from "@/lib/student.functions";
 
 const STORAGE_KEY = "upcoming-groups-v1";
@@ -18,23 +19,29 @@ function nextDays(today: string, count: number) {
   return out;
 }
 
-function dayLabel(date: string) {
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    timeZone: "UTC",
-  });
+function dayLabel(date: string, language: "bn" | "en") {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString(
+    language === "bn" ? "bn-BD" : "en-US",
+    { month: "short", day: "numeric", timeZone: "UTC" },
+  );
+}
+
+function displayCount(count: number, language: "bn" | "en") {
+  return language === "bn" ? count.toLocaleString("bn-BD") : String(count);
 }
 
 export function UpcomingClasses() {
+  const { language, t } = useLanguage();
   const [selected, setSelected] = useState<string[]>([]);
   const fetchAll = useServerFn(upcomingAll);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) setSelected(parsed);
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) {
+        setSelected(parsed.filter((value): value is string => typeof value === "string"));
+      }
     } catch {
       /* ignore */
     }
@@ -66,23 +73,35 @@ export function UpcomingClasses() {
     <section className="card-panel space-y-4 p-5">
       <div className="flex items-center gap-2">
         <CalendarDays className="size-4 text-primary" />
-        <h2 className="font-display text-base font-semibold">আসন্ন ক্লাস</h2>
+        <h2 className="font-display text-base font-semibold">
+          {t("আসন্ন ক্লাস", "Upcoming Classes")}
+        </h2>
       </div>
 
       {groups.length ? (
         <div className="space-y-2">
           <p className="text-[11px] text-muted-foreground">
-            {active.length ? `${active.length}টি কোর্স বেছে নেওয়া আছে` : "সব কোর্সের ক্লাস দেখাচ্ছে — নিজের কোর্স বেছে নিন"}
+            {active.length
+              ? t(
+                  `${displayCount(active.length, language)}টি কোর্স বেছে নেওয়া আছে`,
+                  `${displayCount(active.length, language)} ${active.length === 1 ? "course" : "courses"} selected`,
+                )
+              : t(
+                  "সব কোর্সের ক্লাস দেখাচ্ছে — নিজের কোর্স বেছে নিন",
+                  "Showing classes from all courses — select your courses",
+                )}
           </p>
           <div className="flex flex-wrap gap-1.5">
             <button
               type="button"
               onClick={() => update([])}
               className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
-                active.length === 0 ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground/80 hover:bg-secondary/70"
+                active.length === 0
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-foreground/80 hover:bg-secondary/70"
               }`}
             >
-              সব
+              {t("সব", "All")}
             </button>
             {groups.map((g) => {
               const on = active.includes(g);
@@ -92,8 +111,11 @@ export function UpcomingClasses() {
                   type="button"
                   onClick={() => update(on ? active.filter((x) => x !== g) : [...active, g])}
                   className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
-                    on ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground/80 hover:bg-secondary/70"
+                    on
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-foreground/80 hover:bg-secondary/70"
                   }`}
+                  aria-pressed={on}
                 >
                   {g}
                 </button>
@@ -104,7 +126,7 @@ export function UpcomingClasses() {
       ) : null}
 
       {isLoading ? (
-        <div className="flex justify-center py-4">
+        <div className="flex justify-center py-4" role="status" aria-label={t("ক্লাস লোড হচ্ছে", "Loading classes")}>
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
         </div>
       ) : (
@@ -113,19 +135,41 @@ export function UpcomingClasses() {
             const list = items.filter((i) => i.date === date);
             return (
               <div key={date} className="space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground">{dayLabel(date)}</p>
+                <p className="text-xs font-semibold text-muted-foreground">
+                  {dayLabel(date, language)}
+                </p>
                 {list.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground">ক্লাস নেই</p>
+                  <p className="rounded-xl border border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground">
+                    {t("ক্লাস নেই", "No classes")}
+                  </p>
                 ) : (
                   <ul className="space-y-1.5">
                     {list.map((c) => (
-                      <li key={c.id} className="flex items-center gap-3 rounded-xl border border-border bg-secondary/30 px-3 py-2.5">
-                        <span className="w-16 shrink-0 text-center text-[11px] font-medium text-primary">{c.time || "—"}</span>
+                      <li
+                        key={c.id}
+                        className="flex items-center gap-3 rounded-xl border border-border bg-secondary/30 px-3 py-2.5"
+                      >
+                        <span className="w-16 shrink-0 text-center text-[11px] font-medium text-primary">
+                          {c.time || "—"}
+                        </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium leading-snug">{c.title || "টপিক জানানো হবে"}</p>
-                          <p className="truncate text-[11px] text-muted-foreground">{c.subject}</p>
+                          <p className="text-sm font-medium leading-snug">
+                            {c.title || t("টপিক জানানো হবে", "Topic to be announced")}
+                          </p>
+                          <p className="truncate text-[11px] text-muted-foreground">
+                            {c.subject}
+                          </p>
                         </div>
-                        {c.link ? <a href={c.link} target="_blank" rel="noreferrer" className="shrink-0 rounded-lg bg-primary px-2.5 py-1 text-xs text-primary-foreground">ক্লাসে যান</a> : null}
+                        {c.link ? (
+                          <a
+                            href={c.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="shrink-0 rounded-lg bg-primary px-2.5 py-1 text-xs text-primary-foreground"
+                          >
+                            {t("ক্লাসে যান", "Join Class")}
+                          </a>
+                        ) : null}
                       </li>
                     ))}
                   </ul>

@@ -172,6 +172,10 @@ export type Database = {
       };
       students: {
         Row: {
+          class_name: string | null;
+          academic_year: string | null;
+          institution_name: string | null;
+          address: string | null;
           academic_batch: string | null;
           academic_group: string | null;
           account_role: string;
@@ -196,6 +200,10 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          class_name?: string | null;
+          academic_year?: string | null;
+          institution_name?: string | null;
+          address?: string | null;
           academic_batch?: string | null;
           academic_group?: string | null;
           account_role?: string;
@@ -220,6 +228,10 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          class_name?: string | null;
+          academic_year?: string | null;
+          institution_name?: string | null;
+          address?: string | null;
           academic_batch?: string | null;
           academic_group?: string | null;
           account_role?: string;

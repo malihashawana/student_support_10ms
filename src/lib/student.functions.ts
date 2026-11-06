@@ -73,7 +73,7 @@ export const createTicket = createServerFn({ method: "POST" })
   .inputValidator(
     (input: {
       category: string;
-      title: string;
+      title?: string;
       description: string;
       course?: string | null;
       class_exam?: string | null;
@@ -82,17 +82,24 @@ export const createTicket = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { studentId } = await requireStudent();
-    const title = (data.title ?? "").trim();
+    const suppliedTitle = (data.title ?? "").trim();
     const description = (data.description ?? "").trim();
+    const link = (data.link ?? "").trim();
     if (!CATEGORIES.includes(data.category as (typeof CATEGORIES)[number])) {
       throw friendly("সমস্যার সঠিক ধরন নির্বাচন করুন।");
     }
-    if (title.length < 5 || title.length > 150) {
-      throw friendly("সমস্যার শিরোনাম ৫ থেকে ১৫০ অক্ষরের মধ্যে লিখুন।");
+    if (suppliedTitle.length > 150) {
+      throw friendly("সমস্যার শিরোনাম ১৫০ অক্ষরের বেশি হতে পারবে না।");
     }
     if (description.length < 10 || description.length > 4000) {
-      throw friendly("সমস্যাটি অন্তত ১০ অক্ষরে বর্ণনা করুন।");
+      throw friendly("সমস্যাটি ১০ থেকে ৪০০০ অক্ষরের মধ্যে বর্ণনা করুন।");
     }
+    if (link && (!/^https?:\/\//i.test(link) || link.length > 500)) {
+      throw friendly("লিংক অবশ্যই http:// বা https:// দিয়ে শুরু হতে হবে এবং ৫০০ অক্ষরের মধ্যে থাকতে হবে।");
+    }
+    // The database and staff views still require a non-empty title.
+    // Generate one only when the student leaves the optional field blank.
+    const title = suppliedTitle || `${data.category} Issue`; 
 
     // source_role is still recorded for context (shown as a small "captain"
     // tag in staff/captain views), but it no longer elevates priority on its
@@ -129,11 +136,7 @@ export const createTicket = createServerFn({ method: "POST" })
       message: description,
     });
 
-    const link = (data.link ?? "").trim();
     if (link) {
-      if (!/^https?:\/\//i.test(link) || link.length > 500) {
-        throw friendly("Please provide a valid link starting with http:// or https://");
-      }
       await db.from("attachments").insert({
         ticket_id: ticket.id,
         file_name: link,
@@ -197,43 +200,20 @@ export const addStudentMessage = createServerFn({ method: "POST" })
     return { ok: true, status: nextStatus };
   });
 
+// Community endpoints are intentionally disabled. Keep the exported names and
+// input signatures temporarily so legacy routes cannot read other students' tickets.
 export const communityTickets = createServerFn({ method: "POST" })
   .inputValidator((input: { search?: string; category?: string; status?: string }) => input)
-  .handler(async ({ data }) => {
+  .handler(async () => {
     await requireStudent();
-    let query = db
-      .from("tickets")
-      .select(
-        "id, ticket_number, category, title, description, course, status, priority, source_role, approved_by_captain_name, approved_at, official_response, created_at, resolved_at",
-      )
-      .order("created_at", { ascending: false })
-      .limit(200);
-    const search = (data.search ?? "").trim();
-    if (search) {
-      const safe = search.replace(/[%,()]/g, " ");
-      query = query.or(
-        `title.ilike.%${safe}%,description.ilike.%${safe}%,category.ilike.%${safe}%,course.ilike.%${safe}%,ticket_number.ilike.%${safe}%,class_exam.ilike.%${safe}%`,
-      );
-    }
-    if (data.category && data.category !== "all") query = query.eq("category", data.category);
-    if (data.status && data.status !== "all") query = query.eq("status", data.status);
-    const { data: rows } = await query;
-    return rows ?? [];
+    throw friendly("সবার সমস্যা ফিচারটি বন্ধ করা হয়েছে।");
   });
 
 export const communityTicketDetail = createServerFn({ method: "GET" })
   .inputValidator((input: { id: string }) => input)
-  .handler(async ({ data }) => {
+  .handler(async () => {
     await requireStudent();
-    const { data: ticket } = await db
-      .from("tickets")
-      .select(
-        "id, ticket_number, category, title, description, course, class_exam, status, official_response, created_at, resolved_at, updated_at",
-      )
-      .eq("id", data.id)
-      .maybeSingle();
-    if (!ticket) throw friendly("সমস্যাটি খুঁজে পাওয়া যায়নি।");
-    return ticket;
+    throw friendly("সবার সমস্যা ফিচারটি বন্ধ করা হয়েছে।");
   });
 
 export const publishedNotices = createServerFn({ method: "GET" }).handler(async () => {

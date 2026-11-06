@@ -6,19 +6,23 @@ import { Bell, Loader2, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { PriorityBadge } from "@/components/StatusBadge";
+import { useLanguage } from "@/lib/language-context";
 import { publishedNotices } from "@/lib/student.functions";
 import { formatDateBn } from "@/lib/support-constants";
 
 export const Route = createFileRoute("/student/notices")({
   head: () => ({
     meta: [
-      { title: "নোটিশ — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
+      { title: "Notices — Student Support Hub HSC 27 & 28" },
       {
         name: "description",
-        content: "HSC 28 সাপোর্ট টিমের অফিসিয়াল ঘোষণা ও আপডেট।",
+        content: "Official notices and updates for HSC 27 and HSC 28 students.",
       },
-      { property: "og:title", content: "নোটিশ — স্টুডেন্ট সাপোর্ট হাব HSC 28" },
-      { property: "og:description", content: "শিক্ষার্থীদের জন্য HSC 28-এর সর্বশেষ ঘোষণা।" },
+      { property: "og:title", content: "Notices — Student Support Hub HSC 27 & 28" },
+      {
+        property: "og:description",
+        content: "Latest official notices for HSC 27 and HSC 28 students.",
+      },
     ],
   }),
   component: NoticesPage,
@@ -31,24 +35,38 @@ function isRecent(dateStr: string) {
 }
 
 function NoticesPage() {
+  const { language, t } = useLanguage();
   const fetchNotices = useServerFn(publishedNotices);
   const { data, isLoading } = useQuery({
     queryKey: ["student-notices"],
     queryFn: () => fetchNotices(),
   });
 
+  function formatNoticeDate(dateStr: string) {
+    if (language === "bn") return formatDateBn(dateStr);
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return dateStr;
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
-        title="নোটিশ বোর্ড"
-        description="সাপোর্ট টিমের সর্বশেষ ঘোষণা ও গুরুত্বপূর্ণ আপডেট এখানে দেখুন।"
+        title={t("নোটিশ বোর্ড", "Notice Board")}
+        description={t(
+          "সাপোর্ট টিমের সর্বশেষ ঘোষণা ও গুরুত্বপূর্ণ আপডেট এখানে দেখুন।",
+          "Find the latest announcements and important updates from the support team here.",
+        )}
       />
 
       {isLoading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
-            ) : data?.length ? (
+      ) : data?.length ? (
         <ul className="space-y-4">
           {data.map((notice, index) => {
             const recent = isRecent(notice.created_at);
@@ -63,6 +81,7 @@ function NoticesPage() {
                 : featured
                   ? "border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-background shadow-sm"
                   : "border-border bg-card";
+
             return (
               <li
                 key={notice.id}
@@ -89,7 +108,7 @@ function NoticesPage() {
                         {recent ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-600">
                             <Sparkles className="size-3" />
-                            নতুন
+                            {t("নতুন", "New")}
                           </span>
                         ) : null}
                       </div>
@@ -98,7 +117,7 @@ function NoticesPage() {
                           isImportant || isUrgent ? "opacity-80" : "text-muted-foreground"
                         }`}
                       >
-                        {formatDateBn(notice.created_at)}
+                        {formatNoticeDate(notice.created_at)}
                       </p>
                     </div>
                   </div>
@@ -118,8 +137,11 @@ function NoticesPage() {
       ) : (
         <EmptyState
           icon={<Bell className="size-5" />}
-          title="নতুন কোনো নোটিশ নেই।"
-          description="নতুন ঘোষণা এলে এখানে দেখানো হবে।"
+          title={t("নতুন কোনো নোটিশ নেই।", "No new notices.")}
+          description={t(
+            "নতুন ঘোষণা এলে এখানে দেখানো হবে।",
+            "New announcements will appear here.",
+          )}
         />
       )}
     </div>

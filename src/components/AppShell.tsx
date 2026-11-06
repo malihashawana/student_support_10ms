@@ -35,6 +35,17 @@ const navigationTranslations: Record<string, string> = {
   "শিক্ষার্থী": "Students",
   "রিপোর্ট": "Reports",
   "টিম": "Team",
+  "সারসংক্ষেপ": "Overview",
+  "সমস্যা ওয়ার্কস্পেস": "Issue Desk",
+  "শিক্ষার্থী ডেটাবেজ": "Student Database",
+  "নোটিশ": "Notices",
+  "অ্যাক্টিভিটি লগ": "Activity Log",
+  "কোর্স নোট": "Course Notes",
+  "কোর্স অ্যাক্টিভিটি": "Course Activity",
+  "সমস্যা জানান": "Report an Issue",
+  "প্রায়োরিটি সমস্যা জানান": "Report a Priority Issue",
+  "HSC 28 কোর্স": "HSC 28 Courses",
+  "ক্যাপ্টেন ড্যাশবোর্ড": "Captain Dashboard",
 };
 
 export function AppShell({
@@ -60,17 +71,23 @@ export function AppShell({
 
   // Filtering the menu is presentation-only. The courseSchedule server
   // function must independently enforce HSC 28 access.
-  const visibleNav =
-    variant === "student" && academicBatch !== "hsc_28"
-      ? nav.filter((item) => item.to !== "/student/courses")
-      : nav;
+  const visibleNav = nav.filter((item) => {
+    if (variant !== "student") return true;
+    if (item.to === "/student/community" || item.to === "/student/community/") return false;
+    if (item.to === "/student/courses" && academicBatch !== "hsc_28") return false;
+    return true;
+  });
+
+  const translatedSubtitle = language === "en"
+    ? ({ "সাপোর্ট টিম": "Support Team" } as Record<string, string>)[subtitle] ?? subtitle
+    : subtitle;
 
   const batchLabel =
     academicBatch === "hsc_27"
       ? t("এইচএসসি ২৭", "HSC 27")
       : academicBatch === "hsc_28"
         ? t("এইচএসসি ২৮", "HSC 28")
-        : t("স্টুডেন্ট সাপোর্ট হাব", "Student Support Hub");
+        : t("স্টুডেন্ট সাপোর্ট ডেস্ক", "Student Support Desk");
 
   async function signOut() {
     try {
@@ -78,7 +95,7 @@ export function AppShell({
       await router.invalidate();
       await navigate({ to: "/", replace: true });
     } catch {
-      toast.error(t("সাইন আউট করা যায়নি। আবার চেষ্টা করুন।", "Could not sign out. Please try again."));
+      toast.error(t("সাইন আউট করা যায়নি। আবার চেষ্টা করো।", "Could not sign out. Please try again."));
     }
   }
 
@@ -112,7 +129,7 @@ export function AppShell({
           <div className="ml-auto flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium">{title}</p>
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
+              <p className="text-xs text-muted-foreground">{translatedSubtitle}</p>
             </div>
             <div
               role="group"
@@ -174,7 +191,7 @@ export function AppShell({
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5 transition-colors group-hover:bg-white/15">
                   {item.icon}
                 </span>
-                {item.label}
+                {language === "en" ? (navigationTranslations[item.label] ?? item.label) : item.label}
               </Link>
             ))}
           </nav>

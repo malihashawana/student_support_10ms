@@ -8,7 +8,6 @@ import {
   ListChecks,
   ShieldCheck,
   UserRound,
-  Users,
 } from "lucide-react";
 
 import { AppShell, type NavItem } from "@/components/AppShell";
@@ -50,7 +49,7 @@ function StudentLayout() {
       icon: <FilePlus2 className="size-4" />,
     },
     { to: "/student/issues", label: "আমার সমস্যা", icon: <ListChecks className="size-4" /> },
-    { to: "/student/community", label: "সবার সমস্যা", icon: <Users className="size-4" /> },
+    /*{ to: "/student/community", label: "সবার সমস্যা", icon: <Users className="size-4" /> },*/
     // Study Help remains hidden until it is ready.
     ...(isHsc28
       ? [{ to: "/student/courses", label: "HSC 28 কোর্স", icon: <BookMarked className="size-4" /> }]

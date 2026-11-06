@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { getAttachmentUrl } from "@/lib/attachments.functions";
+import { useLanguage } from "@/lib/language-context";
 import { formatBytesBn, formatDateShortBn } from "@/lib/support-constants";
 
 export type AttachmentRow = {
@@ -26,7 +27,32 @@ function iconFor(type: string | null) {
   return <FileText className="size-4" />;
 }
 
+function formatBytesEn(bytes: number | null) {
+  if (bytes == null || !Number.isFinite(bytes)) return "—";
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB", "TB"];
+  let value = bytes;
+  let unit = -1;
+  do {
+    value /= 1024;
+    unit += 1;
+  } while (value >= 1024 && unit < units.length - 1);
+  return `${Number(value.toFixed(value >= 10 ? 1 : 2))} ${units[unit]}`;
+}
+
+function formatDateEn(date: string) {
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime())
+    ? date
+    : new Intl.DateTimeFormat("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(parsed);
+}
+
 export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }) {
+  const { language, t } = useLanguage();
   const resolve = useServerFn(getAttachmentUrl);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<string | null>(null);
@@ -38,7 +64,7 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
       setUrls((prev) => ({ ...prev, [id]: url }));
       return url;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "এই সংযুক্তিটি খোলা যায়নি।");
+      toast.error(err instanceof Error ? err.message : t("এই সংযুক্তিটি খোলা যায়নি।", "Could not open this attachment."));
       return null;
     } finally {
       setLoading(null);
@@ -46,7 +72,11 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
   }
 
   if (!attachments.length) {
-    return <p className="px-4 py-6 text-sm text-muted-foreground">এই টিকিটে কোনো সংযুক্তি নেই।</p>;
+    return (
+      <p className="px-4 py-6 text-sm text-muted-foreground">
+        {t("এই টিকিটে কোনো সংযুক্তি নেই।", "There are no attachments on this ticket.")}
+      </p>
+    );
   }
 
   return (
@@ -65,9 +95,9 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{attachment.file_name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {isLink ? "এক্সটার্নাল লিংক" : (attachment.file_type ?? "ফাইল")} ·{" "}
-                  {isLink ? "—" : formatBytesBn(attachment.file_size)} ·{" "}
-                  {formatDateShortBn(attachment.created_at)}
+                  {isLink ? t("এক্সটার্নাল লিংক", "External link") : (attachment.file_type ?? t("ফাইল", "File"))} ·{" "}
+                  {isLink ? "—" : language === "bn" ? formatBytesBn(attachment.file_size) : formatBytesEn(attachment.file_size)} ·{" "}
+                  {language === "bn" ? formatDateShortBn(attachment.created_at) : formatDateEn(attachment.created_at)}
                 </p>
               </div>
               {isLink ? (
@@ -78,14 +108,14 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
                     rel="noopener noreferrer nofollow"
                   >
                     <ExternalLink className="size-4" />
-                    লিংক খুলুন
+                    {t("লিংক খুলুন", "Open link")}
                   </a>
                 </Button>
               ) : url ? (
                 <Button size="sm" variant="outline" asChild>
                   <a href={url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="size-4" />
-                    খুলুন
+                    {t("খুলুন", "Open")}
                   </a>
                 </Button>
               ) : (
@@ -95,7 +125,11 @@ export function AttachmentList({ attachments }: { attachments: AttachmentRow[] }
                   disabled={loading === attachment.id}
                   onClick={() => load(attachment.id)}
                 >
-                  {isImage || isAudio || isVideo ? "প্রিভিউ" : "ডাউনলোড"}
+                  {loading === attachment.id
+                    ? t("লোড হচ্ছে...", "Loading...")
+                    : isImage || isAudio || isVideo
+                      ? t("প্রিভিউ", "Preview")
+                      : t("ডাউনলোড", "Download")}
                 </Button>
               )}
             </div>

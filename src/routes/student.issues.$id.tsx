@@ -9,30 +9,85 @@ import { AttachmentList } from "@/components/AttachmentList";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from "@/lib/language-context";
 import { bn, formatDateBn, labelCategory, labelCourse } from "@/lib/support-constants";
 import { addStudentMessage, myTicketDetail } from "@/lib/student.functions";
 
 export const Route = createFileRoute("/student/issues/$id")({
   head: () => ({
     meta: [
-      { title: "টিকেটের বিস্তারিত — Student Support Hub HSC 28" },
+      { title: "Ticket Details — Student Support Hub HSC 27 & 28" },
       {
         name: "description",
-        content: "তোমার সাপোর্ট টিকেটের সম্পূর্ণ কথোপকথন, অফিসিয়াল উত্তর ও সংযুক্তি।",
+        content: "View your support ticket, official response, conversation, and attachments.",
       },
-      { property: "og:title", content: "টিকেটের বিস্তারিত — Student Support Hub HSC 28" },
-      { property: "og:description", content: "তোমার টিকেটে অফিসিয়াল উত্তর দেখো।" },
+      { property: "og:title", content: "Ticket Details — Student Support Hub HSC 27 & 28" },
+      { property: "og:description", content: "View the official response to your support ticket." },
     ],
   }),
   component: TicketDetail,
 });
 
+const EN_CATEGORY_LABELS: Record<string, string> = {
+  class: "Class",
+  classes: "Classes",
+  exam: "Exam",
+  exams: "Exams",
+  video: "Video",
+  videos: "Videos",
+  course: "Course",
+  courses: "Courses",
+  payment: "Payment",
+  technical: "Technical Issue",
+  other: "Other",
+  others: "Other",
+  "ক্লাস": "Class",
+  "পরীক্ষা": "Exam",
+  "ভিডিও": "Video",
+  "কোর্স": "Course",
+  "পেমেন্ট": "Payment",
+  "টেকনিক্যাল": "Technical Issue",
+  "অন্যান্য": "Other",
+};
+
+function englishCategory(value: string): string {
+  const key = value.trim().toLowerCase();
+  return EN_CATEGORY_LABELS[key] ?? labelCategory(value);
+}
+
+function englishCourse(value: string): string {
+  // Course names may be user-defined; do not guess translations.
+  return labelCourse(value);
+}
+
+function englishDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function englishTicketNumber(value: string | number): string {
+  return String(value).replace(/[০-৯]/g, (digit) =>
+    String("০১২৩৪৫৬৭৮৯".indexOf(digit)),
+  );
+}
+
 function TicketDetail() {
   const { id } = Route.useParams();
+  const { language, t } = useLanguage();
   const fetchDetail = useServerFn(myTicketDetail);
   const sendMessage = useServerFn(addStudentMessage);
   const queryClient = useQueryClient();
   const [reply, setReply] = useState("");
+
+  const formatDate = (value: string) =>
+    language === "bn" ? formatDateBn(value) : englishDate(value);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["my-ticket", id],
@@ -43,11 +98,20 @@ function TicketDetail() {
     mutationFn: (message: string) => sendMessage({ data: { ticketId: id, message } }),
     onSuccess: () => {
       setReply("");
-      toast.success("তোমার বার্তা সাপোর্ট টিমের কাছে পাঠানো হয়েছে।");
+      toast.success(
+        t(
+          "তোমার বার্তা সাপোর্ট টিমের কাছে পাঠানো হয়েছে।",
+          "Your message has been sent to the support team.",
+        ),
+      );
       void queryClient.invalidateQueries({ queryKey: ["my-ticket", id] });
     },
     onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "তোমার বার্তা পাঠানো যায়নি।"),
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : t("তোমার বার্তা পাঠানো যায়নি।", "Your message could not be sent."),
+      ),
   });
 
   if (isLoading) {
@@ -62,10 +126,17 @@ function TicketDetail() {
     return (
       <div className="card-panel p-8 text-center">
         <p className="text-sm text-muted-foreground">
-          {error instanceof Error ? error.message : "তোমার অ্যাকাউন্টে এই টিকেট পাওয়া যায়নি।"}
+          {error instanceof Error
+            ? error.message
+            : t(
+                "তোমার অ্যাকাউন্টে এই টিকেট পাওয়া যায়নি।",
+                "This ticket was not found in your account.",
+              )}
         </p>
         <Button asChild variant="outline" className="mt-4">
-          <Link to="/student/issues">আমার সমস্যায় ফিরুন</Link>
+          <Link to="/student/issues">
+            {t("আমার সমস্যায় ফিরুন", "Back to My Tickets")}
+          </Link>
         </Button>
       </div>
     );
@@ -80,36 +151,47 @@ function TicketDetail() {
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        আমার সমস্যা
+        {t("আমার সমস্যা", "My Tickets")}
       </Link>
 
       <div className="card-panel p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="font-display text-xs font-semibold tracking-wide text-primary">
-              {bn(ticket.ticket_number)}
+              {language === "bn"
+                ? bn(ticket.ticket_number)
+                : englishTicketNumber(ticket.ticket_number)}
             </p>
             <h1 className="font-display mt-1 text-xl font-semibold">{ticket.title}</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              {labelCategory(ticket.category)}
-              {ticket.course ? ` · ${labelCourse(ticket.course)}` : ""}
+              {language === "bn"
+                ? labelCategory(ticket.category)
+                : englishCategory(ticket.category)}
+              {ticket.course
+                ? ` · ${language === "bn" ? labelCourse(ticket.course) : englishCourse(ticket.course)}`
+                : ""}
               {ticket.class_exam ? ` · ${ticket.class_exam}` : ""} ·{" "}
-              {formatDateBn(ticket.created_at)}
+              {formatDate(ticket.created_at)}
             </p>
           </div>
           <StatusBadge status={ticket.status} />
         </div>
-        <p className="mt-4 text-sm whitespace-pre-wrap text-foreground/90">{ticket.description}</p>
+        <p className="mt-4 text-sm whitespace-pre-wrap text-foreground/90">
+          {ticket.description}
+        </p>
         {ticket.official_response ? (
           <div className="mt-4 rounded-lg border border-primary/25 bg-primary/5 p-4">
             <p className="text-xs font-semibold tracking-wide text-primary uppercase">
-              অফিসিয়াল উত্তর
+              {t("অফিসিয়াল উত্তর", "Official Response")}
             </p>
             <p className="mt-2 text-sm whitespace-pre-wrap">{ticket.official_response}</p>
           </div>
         ) : (
           <p className="mt-4 rounded-lg bg-secondary px-4 py-3 text-sm text-muted-foreground">
-            সাপোর্ট টিম এখনো উত্তর দেয়নি। উত্তর এলে এখানে দেখা যাবে।
+            {t(
+              "সাপোর্ট টিম এখনো উত্তর দেয়নি। উত্তর এলে এখানে দেখা যাবে।",
+              "The support team has not replied yet. Their response will appear here.",
+            )}
           </p>
         )}
       </div>
@@ -117,14 +199,14 @@ function TicketDetail() {
       <div className="card-panel">
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <Paperclip className="size-4 text-muted-foreground" />
-          <h2 className="text-sm font-semibold">সংযুক্তি</h2>
+          <h2 className="text-sm font-semibold">{t("সংযুক্তি", "Attachments")}</h2>
         </div>
         <AttachmentList attachments={attachments} />
       </div>
 
       <div className="card-panel">
         <div className="border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold">কথোপকথন</h2>
+          <h2 className="text-sm font-semibold">{t("কথোপকথন", "Conversation")}</h2>
         </div>
         <div className="space-y-3 p-4">
           {messages.length ? (
@@ -138,20 +220,27 @@ function TicketDetail() {
                 }
               >
                 <p className="text-xs font-medium text-muted-foreground">
-                  {message.sender_type === "staff" ? "সাপোর্ট টিম" : "তুমি"} ·{" "}
-                  {formatDateBn(message.created_at)}
+                  {message.sender_type === "staff"
+                    ? t("সাপোর্ট টিম", "Support Team")
+                    : t("তুমি", "You")}{" "}
+                  · {formatDate(message.created_at)}
                 </p>
                 <p className="mt-1 text-sm whitespace-pre-wrap">{message.message}</p>
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">এখনো কোনো বার্তা নেই।</p>
+            <p className="text-sm text-muted-foreground">
+              {t("এখনো কোনো বার্তা নেই।", "No messages yet.")}
+            </p>
           )}
         </div>
         <div className="border-t border-border p-4">
           <Textarea
             rows={3}
-            placeholder="সাপোর্ট টিমের জন্য আরও তথ্য যোগ করো..."
+            placeholder={t(
+              "সাপোর্ট টিমের জন্য আরও তথ্য যোগ করো...",
+              "Add more information for the support team...",
+            )}
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             maxLength={2000}
@@ -167,7 +256,7 @@ function TicketDetail() {
               ) : (
                 <Send className="size-4" />
               )}
-              বার্তা পাঠান
+              {t("বার্তা পাঠান", "Send Message")}
             </Button>
           </div>
         </div>

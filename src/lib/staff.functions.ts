@@ -12,6 +12,28 @@ import {
 } from "./support.server";
 import { STATUSES } from "./support-constants";
 
+// Date-only ticket filters use Bangladesh calendar days (UTC+06:00),
+// regardless of the server's deployment timezone.
+function dhakaDayStart(date: string): string {
+  return `${date}T00:00:00+06:00`;
+}
+
+function dhakaDate(offsetDays = 0): string {
+  const now = new Date(Date.now() + offsetDays * 86_400_000);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
+function nextDhakaDate(date: string): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 export type StaffTicketFilters = {
   search?: string;
   status?: string;
@@ -77,34 +99,26 @@ export const staffTickets = createServerFn({ method: "POST" })
     if (data.course && data.course !== "all") query = query.eq("course", data.course);
     if (data.priority && data.priority !== "all") query = query.eq("priority", data.priority);
 
-    const now = new Date();
-    const startOfDay = (d: Date) => {
-      const c = new Date(d);
-      c.setHours(0, 0, 0, 0);
-      return c;
-    };
-
-    if (data.range === "today") query = query.gte("created_at", startOfDay(now).toISOString());
-    else if (data.range === "yesterday") {
-      const y = new Date(now);
-      y.setDate(y.getDate() - 1);
-      query = query
-        .gte("created_at", startOfDay(y).toISOString())
-        .lt("created_at", startOfDay(now).toISOString());
+    const today = dhakaDate();
+    if (data.range === "today") {
+      query = query.gte("created_at", dhakaDayStart(today))
+        .lt("created_at", dhakaDayStart(nextDhakaDate(today)));
+    } else if (data.range === "yesterday") {
+      query = query.gte("created_at", dhakaDayStart(dhakaDate(-1)))
+        .lt("created_at", dhakaDayStart(today));
     } else if (data.range === "7d" || data.range === "30d") {
-      const d = new Date(now);
-      d.setDate(d.getDate() - (data.range === "7d" ? 7 : 30));
-      query = query.gte("created_at", d.toISOString());
+      const days = data.range === "7d" ? 7 : 30;
+      query = query.gte("created_at", new Date(Date.now() - days * 86_400_000).toISOString());
     } else if (data.range === "custom") {
-      if (data.from) query = query.gte("created_at", new Date(data.from).toISOString());
-      if (data.to) {
-        const to = new Date(data.to);
-        to.setHours(23, 59, 59, 999);
-        query = query.lte("created_at", to.toISOString());
-      }
+      if (data.from) query = query.gte("created_at", dhakaDayStart(data.from));
+      if (data.to) query = query.lt("created_at", dhakaDayStart(nextDhakaDate(data.to)));
     }
 
-    const { data: rows } = await query;
+    const { data: rows, error: ticketsError } = await query;
+    if (ticketsError) {
+      console.error("staff ticket query failed", ticketsError);
+      throw friendly("টিকেট লোড করা যায়নি। আবার চেষ্টা করুন।");
+    }
     const search = (data.search ?? "").trim().toLowerCase();
     let list = rows ?? [];
     if (search) {
