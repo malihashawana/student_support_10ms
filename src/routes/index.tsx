@@ -188,7 +188,7 @@ function LoginPage() {
         <section className="order-2 space-y-7 lg:order-1 lg:pt-9">
           <span className="inline-flex items-center gap-2 rounded-full border border-[#F4C6CC] bg-[#FFF5F6] px-3 py-2 text-xs font-bold text-[#931212]">
             <span className="size-2 rounded-full bg-[#E8001D]" />
-            {t("HSC 27 ও HSC 28 অনলাইন ব্যাচ", "HSC 27 & HSC 28 Online Batch")}
+            {t("অনলাইন ব্যাচ", "HSC Online Batch")}
           </span>
           <div className="space-y-4">
             <h1 className="max-w-2xl font-display text-3xl font-bold leading-[1.4] tracking-normal sm:text-4xl lg:text-[44px]">
